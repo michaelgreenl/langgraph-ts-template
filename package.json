@@ -17,11 +17,14 @@
         "lint": "eslint src",
         "lint:langgraph-json": "node scripts/checkLanggraphPaths.js",
         "lint:all": "yarn lint & yarn lint:langgraph-json & yarn format:check",
-        "test:all": "yarn test && yarn test:int && yarn lint:langgraph"
+        "test:all": "yarn test && yarn test:int && yarn lint:langgraph",
+        "prepare": "husky"
     },
     "dependencies": {
+        "@commitlint/config-conventional": "^20.5.0",
         "@langchain/core": "^1.1.36",
         "@langchain/langgraph": "^1.2.5",
+        "husky": "^9.1.7",
         "zod": "^4.3.6"
     },
     "resolutions": {
