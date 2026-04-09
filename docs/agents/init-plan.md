@@ -46,12 +46,16 @@
 
 ### 1a. Migrate to Bun
 
+- [x] complete
+
 - Replace all yarn scripts with bun equivalents in `package.json`
 - Update `packageManager` field
 - Update CI workflows (`yarn install --immutable` → `bun install --frozen-lockfile`)
 - Replace `bun.lock` with fresh lockfile from `bun install`
 
 ### 1b. Migrate Jest → Vitest
+
+- [ ] complete
 
 - Install `vitest`, remove `jest`, `ts-jest`, `@types/jest`
 - Create `vitest.config.ts` (ESM-native, no moduleNameMapper)
@@ -62,6 +66,8 @@
 - Update CI workflows
 
 ### 1c. Add Changesets + VERSIONING doc
+
+- [ ] complete
 
 - Install `@changesets/cli`, init changesets
 - Add `version` and `publish` scripts to `package.json`
