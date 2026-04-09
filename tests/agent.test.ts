@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals';
+import { describe, expect, it } from 'vitest';
 import { route } from '../src/agent/graph.js';
 describe('Routers', () => {
     it('Test route', async () => {

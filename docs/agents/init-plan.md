@@ -55,7 +55,7 @@
 
 ### 1b. Migrate Jest → Vitest
 
-- [ ] complete
+- [x] complete
 
 - Install `vitest`, remove `jest`, `ts-jest`, `@types/jest`
 - Create `vitest.config.ts` (ESM-native, no moduleNameMapper)

@@ -1,4 +1,4 @@
-import { describe, it, expect } from '@jest/globals';
+import { describe, expect, it } from 'vitest';
 import { graph } from '../src/agent/graph.js';
 
 describe('Graph', () => {
@@ -14,5 +14,5 @@ describe('Graph', () => {
 
         const lastMessage = result.messages[result.messages.length - 1];
         expect(lastMessage.content.toString().toLowerCase()).toContain('hi');
-    }, 30000); // Increased timeout to 30 seconds
+    }, 30_000);
 });
