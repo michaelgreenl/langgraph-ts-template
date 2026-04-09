@@ -67,7 +67,7 @@
 
 ### 1c. Add Changesets + VERSIONING doc
 
-- [ ] complete
+- [x] complete
 
 - Install `@changesets/cli`, init changesets
 - Add `version` and `publish` scripts to `package.json`
