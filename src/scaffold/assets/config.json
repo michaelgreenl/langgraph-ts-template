@@ -1,0 +1,29 @@
+{
+    "workspace": ".",
+    "graph": {
+        "name": "agent"
+    },
+    "openviking": {
+        "enabled": true,
+        "host": "localhost",
+        "port": 1933
+    },
+    "llm": {
+        "provider": "openai",
+        "apiKey": "${OPENAI_API_KEY}"
+    },
+    "templates": {
+        "sources": ["embedded", "custom"],
+        "customPath": ".maw/templates",
+        "gitRepos": [],
+        "globalSnippets": ["general-coding", "security", "project-context"],
+        "agents": {
+            "researcher": {
+                "snippets": ["research-rules", "python"]
+            },
+            "coder": {
+                "snippets": ["typescript"]
+            }
+        }
+    }
+}

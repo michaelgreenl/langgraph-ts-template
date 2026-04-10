@@ -7,6 +7,8 @@ const testDir = dirname(fileURLToPath(import.meta.url));
 const root = resolve(testDir, '..');
 const packageJson = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8')) as {
     dependencies?: Record<string, string>;
+    exports?: Record<string, unknown>;
+    files?: string[];
     scripts?: Record<string, string>;
 };
 
@@ -15,5 +17,11 @@ describe('package metadata', () => {
         expect(packageJson.dependencies).not.toHaveProperty('husky');
         expect(packageJson.scripts).not.toHaveProperty('prepare');
         expect(packageJson.scripts?.prepare ?? '').not.toContain('husky');
+    });
+
+    it('publishes scaffold assets and subpath exports for maw init', () => {
+        expect(packageJson.files).toContain('src/scaffold/assets');
+        expect(packageJson.exports).toHaveProperty('./config');
+        expect(packageJson.exports).toHaveProperty('./scaffold');
     });
 });

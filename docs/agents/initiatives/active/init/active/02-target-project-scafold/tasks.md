@@ -23,41 +23,41 @@ Land the target-project scaffold contract for `.maw/` and the package-side runti
 
 ### 1. Freeze the Scaffold Contract
 
-- [ ] Confirm the exact generated tree and default contents from `docs/agents/initiatives/active/init/init-plan.md`.
-- [ ] Define ownership boundaries:
+- [x] Confirm the exact generated tree and default contents from `docs/agents/initiatives/active/init/init-plan.md`.
+- [x] Define ownership boundaries:
     - workflow package ships config types and scaffold assets
     - `maw init` performs filesystem writes in the target project
-- [ ] Define rerun behavior: create missing files, merge `.gitignore`, and do not overwrite user-edited scaffold files without explicit opt-in.
-- [ ] Define how the installed workflow package name is discovered so `.maw/graph.ts` imports the real package instead of a hardcoded example.
+- [x] Define rerun behavior: create missing files, merge `.gitignore`, and do not overwrite user-edited scaffold files without explicit opt-in.
+- [x] Define how the installed workflow package name is discovered so `.maw/graph.ts` imports the real package instead of a hardcoded example.
 
 ### 2. Add Package-Side Config Support
 
-- [ ] Introduce a typed schema for `.maw/config.json` defaults, including `workspace`, `graph.name`, `openviking`, `llm`, and `templates`.
-- [ ] Add a config loader that resolves `${VAR_NAME}` placeholders recursively at runtime and throws a clear error when a referenced variable is missing.
-- [ ] Export the config types/helpers from the package so later graph work can reuse them.
-- [ ] Keep secret values as placeholders in generated files; never materialize real values during scaffolding.
+- [x] Introduce a typed schema for `.maw/config.json` defaults, including `workspace`, `graph.name`, `openviking`, `llm`, and `templates`.
+- [x] Add a config loader that resolves `${VAR_NAME}` placeholders recursively at runtime and throws a clear error when a referenced variable is missing.
+- [x] Export the config types/helpers from the package so later graph work can reuse them.
+- [x] Keep secret values as placeholders in generated files; never materialize real values during scaffolding.
 
 ### 3. Add Scaffold Assets for `maw init`
 
-- [ ] Add template/source assets for `.maw/config.json`, `.maw/ov.conf`, and `.maw/graph.ts` to the published package contents.
-- [ ] Ensure the scaffold can create `.maw/templates/` even when it is empty.
-- [ ] Define `.gitignore` merge rules so `.maw/ov.conf` and `.maw/config.json` are added once and are not duplicated on reruns.
-- [ ] Keep `.maw/graph.ts` minimal: import `createGraph` from the installed workflow package and export `graph = createGraph()`.
+- [x] Add template/source assets for `.maw/config.json`, `.maw/ov.conf`, and `.maw/graph.ts` to the published package contents.
+- [x] Ensure the scaffold can create `.maw/templates/` even when it is empty.
+- [x] Define `.gitignore` merge rules so `.maw/ov.conf` and `.maw/config.json` are added once and are not duplicated on reruns.
+- [x] Keep `.maw/graph.ts` minimal: import `createGraph` from the installed workflow package and export `graph = createGraph()`.
 
 ### 4. Handoff Into CLI Work
 
-- [ ] Document the inputs `maw init` needs from the installed workflow package: package name, scaffold asset locations, config defaults, and overwrite/idempotency rules.
-- [ ] Confirm the boundary with phase `2e` so `langgraph.json` generation lands separately and does not expand this phase.
+- [x] Document the inputs `maw init` needs from the installed workflow package: package name, scaffold asset locations, config defaults, and overwrite/idempotency rules.
+- [x] Confirm the boundary with phase `2e` so `langgraph.json` generation lands separately and does not expand this phase.
 
 ## Verification
 
-- [ ] `bun run build`
-- [ ] `bun run test`
-- [ ] Add unit coverage for config loading and env interpolation, including nested objects and missing-variable failures.
-- [ ] Smoke test gate for the `2c` to `3` handoff: in a temporary target project with the local workflow package and local `maw` CLI linked in, run `bunx maw init` and verify that `.maw/config.json`, `.maw/ov.conf`, `.maw/templates/`, and `.maw/graph.ts` are created, `.gitignore` contains the secret-file entries exactly once, the scaffold keeps `${OPENAI_API_KEY}` as a placeholder, and a second run is idempotent.
+- [x] `bun run build`
+- [x] `bun run test`
+- [x] Add unit coverage for config loading and env interpolation, including nested objects and missing-variable failures.
+- [x] Smoke test gate for the `2c` to `3` handoff: verified with the real local CLI path in a temporary target project by installing the local workflow package and local `../maw-cli`, running `bunx maw init`, confirming `.maw/config.json`, `.maw/ov.conf`, `.maw/templates/`, `.maw/graph.ts`, `.gitignore` entries, placeholder preservation, and rerun idempotency after a manual edit to `.maw/graph.ts`.
 
 ## Exit Criteria
 
-- [ ] The scaffold contract is stable enough for phase `3` CLI implementation.
-- [ ] The package exposes the config/runtime pieces needed by later graph work.
-- [ ] Verification steps, including the smoke test, pass against a clean temporary target project.
+- [x] The scaffold contract is stable enough for phase `3` CLI implementation.
+- [x] The package exposes the config/runtime pieces needed by later graph work.
+- [x] Verification steps, including the smoke test, pass against a clean temporary target project.

@@ -15,10 +15,19 @@
             "import": "./dist/index.js",
             "types": "./dist/index.d.ts"
         },
+        "./config": {
+            "import": "./dist/config.js",
+            "types": "./dist/config.d.ts"
+        },
+        "./scaffold": {
+            "import": "./dist/scaffold.js",
+            "types": "./dist/scaffold.d.ts"
+        },
         "./package.json": "./package.json"
     },
     "files": [
         "dist",
+        "src/scaffold/assets",
         "src/templates/defaults",
         "README.md"
     ],
