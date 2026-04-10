@@ -3,15 +3,8 @@
  * Make this code your own!
  */
 import { StateGraph } from '@langchain/langgraph';
-import { RunnableConfig } from '@langchain/core/runnables';
 import { StateAnnotation } from './state.js';
-
 const DEFAULT_GRAPH_NAME = 'New Agent';
-
-export interface GraphConfig {
-    name?: string;
-}
-
 /**
  * Define a node, these do the work of the graph and should have most of the logic.
  * Must return a subset of the properties set in StateAnnotation.
@@ -20,10 +13,7 @@ export interface GraphConfig {
  * @returns Some subset of parameters of the graph state, used to update the state
  * for the edges and nodes executed next.
  */
-const callModel = async (
-    _state: typeof StateAnnotation.State,
-    _config: RunnableConfig,
-): Promise<typeof StateAnnotation.Update> => {
+const callModel = async (_state, _config) => {
     /**
      * Do some work... (e.g. call an LLM)
      * For example, with LangChain you could do something like:
@@ -71,7 +61,6 @@ const callModel = async (
         ],
     };
 };
-
 /**
  * Routing function: Determines whether to continue research or end the builder.
  * This function decides if the gathered information is satisfactory or if more research is needed.
@@ -79,25 +68,20 @@ const callModel = async (
  * @param state - The current state of the research builder
  * @returns Either "callModel" to continue research or END to finish the builder
  */
-export const route = (state: typeof StateAnnotation.State): '__end__' | 'callModel' => {
+export const route = (state) => {
     if (state.messages.length > 0) {
         return '__end__';
     }
-
     // Loop back
     return 'callModel';
 };
-
-export const createGraph = (cfg: GraphConfig = {}) => {
+export const createGraph = (cfg = {}) => {
     const graph = new StateGraph(StateAnnotation)
         .addNode('callModel', callModel)
         .addEdge('__start__', 'callModel')
         .addConditionalEdges('callModel', route)
         .compile();
-
     graph.name = cfg.name ?? DEFAULT_GRAPH_NAME;
-
     return graph;
 };
-
 export const graph = createGraph();

@@ -20,6 +20,6 @@
         "types": ["node"],
         "resolveJsonModule": true
     },
-    "include": ["**/*.ts", "**/*.js"],
+    "include": ["src/**/*.ts"],
     "exclude": ["node_modules", "dist"]
 }
