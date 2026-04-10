@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 import { spawn } from 'node:child_process';
-const child = spawn('maw', process.argv.slice(2), {
+const child = spawn('maw-cli', process.argv.slice(2), {
     stdio: 'inherit',
 });
 child.on('close', (code, signal) => {
@@ -11,6 +11,6 @@ child.on('close', (code, signal) => {
     process.exitCode = code ?? 1;
 });
 child.on('error', (err) => {
-    process.stderr.write(`Unable to start maw: ${err.message}\n`);
+    process.stderr.write(`Unable to start maw-cli: ${err.message}\n`);
     process.exitCode = 1;
 });

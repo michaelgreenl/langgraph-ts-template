@@ -11,6 +11,7 @@ const packageJson = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8
     files?: string[];
     scripts?: Record<string, string>;
 };
+const bin = readFileSync(resolve(root, 'src/bin.ts'), 'utf8');
 
 describe('package metadata', () => {
     it('keeps husky out of the consumer install path', () => {
@@ -19,9 +20,16 @@ describe('package metadata', () => {
         expect(packageJson.scripts?.prepare ?? '').not.toContain('husky');
     });
 
-    it('publishes scaffold assets and subpath exports for maw init', () => {
+    it('publishes scaffold assets and subpath exports for maw-cli init', () => {
         expect(packageJson.files).toContain('src/scaffold/assets');
         expect(packageJson.exports).toHaveProperty('./config');
         expect(packageJson.exports).toHaveProperty('./scaffold');
+    });
+
+    it('depends on and proxies to maw-cli', () => {
+        expect(packageJson.dependencies).toHaveProperty('maw-cli');
+        expect(packageJson.dependencies).not.toHaveProperty('maw');
+        expect(bin).toContain("spawn('maw-cli'");
+        expect(bin).toContain('Unable to start maw-cli');
     });
 });

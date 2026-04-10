@@ -1,8 +1,8 @@
 # Phase 2c Handoff
 
-## Package Inputs For `maw init`
+## Package Inputs For `maw-cli init`
 
-`maw init` should consume the workflow package through the dedicated subpath exports, not the root export:
+`maw-cli init` should consume the workflow package through the dedicated subpath exports, not the root export:
 
 - `<workflow>/scaffold`
 - `<workflow>/config`
@@ -14,7 +14,7 @@ This avoids importing the compiled graph just to read scaffold metadata.
 The workflow package now exposes a `scaffold` object with:
 
 - `packageName`: the installed workflow package name, read from the package manifest
-- `directories`: directories `maw init` should create even when they are empty
+- `directories`: directories `maw-cli init` should create even when they are empty
 - `assets`: source-path and target-path pairs for `.maw/config.json`, `.maw/ov.conf`, and `.maw/graph.ts`
 - `gitignore`: secret-bearing entries to merge into the target project's `.gitignore`
 - `rules.overwrite = "preserve"`: do not overwrite existing scaffold files unless the CLI adds explicit opt-in later
@@ -46,4 +46,4 @@ Phase `2c` stops at the `.maw/` scaffold contract and runtime config support.
 
 Phase `2e` still owns generated `langgraph.json`.
 
-The local `../maw-cli` now consumes this contract through its `init` command, and the real `bunx maw init` smoke test passes against a temporary target project. The CLI implementation is intentionally narrow: it discovers the installed workflow package, loads its `./scaffold` export from the package manifest, creates missing scaffold files, merges `.gitignore` once, and preserves existing scaffold files on reruns.
+The local `../maw-cli` now consumes this contract through its `init` command, and the real `bunx maw-cli init` smoke test passes against a temporary target project. The CLI implementation is intentionally narrow: it discovers the installed workflow package, loads its `./scaffold` export from the package manifest, creates missing scaffold files, merges `.gitignore` once, and preserves existing scaffold files on reruns.

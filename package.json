@@ -50,7 +50,7 @@
         "@commitlint/config-conventional": "^20.5.0",
         "@langchain/core": "^1.1.36",
         "@langchain/langgraph": "^1.2.5",
-        "maw": "git+https://github.com/michaelgreenl/maw-cli.git",
+        "maw-cli": "git+https://github.com/michaelgreenl/maw-cli.git",
         "zod": "^4.3.6"
     },
     "devDependencies": {

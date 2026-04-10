@@ -8,7 +8,7 @@
         "@commitlint/config-conventional": "^20.5.0",
         "@langchain/core": "^1.1.36",
         "@langchain/langgraph": "^1.2.5",
-        "maw": "git+https://github.com/michaelgreenl/maw-cli.git",
+        "maw-cli": "git+https://github.com/michaelgreenl/maw-cli.git",
         "zod": "^4.3.6",
       },
       "devDependencies": {
@@ -629,7 +629,7 @@
 
     "math-intrinsics": ["math-intrinsics@1.1.0", "", {}, "sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g=="],
 
-    "maw": ["maw@github:michaelgreenl/maw-cli#eac51a1", { "bin": { "maw": "./dist/index.js" } }, "michaelgreenl-maw-cli-eac51a1"],
+    "maw-cli": ["maw-cli@github:michaelgreenl/maw-cli#eac51a1", { "bin": { "maw-cli": "./bin/maw-cli.js" } }, "michaelgreenl-maw-cli-eac51a1"],
 
     "meow": ["meow@13.2.0", "", {}, "sha512-pxQJQzB6djGPXh08dacEloMFopsOqGVRKFPYvPOt9XDZ1HasbgDZA74CJGreSU4G3Ak7EFJGoiH2auq+yXISgA=="],
 

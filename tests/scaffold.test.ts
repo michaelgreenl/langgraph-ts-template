@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import { createScaffoldFiles, readScaffoldAsset, scaffold } from '../src/scaffold.js';
 
 describe('MAW scaffold contract', () => {
-    it('defines the maw init handoff rules', () => {
+    it('defines the maw-cli init handoff rules', () => {
         expect(scaffold.packageName.length).toBeGreaterThan(0);
         expect(scaffold.directories).toContain('.maw/templates');
         expect(scaffold.gitignore).toEqual(['.maw/config.json', '.maw/ov.conf']);
@@ -12,7 +12,7 @@ describe('MAW scaffold contract', () => {
         });
     });
 
-    it('points maw init at the packaged asset sources', () => {
+    it('points maw-cli init at the packaged asset sources', () => {
         expect(scaffold.assets.config.target).toBe('.maw/config.json');
         expect(scaffold.assets.ov.target).toBe('.maw/ov.conf');
         expect(scaffold.assets.graph.target).toBe('.maw/graph.ts');
