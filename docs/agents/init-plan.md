@@ -6,7 +6,7 @@
 ┌──────────────────────────────────────────┐
 │  THIS REPO: langgraph-ts-template        │
 │  Template for building maw-compatible    │
-│  workflow packages                        │
+│  workflow packages                       │
 ├──────────────────────────────────────────┤
 │  NEW REPO: maw (CLI package)             │
 │  Published separately, workflows depend  │
@@ -16,22 +16,22 @@
          │ Developer derives workflows from template
          ▼
 ┌──────────────────────────────────────────┐
-│  WORKFLOW PACKAGE (e.g. docs-agent)       │
-│  Built from this template                 │
-│  Installed into target projects via:       │
+│  WORKFLOW PACKAGE (e.g. docs-agent)      │
+│  Built from this template                │
+│  Installed into target projects via:     │
 │  bun add docs-agent@git+https://...      │
 └──────────────────────────────────────────┘
          │ Installed into target project
          ▼
 ┌──────────────────────────────────────────┐
-│  TARGET PROJECT                           │
-│  .maw/config.json  (workflow config)      │
-│  .maw/templates/   (custom snippets)      │
-│  .maw/ov.conf      (OpenViking config)    │
+│  TARGET PROJECT                          │
+│  .maw/config.json  (workflow config)     │
+│  .maw/templates/   (custom snippets)     │
+│  .maw/ov.conf      (OpenViking config)   │
 │  npx maw init       → scaffold .maw/     │
-│  npx maw dev        → start dev server    │
-│  npx maw ov:init    → setup OpenViking     │
-│  npx maw ov:index   → index project        │
+│  npx maw dev        → start dev server   │
+│  npx maw ov:init    → setup OpenViking   │
+│  npx maw ov:index   → index project      │
 └──────────────────────────────────────────┘
 ```
 
