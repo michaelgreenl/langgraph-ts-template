@@ -13,6 +13,7 @@ describe('MAW config', () => {
         const cfg = createConfig();
 
         expect(cfg.llm.apiKey).toBe('${OPENAI_API_KEY}');
+        expect(cfg.graph).toMatchObject({ agent: 'researcher' });
     });
 
     it('resolves environment variables in nested objects and arrays', () => {

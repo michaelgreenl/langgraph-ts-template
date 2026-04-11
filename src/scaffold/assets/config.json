@@ -1,7 +1,8 @@
 {
     "workspace": ".",
     "graph": {
-        "name": "agent"
+        "name": "agent",
+        "agent": "researcher"
     },
     "openviking": {
         "enabled": true,

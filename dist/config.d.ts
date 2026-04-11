@@ -3,6 +3,7 @@ export declare const mawConfigSchema: z.ZodObject<{
     workspace: z.ZodString;
     graph: z.ZodObject<{
         name: z.ZodString;
+        agent: z.ZodString;
     }, z.core.$strip>;
     openviking: z.ZodObject<{
         enabled: z.ZodBoolean;

@@ -2,9 +2,86 @@
  * Starter LangGraph.js Template
  * Make this code your own!
  */
+import { SystemMessage } from '@langchain/core/messages';
 import { StateGraph } from '@langchain/langgraph';
-import { StateAnnotation } from './state.js';
+import { access } from 'node:fs/promises';
+import { resolve } from 'node:path';
+import { createConfig, loadConfig } from '../config.js';
+import { createTemplateEngine } from '../templates/engine.js';
+import { MAW_SYSTEM_ID, StateAnnotation } from './state.js';
 const DEFAULT_GRAPH_NAME = 'New Agent';
+const DEFAULT_CONFIG_FILE = '.maw/config.json';
+const fileExists = async (file) => {
+    try {
+        await access(file);
+        return true;
+    }
+    catch {
+        return false;
+    }
+};
+const loadRuntime = async (cfg) => {
+    const root = cfg.root ?? process.cwd();
+    if (cfg.config) {
+        return {
+            agent: cfg.agent ?? cfg.config.graph.agent,
+            config: cfg.config,
+            root,
+            strict: true,
+        };
+    }
+    const file = resolve(root, cfg.configPath ?? DEFAULT_CONFIG_FILE);
+    if (await fileExists(file)) {
+        const config = await loadConfig(file);
+        return {
+            agent: cfg.agent ?? config.graph.agent,
+            config,
+            root,
+            strict: true,
+        };
+    }
+    const config = createConfig();
+    return {
+        agent: cfg.agent ?? config.graph.agent,
+        config,
+        root,
+        strict: false,
+    };
+};
+const isPrompt = (message, prompt) => {
+    if (!message || message._getType() !== 'system') {
+        return false;
+    }
+    return message.id === MAW_SYSTEM_ID || String(message.content) === prompt;
+};
+const prompt = async (cfg) => {
+    const runtime = await loadRuntime(cfg);
+    const engine = createTemplateEngine({
+        config: runtime.config,
+        root: runtime.root,
+        strict: runtime.strict,
+    });
+    return engine.compose(runtime.agent, {
+        workspacePath: runtime.config.workspace,
+        ...cfg.vars,
+    });
+};
+const ensurePrompt = (cached) => {
+    return async (state) => {
+        const system = await cached;
+        if (isPrompt(state.messages[0], system)) {
+            return {};
+        }
+        return {
+            messages: [
+                new SystemMessage({
+                    content: system,
+                    id: MAW_SYSTEM_ID,
+                }),
+            ],
+        };
+    };
+};
 /**
  * Define a node, these do the work of the graph and should have most of the logic.
  * Must return a subset of the properties set in StateAnnotation.
@@ -76,12 +153,15 @@ export const route = (state) => {
     return 'callModel';
 };
 export const createGraph = (cfg = {}) => {
+    const cached = prompt(cfg);
     const graph = new StateGraph(StateAnnotation)
+        .addNode('ensurePrompt', ensurePrompt(cached))
         .addNode('callModel', callModel)
-        .addEdge('__start__', 'callModel')
+        .addEdge('__start__', 'ensurePrompt')
+        .addEdge('ensurePrompt', 'callModel')
         .addConditionalEdges('callModel', route)
         .compile();
-    graph.name = cfg.name ?? DEFAULT_GRAPH_NAME;
+    graph.name = cfg.name ?? cfg.config?.graph.name ?? DEFAULT_GRAPH_NAME;
     return graph;
 };
 export const graph = createGraph();

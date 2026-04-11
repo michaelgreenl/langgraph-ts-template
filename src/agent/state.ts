@@ -1,6 +1,21 @@
 import { BaseMessage, BaseMessageLike } from '@langchain/core/messages';
 import { Annotation, messagesStateReducer } from '@langchain/langgraph';
 
+export const MAW_SYSTEM_ID = 'maw-system';
+
+const pinSystem = (messages: BaseMessage[]): BaseMessage[] => {
+    const index = messages.findIndex((message) => message.id === MAW_SYSTEM_ID);
+
+    if (index <= 0) {
+        return messages;
+    }
+
+    return [messages[index], ...messages.slice(0, index), ...messages.slice(index + 1)];
+};
+
+const reduceMessages = (left: BaseMessage[], right: BaseMessageLike[]): BaseMessage[] =>
+    pinSystem(messagesStateReducer(left, right));
+
 /**
  * A graph's StateAnnotation defines three main things:
  * 1. The structure of the data to be passed between nodes (which "channels" to read from/write to and their types)
@@ -45,7 +60,7 @@ export const StateAnnotation = Annotation.Root({
      *     message from \`right\` will replace the message from \`left\`.`
      */
     messages: Annotation<BaseMessage[], BaseMessageLike[]>({
-        reducer: messagesStateReducer,
+        reducer: reduceMessages,
         default: () => [],
     }),
     /**

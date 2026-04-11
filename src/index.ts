@@ -9,6 +9,7 @@ export {
     resolveEnvVars,
     type MawConfig,
 } from './config.js';
+export { createTemplateEngine, type TemplateEngine, type TemplateVars } from './templates/engine.js';
 export {
     SCAFFOLD_DIRECTORIES,
     SCAFFOLD_GITIGNORE,

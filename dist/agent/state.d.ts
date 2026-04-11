@@ -1,4 +1,5 @@
 import { BaseMessage, BaseMessageLike } from '@langchain/core/messages';
+export declare const MAW_SYSTEM_ID = "maw-system";
 /**
  * A graph's StateAnnotation defines three main things:
  * 1. The structure of the data to be passed between nodes (which "channels" to read from/write to and their types)

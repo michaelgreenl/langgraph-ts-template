@@ -12,6 +12,7 @@ export const mawConfigSchema = z.object({
     workspace: z.string().min(1),
     graph: z.object({
         name: z.string().min(1),
+        agent: z.string().min(1),
     }),
     openviking: z.object({
         enabled: z.boolean(),
