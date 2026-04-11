@@ -135,8 +135,7 @@ src/
 {
     "workspace": ".",
     "graph": {
-        "name": "agent",
-        "agent": "researcher"
+        "name": "agent"
     },
     "openviking": {
         "enabled": true,
@@ -219,7 +218,7 @@ Template resolution priority (higher wins on name collision):
 
 ```ts
 // Agent-specific prompt composition
-const systemPrompt = await engine.compose(config.graph.agent, {
+const systemPrompt = await engine.compose('researcher', {
     projectType: 'typescript',
     workspacePath: config.workspace,
     openvikingContext: gatheredContext, // from OV if enabled

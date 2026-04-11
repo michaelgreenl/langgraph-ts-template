@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { z } from 'zod';
-import { readScaffoldAsset } from './scaffold.js';
+import { readScaffoldAsset } from './scaffold/index.js';
 
 const envPattern = /\$\{(\w+)\}/g;
 

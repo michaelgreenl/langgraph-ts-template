@@ -2,7 +2,7 @@ import { access, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promise
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { createScaffoldFiles, scaffold } from '../src/scaffold.js';
+import { createScaffoldFiles, scaffold } from '../src/scaffold/index.js';
 
 const roots: string[] = [];
 

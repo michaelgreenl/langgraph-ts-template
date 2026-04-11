@@ -22,4 +22,4 @@ export {
     type ScaffoldAsset,
     type ScaffoldAssetName,
     type ScaffoldRules,
-} from './scaffold.js';
+} from './scaffold/index.js';

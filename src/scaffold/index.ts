@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
-const packagePath = fileURLToPath(new URL('../package.json', import.meta.url));
+const packagePath = fileURLToPath(new URL('../../package.json', import.meta.url));
 const graphToken = '__WORKFLOW_PACKAGE__';
 
 const assetFiles = {
@@ -11,13 +11,13 @@ const assetFiles = {
 } as const;
 
 const resolveAsset = (file: string): string => {
-    const local = fileURLToPath(new URL(`./scaffold/assets/${file}`, import.meta.url));
+    const local = fileURLToPath(new URL(`./assets/${file}`, import.meta.url));
 
     if (existsSync(local)) {
         return local;
     }
 
-    const src = fileURLToPath(new URL(`../src/scaffold/assets/${file}`, import.meta.url));
+    const src = fileURLToPath(new URL(`../scaffold/assets/${file}`, import.meta.url));
 
     if (existsSync(src)) {
         return src;
