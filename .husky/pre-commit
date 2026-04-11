@@ -1,1 +1,1 @@
-bun run test && bun run test:int && bun typecheck
+bun run test:all
