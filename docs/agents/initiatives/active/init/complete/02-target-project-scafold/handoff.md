@@ -34,7 +34,7 @@ Secret placeholders stay literal in scaffolded files. Resolution only happens at
 
 ## Current Defaults
 
-- `.maw/config.json` matches the phase `2c` contract, with `coder.snippets = ["typescript"]`
+- `.maw/config.json` matches the phase `2c` contract, with `graph.agent = "researcher"` selecting the default prompt profile and `coder.snippets = ["typescript"]`
 - `.maw/ov.conf` is preconfigured for OpenAI-backed embedding and VLM settings using `${OPENAI_API_KEY}`
 - `.maw/graph.ts` stays minimal: `createGraph()` import plus export
 
