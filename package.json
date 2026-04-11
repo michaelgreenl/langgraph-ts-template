@@ -33,6 +33,7 @@
     ],
     "scripts": {
         "build": "tsc",
+        "typecheck": "tsc --noEmit",
         "clean": "rm -rf dist",
         "test": "vitest run --mode unit",
         "test:int": "vitest run --mode integration",

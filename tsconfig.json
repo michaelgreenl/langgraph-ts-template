@@ -12,10 +12,9 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "useDefineForClassFields": true,
-        "strictPropertyInitialization": false,
         "allowJs": true,
         "strict": true,
-        "strictFunctionTypes": false,
+        "noUncheckedIndexedAccess": true,
         "outDir": "dist",
         "types": ["node"],
         "resolveJsonModule": true

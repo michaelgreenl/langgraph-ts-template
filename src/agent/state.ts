@@ -6,7 +6,7 @@ export const MAW_SYSTEM_ID = 'maw-system';
 const pinSystem = (messages: BaseMessage[]): BaseMessage[] => {
     const index = messages.findIndex((message) => message.id === MAW_SYSTEM_ID);
 
-    if (index <= 0) {
+    if (!messages[index]) {
         return messages;
     }
 
