@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createScaffoldFiles, readScaffoldAsset, scaffold } from '../src/scaffold/index.js';
+import { createScaffoldFiles, readScaffoldAsset, scaffold } from '../../src/scaffold/index.js';
 
 describe('MAW scaffold contract', () => {
     it('defines the maw-cli init handoff rules', () => {

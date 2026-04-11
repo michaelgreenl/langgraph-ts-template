@@ -2,7 +2,7 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createConfig, loadConfig, resolveEnvVars } from '../src/config.js';
+import { createConfig, loadConfig, resolveEnvVars } from '../../src/config.js';
 
 describe('MAW config', () => {
     afterEach(() => {

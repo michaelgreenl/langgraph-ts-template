@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { createGraph, graph } from '../src/index.js';
+import { createGraph, graph } from '../../src/index.js';
 
 describe('Public API', () => {
     it('creates a compiled graph', async () => {
