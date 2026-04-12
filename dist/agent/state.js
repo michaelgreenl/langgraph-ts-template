@@ -2,7 +2,7 @@ import { Annotation, messagesStateReducer } from '@langchain/langgraph';
 export const MAW_SYSTEM_ID = 'maw-system';
 const pinSystem = (messages) => {
     const index = messages.findIndex((message) => message.id === MAW_SYSTEM_ID);
-    if (index <= 0) {
+    if (!messages[index]) {
         return messages;
     }
     return [messages[index], ...messages.slice(0, index), ...messages.slice(index + 1)];

@@ -24,6 +24,10 @@ describe('package metadata', () => {
         expect(packageJson.files).toContain('src/scaffold/assets');
         expect(packageJson.exports).toHaveProperty('./config');
         expect(packageJson.exports).toHaveProperty('./scaffold');
+        expect(packageJson.exports?.['./scaffold']).toEqual({
+            import: './dist/scaffold/index.js',
+            types: './dist/scaffold/index.d.ts',
+        });
     });
 
     it('depends on and proxies to maw-cli', () => {

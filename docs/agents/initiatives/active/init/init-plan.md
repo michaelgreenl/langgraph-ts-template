@@ -227,10 +227,11 @@ const systemPrompt = await engine.compose('researcher', {
 
 ### 2e. Generated langgraph.json in target project
 
-- [ ] complete
+- [x] complete
 
 ```json
 {
+    "node_version": "20",
     "graphs": {
         "agent": "./.maw/graph.ts:graph"
     },

@@ -25,7 +25,8 @@ function isObjectExported(filePath, objectName) {
 function checkLanggraphPaths() {
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
-    const langgraphPath = path.join(__dirname, '..', 'langgraph.json');
+    const root = process.argv[2] ? path.resolve(process.argv[2]) : path.join(__dirname, '..');
+    const langgraphPath = path.join(root, 'langgraph.json');
 
     if (!fileExists(langgraphPath)) {
         console.error('langgraph.json not found in the root directory');
@@ -45,7 +46,7 @@ function checkLanggraphPaths() {
 
         for (const [key, value] of Object.entries(graphs)) {
             const [filePath, objectName] = value.split(':');
-            const fullPath = path.join(__dirname, '..', filePath);
+            const fullPath = path.resolve(root, filePath);
 
             if (!fileExists(fullPath)) {
                 console.error(`File not found: ${fullPath}`);

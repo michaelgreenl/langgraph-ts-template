@@ -20,8 +20,8 @@
             "types": "./dist/config.d.ts"
         },
         "./scaffold": {
-            "import": "./dist/scaffold.js",
-            "types": "./dist/scaffold.d.ts"
+            "import": "./dist/scaffold/index.js",
+            "types": "./dist/scaffold/index.d.ts"
         },
         "./package.json": "./package.json"
     },

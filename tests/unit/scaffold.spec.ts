@@ -16,6 +16,8 @@ describe('MAW scaffold contract', () => {
         expect(scaffold.assets.config.target).toBe('.maw/config.json');
         expect(scaffold.assets.ov.target).toBe('.maw/ov.conf');
         expect(scaffold.assets.graph.target).toBe('.maw/graph.ts');
+        expect('langgraph' in scaffold.assets).toBe(true);
+        expect(Object.values(scaffold.assets).map((asset) => asset.target)).toContain('langgraph.json');
         expect(readScaffoldAsset('config')).toContain('"workspace": "."');
         expect(readScaffoldAsset('ov')).toContain('${OPENAI_API_KEY}');
     });
@@ -32,5 +34,20 @@ describe('MAW scaffold contract', () => {
 
         expect(files['.maw/config.json']).toContain('${OPENAI_API_KEY}');
         expect(files['.maw/ov.conf']).toContain('${OPENAI_API_KEY}');
+    });
+
+    it('renders the target langgraph config for the scaffolded graph entry', () => {
+        const files = createScaffoldFiles('docs-agent');
+        const config = JSON.parse(files['langgraph.json']) as {
+            node_version: string;
+            graphs: Record<string, string>;
+            env: string;
+            dependencies: string[];
+        };
+
+        expect(config.node_version).toBe('20');
+        expect(config.graphs.agent).toBe('./.maw/graph.ts:graph');
+        expect(config.env).toBe('.env');
+        expect(config.dependencies).toEqual(['.']);
     });
 });

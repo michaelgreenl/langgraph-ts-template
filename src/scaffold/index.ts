@@ -8,19 +8,19 @@ const assetFiles = {
     config: 'config.json',
     ov: 'ov.conf',
     graph: 'graph.ts.template',
+    langgraph: 'langgraph.json.template',
 } as const;
 
 const resolveAsset = (file: string): string => {
-    const local = fileURLToPath(new URL(`./assets/${file}`, import.meta.url));
+    const paths = [
+        fileURLToPath(new URL(`./assets/${file}`, import.meta.url)),
+        fileURLToPath(new URL(`../../src/scaffold/assets/${file}`, import.meta.url)),
+    ];
 
-    if (existsSync(local)) {
-        return local;
-    }
-
-    const src = fileURLToPath(new URL(`../scaffold/assets/${file}`, import.meta.url));
-
-    if (existsSync(src)) {
-        return src;
+    for (const path of paths) {
+        if (existsSync(path)) {
+            return path;
+        }
     }
 
     throw new Error(`Unable to locate scaffold asset: ${file}`);
@@ -83,6 +83,13 @@ export const scaffold: MawScaffold = {
             source: resolveAsset(assetFiles.graph),
             target: '.maw/graph.ts',
         },
+        // LangGraph.js target projects need node_version to select the JS runtime.
+        // The target root stays in the dependency search path via ["."], and env
+        // points at an optional local .env file when developers choose to add one.
+        langgraph: {
+            source: resolveAsset(assetFiles.langgraph),
+            target: 'langgraph.json',
+        },
     },
     gitignore: SCAFFOLD_GITIGNORE,
     rules: SCAFFOLD_RULES,
@@ -95,4 +102,5 @@ export const createScaffoldFiles = (name = scaffold.packageName): Record<string,
     [scaffold.assets.config.target]: readScaffoldAsset('config'),
     [scaffold.assets.ov.target]: readScaffoldAsset('ov'),
     [scaffold.assets.graph.target]: readScaffoldAsset('graph').replace(graphToken, name),
+    [scaffold.assets.langgraph.target]: readScaffoldAsset('langgraph'),
 });
