@@ -1,3 +1,9 @@
+## [0.2.0](https://github.com/michaelgreenl/langgraph-ts-template/compare/v0.1.0...v0.2.0) (2026-04-12)
+
+### Features
+
+* package restructuring complete ([d094568](https://github.com/michaelgreenl/langgraph-ts-template/commit/d0945689d6615b0abebfae9d6f9810e2d6aff04b))
+
 ## [0.1.0](https://github.com/michaelgreenl/langgraph-ts-template/compare/v0.0.4...v0.1.0) (2026-04-11)
 
 ### Features
