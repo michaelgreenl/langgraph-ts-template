@@ -280,6 +280,45 @@ maw-cli ov:init    # Generate .maw/ov.conf, verify Python/OV available
 maw-cli ov:index   # Scan for incompatible files, then index project
 ```
 
+### 3a. Package structure & CLI skeleton
+
+- [x] complete
+
+- Repository with `package.json` shape (`name`, `bin`, `exports`, `files`)
+- `src/index.ts` — command routing, `parseCommandName`, `formatHelp`, `runCli`
+- `bin/maw-cli.js` — published bin wrapper with dual-path resolution
+- Placeholder stubs for all 5 commands registered in router
+- Test suite: CLI routing, bin smoke test, package metadata validation
+- TypeScript, Vitest, and Prettier config
+
+### 3b. `maw-cli init`
+
+- [x] complete
+
+- Workflow auto-discovery via `./scaffold` export contract
+- Scaffold directory + file creation (missing files only, idempotent)
+- `.gitignore` merge (deduped, append-once)
+- Integration tests against real temp filesystem
+
+### 3c. `utils/config.ts`
+
+- [ ] complete
+
+- Read and parse `.maw/config.json` from the target project root
+- Resolve `${VAR_NAME}` env var interpolation recursively (matching the loader spec in 2c)
+- Typed `MawConfig` schema matching the config shape defined in 2c
+- Throw with a clear message if config file is missing or a referenced env var is unset
+- Unit tests: happy path, missing config file, unset env var, nested interpolation
+
+### 3d. `maw-cli dev` & `maw-cli start`
+
+- [ ] complete
+
+- Add `@langchain/langgraph-cli` as a runtime dependency
+- Implement `dev`: read `.maw/config.json` via `utils/config`, generate/verify `langgraph.json` in target project root (matching spec in 2e), exec `langgraph-cli dev`
+- Implement `start`: mirrors `dev` but invokes langgraph-cli production server mode
+- Tests: config-not-found error path, correct `langgraph.json` shape generated, delegation to langgraph-cli
+
 ## Phase 4: OpenViking Integration
 
 ### 4a. `maw-cli ov:init`
