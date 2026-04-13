@@ -302,7 +302,7 @@ maw-cli ov:index   # Scan for incompatible files, then index project
 
 ### 3c. `utils/config.ts`
 
-- [ ] complete
+- [x] complete
 
 - Read and parse `.maw/config.json` from the target project root
 - Resolve `${VAR_NAME}` env var interpolation recursively (matching the loader spec in 2c)

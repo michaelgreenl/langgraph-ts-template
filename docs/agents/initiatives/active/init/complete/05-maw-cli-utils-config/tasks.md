@@ -26,8 +26,8 @@ Add `maw-cli/src/utils/config.ts` — a typed reader that loads `.maw/config.jso
 
 ### 1. Create `src/utils/config.ts`
 
-- [ ] Create `src/utils/config.ts` in `maw-cli/`
-- [ ] Define and export the `MawConfig` interface with the full shape from Phase 2c:
+- [x] Create `src/utils/config.ts` in `maw-cli/`
+- [x] Define and export the `MawConfig` interface with the full shape from Phase 2c:
 
     ```ts
     export interface MawConfig {
@@ -47,39 +47,39 @@ Add `maw-cli/src/utils/config.ts` — a typed reader that loads `.maw/config.jso
 
 ### 2. Implement `resolveEnvVars`
 
-- [ ] Implement `resolveEnvVars(obj: Record<string, unknown>): Record<string, unknown>` as a module-internal (non-exported) helper
-- [ ] Walk every entry: substitute `${VAR}` in string values via `/\$\{(\w+)\}/g`; recurse into nested plain objects; pass all other values through unchanged
-- [ ] Throw `Error` with message `Environment variable <VAR> is not set but referenced in .maw/config.json` when a referenced var is absent (exact spec from Phase 2c)
+- [x] Implement `resolveEnvVars(obj: Record<string, unknown>): Record<string, unknown>` as a module-internal (non-exported) helper
+- [x] Walk every entry: substitute `${VAR}` in string values via `/\$\{(\w+)\}/g`; recurse into nested plain objects; pass all other values through unchanged
+- [x] Throw `Error` with message `Environment variable <VAR> is not set but referenced in .maw/config.json` when a referenced var is absent (exact spec from Phase 2c)
 
 ### 3. Implement `readConfig`
 
-- [ ] Implement `export async function readConfig(root: string): Promise<MawConfig>`
-- [ ] Resolve the config path as `path.join(root, '.maw', 'config.json')` (use `node:path`)
-- [ ] Check existence with `access` from `node:fs/promises` — throw `Error` with message `Config file not found: <path>` when absent
-- [ ] Read with `readFile` from `node:fs/promises` and parse with `JSON.parse`
-- [ ] Call `resolveEnvVars` on the parsed object and cast the result to `MawConfig`
+- [x] Implement `export async function readConfig(root: string): Promise<MawConfig>`
+- [x] Resolve the config path as `path.join(root, '.maw', 'config.json')` (use `node:path`)
+- [x] Check existence with `access` from `node:fs/promises` — throw `Error` with message `Config file not found: <path>` when absent
+- [x] Read with `readFile` from `node:fs/promises` and parse with `JSON.parse`
+- [x] Call `resolveEnvVars` on the parsed object and cast the result to `MawConfig`
 
 ### 4. Export from Public API
 
-- [ ] Add `export { readConfig, type MawConfig } from './utils/config.js'` to `src/index.ts`
-- [ ] Confirm the re-export compiles: the `"."` entry in `exports` maps to `dist/index.js`, so `readConfig` will be importable from `maw-cli`
+- [x] Add `export { readConfig, type MawConfig } from './utils/config.js'` to `src/index.ts`
+- [x] Confirm the re-export compiles: the `"."` entry in `exports` maps to `dist/index.js`, so `readConfig` will be importable from `maw-cli`
 
 ### 5. Unit Tests
 
-- [ ] Add `tests/config.test.ts` (flat, consistent with existing test layout)
-- [ ] Cover the following cases:
+- [x] Add `tests/config.test.ts` (flat, consistent with existing test layout)
+- [x] Cover the following cases:
     - Happy path: temp dir with a valid `.maw/config.json`, env var set → returns `MawConfig` with resolved `llm.apiKey`
     - Missing config file → throws with `"Config file not found"` in the message
     - Unset env var → throws with the variable name in the message
     - Nested interpolation: a `${VAR}` in `llm.apiKey` and a second `${VAR}` in `openviking.host` both resolved correctly in a single call
     - Plain-value passthrough: a string without `${...}` is returned unchanged
     - Non-string leaf values (numbers, booleans) are passed through unchanged
-- [ ] Write fixture configs as real files in a temp dir (no mocking); clean up in `afterEach`
+- [x] Write fixture configs as real files in a temp dir (no mocking); clean up in `afterEach`
 
 ### 6. Smoke Test
 
-- [ ] Add `"smoke:config": "bun ./smoke/config.ts"` to `scripts` in `../maw-smoke/maw-smoke-1/package.json`
-- [ ] Create `../maw-smoke/maw-smoke-1/smoke/config.ts` with:
+- [x] Add `"smoke:config": "bun ./smoke/config.ts"` to `scripts` in `../maw-smoke/maw-smoke-1/package.json`
+- [x] Create `../maw-smoke/maw-smoke-1/smoke/config.ts` with:
     - Write `.maw/config.json` fixture (relative to `process.cwd()` of the smoke project) with `"apiKey": "${MAW_SMOKE_KEY}"` and at least one nested field
     - Set `process.env.MAW_SMOKE_KEY = 'smoke-key-abc'` before calling `readConfig`
     - Import `readConfig` from `maw-cli` (installed via `file:` link)
@@ -92,16 +92,16 @@ Add `maw-cli/src/utils/config.ts` — a typed reader that loads `.maw/config.jso
 
 ## Verification
 
-- [ ] `bun run build` in `maw-cli/` — confirm `dist/utils/config.js` is present and `readConfig` is present in `dist/index.js`
-- [ ] `bun run lint` in `maw-cli/` — no lint errors in `src/utils/config.ts` or `src/index.ts`
-- [ ] `bun run test` in `maw-cli/` — all tests pass, including the new `tests/config.test.ts`
-- [ ] Smoke: `bun run smoke:config` in `../maw-smoke/maw-smoke-1/` — all assertions pass and `Phase 3c smoke passed.` is printed
+- [x] `bun run build` in `maw-cli/` — confirm `dist/utils/config.js` is present and `readConfig` is present in `dist/index.js`
+- [x] `bun run lint` in `maw-cli/` — no lint errors in `src/utils/config.ts` or `src/index.ts`
+- [x] `bun run test` in `maw-cli/` — all tests pass, including the new `tests/config.test.ts`
+- [x] Smoke: `bun run smoke:config` in `../maw-smoke/maw-smoke-1/` — all assertions pass and `Phase 3c smoke passed.` is printed
 
 ## Exit Criteria
 
-- [ ] `readConfig(root)` returns a correctly typed `MawConfig` when the file exists and all env vars are set
-- [ ] `readConfig` throws a descriptive error containing the file path when `.maw/config.json` is absent
-- [ ] `readConfig` throws a descriptive error naming the missing variable when a `${VAR}` reference is unset
-- [ ] Nested interpolation resolves at all levels of the config object
-- [ ] `readConfig` and `MawConfig` are exported from `maw-cli`'s public `"."` export and importable from the smoke project
-- [ ] All unit tests and the smoke check pass without requiring a live service or real API key
+- [x] `readConfig(root)` returns a correctly typed `MawConfig` when the file exists and all env vars are set
+- [x] `readConfig` throws a descriptive error containing the file path when `.maw/config.json` is absent
+- [x] `readConfig` throws a descriptive error naming the missing variable when a `${VAR}` reference is unset
+- [x] Nested interpolation resolves at all levels of the config object
+- [x] `readConfig` and `MawConfig` are exported from `maw-cli`'s public `"."` export and importable from the smoke project
+- [x] All unit tests and the smoke check pass without requiring a live service or real API key
