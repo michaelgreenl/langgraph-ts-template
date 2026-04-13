@@ -55,8 +55,8 @@ Add `maw-cli/src/utils/config.ts` — a typed reader that loads `.maw/config.jso
 
 - [ ] Implement `export async function readConfig(root: string): Promise<MawConfig>`
 - [ ] Resolve the config path as `path.join(root, '.maw', 'config.json')` (use `node:path`)
-- [ ] Read with `Bun.file(path).exists()` — throw `Error` with message `Config file not found: <path>` when absent
-- [ ] Parse with `Bun.file(path).json<Record<string, unknown>>()`
+- [ ] Check existence with `access` from `node:fs/promises` — throw `Error` with message `Config file not found: <path>` when absent
+- [ ] Read with `readFile` from `node:fs/promises` and parse with `JSON.parse`
 - [ ] Call `resolveEnvVars` on the parsed object and cast the result to `MawConfig`
 
 ### 4. Export from Public API
