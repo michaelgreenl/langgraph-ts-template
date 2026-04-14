@@ -92,6 +92,8 @@ describe('scaffold handoff', () => {
 
         expect(await readFile(graph, 'utf8')).toBe('// custom graph\n');
         expect(await readFile(langgraph, 'utf8')).toBe('{\n  "custom": true\n}\n');
-        expect(await readFile(ignore, 'utf8')).toBe('node_modules/\n.maw/config.json\n.maw/ov.conf\n');
+        expect(await readFile(ignore, 'utf8')).toBe(
+            'node_modules/\n.maw/config.json\n.maw/ov.conf\n.maw/openviking/\n',
+        );
     });
 });

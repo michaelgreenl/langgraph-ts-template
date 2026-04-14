@@ -5,7 +5,7 @@ describe('MAW scaffold contract', () => {
     it('defines the maw-cli init handoff rules', () => {
         expect(scaffold.packageName.length).toBeGreaterThan(0);
         expect(scaffold.directories).toContain('.maw/templates');
-        expect(scaffold.gitignore).toEqual(['.maw/config.json', '.maw/ov.conf']);
+        expect(scaffold.gitignore).toEqual(['.maw/config.json', '.maw/ov.conf', '.maw/openviking/']);
         expect(scaffold.rules).toEqual({
             overwrite: 'preserve',
             gitignoreMerge: 'append-once',

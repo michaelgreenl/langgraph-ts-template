@@ -60,7 +60,7 @@ export const WORKFLOW_PACKAGE_NAME = readPackage().name;
 
 export const SCAFFOLD_DIRECTORIES = ['.maw/templates'] as const;
 
-export const SCAFFOLD_GITIGNORE = ['.maw/config.json', '.maw/ov.conf'] as const;
+export const SCAFFOLD_GITIGNORE = ['.maw/config.json', '.maw/ov.conf', '.maw/openviking/'] as const;
 
 export const SCAFFOLD_RULES: ScaffoldRules = {
     overwrite: 'preserve',
@@ -83,9 +83,8 @@ export const scaffold: MawScaffold = {
             source: resolveAsset(assetFiles.graph),
             target: '.maw/graph.ts',
         },
-        // LangGraph.js target projects need node_version to select the JS runtime.
-        // The target root stays in the dependency search path via ["."], and env
-        // points at an optional local .env file when developers choose to add one.
+        // node_version and dependencies are used by langgraphjs deployment commands
+        // (build/docker). env points at an optional local .env file.
         langgraph: {
             source: resolveAsset(assetFiles.langgraph),
             target: 'langgraph.json',
