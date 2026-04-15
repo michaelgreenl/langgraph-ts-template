@@ -1,380 +1,464 @@
 # MAW (Model Accelerated Workflow) — Initialization Plan
 
+## Status Reset
+
+This plan supersedes earlier architecture decisions that blurred the boundary between `maw-cli` and workflow packages.
+
+The current direction is now:
+
+- `maw-cli` is a standalone tool, not a transitive workflow dependency.
+- `maw-cli` owns project-level MAW infrastructure.
+- Workflow packages built from this template only own workflow-specific runtime assets.
+- OpenViking is configured once per target project and shared by every installed workflow.
+- Skills and prompts are configured deterministically, not discovered by autoloading at runtime.
+
+Still valid from earlier work:
+
+- Bun migration
+- Vitest migration
+- Changesets and versioning workflow
+- Workflow packages being installable npm/git packages
+- Nunjucks-based prompt composition inside workflows
+
+Needs targeted refactor from the current implementation:
+
+- `langgraph-ts-template` depending on `maw-cli`
+- Root-level shared `langgraph.json`
+- `.maw/config.json` as the main project config
+- Workflow packages scaffolding `ov.conf` and project config
+- `maw-cli dev` and `maw-cli start` without a workflow argument
+
+## Finalized Decisions
+
+- `maw-cli` is installed and invoked separately from workflow packages.
+- Workflow packages do not carry `maw-cli` as a dependency.
+- The target project root config file is `maw.json`.
+- OpenViking remains per-project, not per-workflow.
+- The target project's workflow runtime files live under `.maw/graphs/<workflow>/`.
+- Each workflow directory contains its own `graph.ts`, `config.json`, and `langgraph.json`.
+- `maw-cli` intentionally generates each workflow's `langgraph.json` because it owns the target-project scaffold conventions and LangGraph CLI invocation.
+- Workflow packages scaffold only workflow-specific files.
+- `maw-cli dev <workflow>` and `maw-cli start <workflow>` execute a single workflow in isolation.
+- Agent skill selection lives in each workflow's `.maw/graphs/<workflow>/config.json`.
+- Custom template overrides live in `.maw/templates/` at the project level.
+- Prompt/skill injection must be deterministic and inspectable before execution.
+- Runtime-backed skills are a later design phase and must still resolve deterministically, not via LLM autoloading.
+
 ## Architecture
 
 ```
 ┌──────────────────────────────────────────┐
-│  THIS REPO: langgraph-ts-template        │
-│  Template for building maw-cli-compatible│
-│  workflow packages                       │
-├──────────────────────────────────────────┤
-│  NEW REPO: maw-cli (CLI package)         │
-│  Published separately, workflows depend  │
-│  on it. Wraps langgraph-cli + adds:      │
-│  init, ov:init, ov:index commands        │
+│  REPO: maw-cli                           │
+│  Standalone CLI/tooling package          │
+│  Owns: init, dev, start, prompt:*, ov:*  │
+│  Owns: maw.json, ov.conf, langgraph.json │
 └──────────────────────────────────────────┘
-         │ Developer derives workflows from template
-         ▼
-┌──────────────────────────────────────────┐
-│  WORKFLOW PACKAGE (e.g. docs-agent)      │
-│  Built from this template                │
-│  Installed into target projects via:     │
-│  bun add docs-agent@git+https://...      │
-└──────────────────────────────────────────┘
-         │ Installed into target project
-         ▼
+                 │
+                 │ manages target project infrastructure
+                 ▼
 ┌──────────────────────────────────────────┐
 │  TARGET PROJECT                          │
-│  .maw/config.json  (workflow config)     │
-│  .maw/templates/   (custom snippets)     │
-│  .maw/ov.conf      (OpenViking config)   │
-│  npx maw-cli init   → scaffold .maw/     │
-│  npx maw-cli dev    → start dev server   │
-│  npx maw-cli ov:init→ setup OpenViking   │
-│  npx maw-cli ov:index→ index project     │
+│  maw.json                                │
+│  .maw/templates/                         │
+│  .maw/graphs/<workflow>/                 │
+│    graph.ts                              │
+│    config.json                           │
+│    langgraph.json                        │
+│  .maw/ov.conf                            │
+└──────────────────────────────────────────┘
+                 ▲
+                 │ installed workflows contribute their own runtime entrypoints
+                 │
+┌──────────────────────────────────────────┐
+│  REPO: langgraph-ts-template             │
+│  Template for workflow packages          │
+│  Owns: graph runtime, prompt engine,     │
+│  embedded default snippets, scaffold     │
+│  files for one workflow                  │
 └──────────────────────────────────────────┘
 ```
 
-## Naming
+## Responsibility Split
 
-- **CLI**: `maw-cli`
-- **Package name**: workflow-specific (e.g. `docs-agent`), set by developer
-- **Package scope**: workflow/agent being installed into the target project
-- **Config directory**: `.maw/`
+| Concern                                       | Owner                                                  |
+| --------------------------------------------- | ------------------------------------------------------ |
+| `maw.json`                                      | `maw-cli`                                                |
+| `.maw/ov.conf`                                  | `maw-cli`                                                |
+| `.maw/templates/` directory                     | `maw-cli` creates it, target project owns its contents   |
+| `.maw/graphs/<workflow>/langgraph.json`         | `maw-cli`                                                |
+| `.maw/graphs/<workflow>/graph.ts`               | workflow package                                       |
+| `.maw/graphs/<workflow>/config.json`            | workflow package                                       |
+| Embedded default snippets                     | workflow package                                       |
+| Prompt list / prompt preview commands         | `maw-cli`                                                |
+| OpenViking indexing and lifecycle commands    | `maw-cli`                                                |
+| Agent model/provider wiring                   | workflow package                                       |
+| OpenViking context retrieval inside the graph | workflow package                                       |
 
-## Phase 1: Tooling Migration
+## Target Project Scaffold
 
-### 1a. Migrate to Bun
+`maw-cli init` should converge on this target-project layout:
 
-- [x] complete
-
-- Replace all yarn scripts with bun equivalents in `package.json`
-- Update `packageManager` field
-- Update CI workflows (`yarn install --immutable` → `bun install --frozen-lockfile`)
-- Replace `bun.lock` with fresh lockfile from `bun install`
-
-### 1b. Migrate Jest → Vitest
-
-- [x] complete
-
-- Install `vitest`, remove `jest`, `ts-jest`, `@types/jest`
-- Create `vitest.config.ts` (ESM-native, no moduleNameMapper)
-- Update test files for Vitest API compatibility
-- Remove `jest.config.js`
-- Remove `jest` from `tsconfig.json` types
-- Update `package.json` scripts
-- Update CI workflows
-
-### 1c. Add Changesets + VERSIONING doc
-
-- [x] complete
-
-- Install `@changesets/cli`, init changesets
-- Add `version` and `publish` scripts to `package.json`
-- Write `VERSIONING.md` explaining the workflow
-
-## Phase 2: Package Restructuring
-
-Refactor this template so workflows derived from it are installable npm packages.
-
-### 2a. Directory structure
-
-- [x] complete
-
-```
-src/
-  index.ts                    # Public API: createGraph, createConfig, etc.
-  agent/
-    graph.ts                  # Graph factory: createGraph(config) → compiled graph
-    state.ts                  # StateAnnotation (shared)
-  templates/
-    engine.ts                 # Nunjucks template engine
-    composition.ts            # Snippet composition logic (global + per-agent)
-    defaults/                 # Embedded default snippet templates
-      general-coding.njk
-      typescript.njk
-      python.njk
-      project-context.njk
-      research-rules.njk
-      security.njk
-  openviking/
-    client.ts                 # HTTP client for OV server API
-    scanner.ts                # Pre-index incompatible file type scanner
-    config.ts                 # ov.conf generation
-```
-
-### 2b. `package.json` updates
-
-- [x] complete
-
-- `name`: workflow-specific (set by developer)
-- Add `bin` field pointing to CLI entry
-- Add `exports` field for programmatic use
-- Add `files` field to control published contents
-- Add `maw-cli` as a dependency
-- Fix stale `main` field (currently points to `my_app/graph.ts`)
-
-### 2c. Target project scaffold
-
-- [x] complete
-
-`npx maw-cli init` creates in the target project:
-
-```
+```text
+maw.json
 .maw/
-  config.json                 # Workflow + template configuration
-  ov.conf                     # OpenViking config (pre-configured for OpenAI, needs API key)
-  templates/                  # Custom snippet overrides (empty, ready for use)
-  graph.ts                    # Entry point: re-exports compiled graph from installed workflow
-.gitignore                    # Adds .maw/ov.conf (contains API keys)
+  templates/
+  graphs/
+    docs-agent/
+      graph.ts
+      config.json
+      langgraph.json
+    code-agent/
+      graph.ts
+      config.json
+      langgraph.json
+  ov.conf
 ```
 
-#### `.maw/config.json`
+### `maw.json`
+
+`maw.json` is the project-level MAW config.
+
+It should stay small and only carry per-project settings:
+
+- workspace root
+- OpenViking host/port/enabled toggle
+- custom templates path
+
+It should not carry:
+
+- workflow agent skill lists
+- workflow prompt composition rules
+- per-agent model/provider configuration
+
+Proposed shape:
 
 ```json
 {
     "workspace": ".",
-    "graph": {
-        "name": "agent"
-    },
     "openviking": {
         "enabled": true,
         "host": "localhost",
         "port": 1933
     },
-    "llm": {
-        "provider": "openai",
-        "apiKey": "${OPENAI_API_KEY}"
-    },
     "templates": {
-        "sources": ["embedded", "custom"],
-        "customPath": ".maw/templates",
-        "gitRepos": [],
-        "globalSnippets": ["general-coding", "security", "project-context"],
-        "agents": {
-            "researcher": {
-                "snippets": ["research-rules", "python"]
-            },
-            "coder": {
-                "snippets": ["typescript", "coding-rules"]
-            }
+        "customPath": ".maw/templates"
+    }
+}
+```
+
+### `.maw/ov.conf`
+
+`.maw/ov.conf` is generated by `maw-cli` and configured once per target project.
+
+- it configures the shared OpenViking database for the project
+- every installed workflow uses the same indexed project context
+- it uses environment variable placeholders like `${OPENAI_API_KEY}`
+- it should move out of the workflow template and into `maw-cli`
+
+### `.maw/graphs/<workflow>/graph.ts`
+
+This file is generated from the workflow package's scaffold export.
+
+It is the workflow-specific LangGraph entry point in the target project.
+
+Example shape:
+
+```ts
+import { createGraph } from 'docs-agent';
+
+export const graph = createGraph();
+```
+
+### `.maw/graphs/<workflow>/config.json`
+
+This file is generated from the workflow package's scaffold export.
+
+It is the workflow-specific agent/skill config and should contain no secrets.
+
+Proposed shape:
+
+```json
+{
+    "agents": {
+        "researcher": {
+            "skills": ["general-coding", "security", "project-context", "research-rules", "python"]
+        },
+        "coder": {
+            "skills": ["general-coding", "security", "project-context", "typescript"]
         }
     }
 }
 ```
 
-#### Environment variable support for secrets
+### `.maw/graphs/<workflow>/langgraph.json`
 
-Any field in `.maw/config.json` that holds a secret (API keys, tokens, passwords) supports environment variable interpolation using the `${VAR_NAME}` syntax:
+This file is generated by `maw-cli`, not by the workflow package.
 
-- `"apiKey": "${OPENAI_API_KEY}"` — resolved from the process environment at runtime
-- `"apiKey": "sk-abc123"` — also works as a plain value, but strongly discouraged (devs should prefer env vars)
+This is intentional because:
 
-The config loader resolves these before any code accesses them:
+- `maw-cli` owns the target-project path convention `.maw/graphs/<workflow>/`
+- `maw-cli` is the tool invoking `langgraphjs`
+- each workflow should be runnable in isolation via `--config .maw/graphs/<workflow>`
 
-```ts
-// config/loader.ts
-function resolveEnvVars(obj: Record<string, unknown>): Record<string, unknown> {
-    const resolved: Record<string, unknown> = {};
-    for (const [key, value] of Object.entries(obj)) {
-        if (typeof value === 'string') {
-            resolved[key] = value.replace(/\$\{(\w+)\}/g, (_, varName) => {
-                const envVal = process.env[varName];
-                if (envVal === undefined) {
-                    throw new Error(`Environment variable ${varName} is not set but referenced in .maw/config.json`);
-                }
-                return envVal;
-            });
-        } else if (typeof value === 'object' && value !== null) {
-            resolved[key] = resolveEnvVars(value as Record<string, unknown>);
-        } else {
-            resolved[key] = value;
-        }
-    }
-    return resolved;
-}
-```
-
-The `.gitignore` generated by `maw-cli init` should include `.maw/ov.conf` and `.maw/config.json` entries that contain secrets, or at minimum alert the user that these files may contain sensitive values and should not be committed.
-
-### 2d. System prompt composition in the graph
-
-- [x] complete
-
-The graph uses Nunjucks to render each agent's system prompt from composed snippets. The system prompt is a `SystemMessage` placed as the first message in the conversation state. It's composed once when the graph initializes, then persists through the conversation.
-
-Snippet rendering order is determined by array order in the config:
-
-```
-system_prompt(researcher) = general-coding + security + project-context + research-rules + python
-system_prompt(coder)      = general-coding + security + project-context + typescript + coding-rules
-```
-
-Template resolution priority (higher wins on name collision):
-
-1. `.maw/templates/` (local custom) — highest priority
-2. `.maw/template-repos/` (cloned git repos) — medium priority
-3. Package embedded defaults — fallback, always available
-
-```ts
-// Agent-specific prompt composition
-const systemPrompt = await engine.compose('researcher', {
-    projectType: 'typescript',
-    workspacePath: config.workspace,
-    openvikingContext: gatheredContext, // from OV if enabled
-});
-```
-
-### 2e. Generated langgraph.json in target project
-
-- [x] complete
+Conceptual shape:
 
 ```json
 {
     "node_version": "20",
     "graphs": {
-        "agent": "./.maw/graph.ts:graph"
+        "<workflow>": "<path-to-.maw/graphs/<workflow>/graph.ts:graph>"
     },
     "env": ".env",
     "dependencies": ["."]
 }
 ```
 
-Where `.maw/graph.ts` is a minimal entry point:
+Path semantics inside `langgraph.json` must be verified against `@langchain/langgraph-cli` during implementation so the generated file uses the correct relative paths.
 
-```ts
-import { createGraph } from 'docs-agent';
-export const graph = createGraph();
+## Workflow Package Contract
+
+Workflow packages built from `langgraph-ts-template` should expose:
+
+- the workflow runtime API, including `createGraph`
+- embedded default Nunjucks snippets
+- a `./scaffold` export that describes only workflow-owned target-project files
+
+The scaffold contract should be revised so the workflow package contributes:
+
+- `.maw/graphs/<workflow>/graph.ts`
+- `.maw/graphs/<workflow>/config.json`
+- a published path to its embedded default templates for prompt preview / prompt composition tooling
+
+The workflow package should not contribute:
+
+- `maw.json`
+- `.maw/ov.conf`
+- `.maw/graphs/<workflow>/langgraph.json`
+- any direct dependency on `maw-cli`
+
+## `maw-cli` Command Surface
+
+Target command surface:
+
+```text
+maw-cli init
+maw-cli dev <workflow>
+maw-cli start <workflow>
+maw-cli prompt:list <workflow>
+maw-cli prompt:preview <workflow> <agent>
+maw-cli ov:init
+maw-cli ov:index
 ```
 
-## Phase 3: `maw-cli` CLI Package (Separate Repo)
+### `maw-cli init`
 
-- [ ] complete
+`maw-cli init` should:
 
-```
-maw-cli/
-  src/
-    index.ts                  # CLI entry point
-    commands/
-      init.ts                 # maw-cli init - scaffold .maw/ in target project
-      dev.ts                  # maw-cli dev - wrapper around langgraph-cli dev
-      start.ts                # maw-cli start - wrapper around langgraph-cli for production
-      ov-init.ts              # maw-cli ov:init - generate ov.conf, verify Python/OV available
-      ov-index.ts             # maw-cli ov:index - scan incompatible files + run indexing
-    utils/
-      config.ts               # Read/validate .maw/config.json
-      ov.ts                   # OpenViking helpers (check install, start server)
-      scanner.ts              # File type scanner for incompatible OV files
-  package.json                # name: "maw-cli", bin: { "maw-cli": "./bin/maw-cli.js" }
-```
+- create `maw.json` if missing
+- create `.maw/templates/`
+- create `.maw/graphs/`
+- create `.maw/ov.conf` if missing
+- discover installed workflow packages via the `./scaffold` export contract
+- create `.maw/graphs/<workflow>/graph.ts` for each discovered workflow if missing
+- create `.maw/graphs/<workflow>/config.json` for each discovered workflow if missing
+- generate `.maw/graphs/<workflow>/langgraph.json` for each discovered workflow if missing
+- preserve existing files on rerun
 
-The `dev` and `start` commands delegate to `@langchain/langgraph-cli` — they detect the installed workflow package, wire up the `langgraph.json`, and run the LangGraph server. No need to rebuild that functionality.
+### `maw-cli dev <workflow>` and `maw-cli start <workflow>`
 
-### CLI commands
+These commands should:
 
-```
-maw-cli init       # Scaffold .maw/ config in target project
-maw-cli dev        # Start LangGraph dev server (wraps langgraph-cli)
-maw-cli start      # Start production server (wraps langgraph-cli)
-maw-cli ov:init    # Generate .maw/ov.conf, verify Python/OV available
-maw-cli ov:index   # Scan for incompatible files, then index project
-```
+- require a workflow argument
+- validate that `maw.json` exists
+- validate that `.maw/graphs/<workflow>/` exists
+- validate that the workflow-specific `graph.ts`, `config.json`, and `langgraph.json` exist
+- invoke `langgraphjs dev --config .maw/graphs/<workflow>` or `langgraphjs start --config .maw/graphs/<workflow>`
 
-### 3a. Package structure & CLI skeleton
+This gives each workflow its own isolated LangGraph server config.
+
+### `maw-cli prompt:list <workflow>`
+
+This command should:
+
+- read `.maw/graphs/<workflow>/config.json`
+- list each agent and its configured skills in order
+
+### `maw-cli prompt:preview <workflow> <agent>`
+
+This command should:
+
+- read `maw.json`
+- read `.maw/graphs/<workflow>/config.json`
+- load the workflow package's embedded default snippets
+- apply `.maw/templates/` overrides when a snippet with the same name exists
+- render the composed system prompt for the requested agent
+- print the final rendered prompt
+
+This command is the primary inspection tool for verifying that prompt injection is working as intended.
+
+## Prompt and Skill Model
+
+The prompt model should now be:
+
+- workflow-specific skill selection lives in `.maw/graphs/<workflow>/config.json`
+- custom snippet overrides live in `.maw/templates/`
+- embedded workflow defaults live inside the installed workflow package
+- prompt composition order is deterministic and declared in config
+- prompt composition happens before the workflow executes, not via autoloading decisions made by the model
+
+This keeps prompts inspectable and predictable.
+
+### Workflow isolation vs template sharing
+
+The plan intentionally separates two concerns:
+
+- which skills an agent gets is workflow-specific
+- what a skill named `security` renders to can be globally overridden for the target project via `.maw/templates/security.njk`
+
+If workflow-specific template-body overrides are needed later, that can be added as a follow-on feature. It is not required for this refactor.
+
+## Runtime-Backed Skills
+
+There is a follow-on need to support skills that require a runtime, such as installed skill packages that generate context or prompt fragments.
+
+That support is out of scope for the current refactor, but the direction is now clear:
+
+- skills must remain declarative and deterministic
+- they should be resolved before graph execution or at graph build time
+- they must not depend on the model deciding whether to autoload them
+- if supported, they should be configured through MAW config, not installed manually on a per-agent runtime basis
+
+This should be treated as a later design and implementation phase.
+
+## Current State Assessment
+
+These parts of the current implementation conflict with the finalized architecture and need revision:
+
+- `langgraph-ts-template/package.json` currently depends on `maw-cli`
+- the workflow template currently scaffolds `.maw/config.json`
+- the workflow template currently scaffolds `.maw/ov.conf`
+- the workflow template currently scaffolds `langgraph.json`
+- the current target scaffold uses `.maw/graph.ts` instead of `.maw/graphs/<workflow>/graph.ts`
+- the current `maw-cli dev` and `maw-cli start` do not require a workflow argument
+- the current plan/task docs assume a single shared workflow config at `.maw/config.json`
+
+## Execution Plan
+
+### Phase 0: Plan Realignment
 
 - [x] complete
 
-- Repository with `package.json` shape (`name`, `bin`, `exports`, `files`)
-- `src/index.ts` — command routing, `parseCommandName`, `formatHelp`, `runCli`
-- `bin/maw-cli.js` — published bin wrapper with dual-path resolution
-- Placeholder stubs for all 5 commands registered in router
-- Test suite: CLI routing, bin smoke test, package metadata validation
-- TypeScript, Vitest, and Prettier config
+- finalize the architecture decisions in this document
+- treat conflicting older phase notes as superseded by this plan
+- regenerate downstream task docs from this plan before starting broad implementation
 
-### 3b. `maw-cli init`
-
-- [x] complete
-
-- Workflow auto-discovery via `./scaffold` export contract
-- Scaffold directory + file creation (missing files only, idempotent)
-- `.gitignore` merge (deduped, append-once)
-- Integration tests against real temp filesystem
-
-### 3c. `utils/config.ts`
-
-- [x] complete
-
-- Read and parse `.maw/config.json` from the target project root
-- Resolve `${VAR_NAME}` env var interpolation recursively (matching the loader spec in 2c)
-- Typed `MawConfig` schema matching the config shape defined in 2c
-- Throw with a clear message if config file is missing or a referenced env var is unset
-- Unit tests: happy path, missing config file, unset env var, nested interpolation
-
-### 3d. `maw-cli dev` & `maw-cli start`
-
-- [x] complete
-
-- Add `@langchain/langgraph-cli` as a runtime dependency
-- Implement `dev`: verify `.maw/config.json` exists, generate/verify `langgraph.json` in target project root (matching spec in 2e), exec `langgraphjs dev` (binary from `@langchain/langgraph-cli`)
-- Implement `start`: mirrors `dev` but invokes `langgraphjs start`
-- Tests: config-not-found error path, unresolved config env vars do not block command startup, correct `langgraph.json` shape generated, delegation to `langgraphjs`
-
-## Phase 4: OpenViking Integration
-
-### 4a. `maw-cli ov:init`
+### Phase 1: `maw-cli` targeted refactor
 
 - [ ] complete
 
-- Checks for Python + pip availability
-- Offers to install OpenViking (`pip install openviking`)
-- Generates `.maw/ov.conf` with OpenAI embedding provider (API key via env var: `"api_key": "${OPENAI_API_KEY}"`)
-- Validates the config
+- move project-level config handling from `.maw/config.json` to `maw.json`
+- move `ov.conf` ownership into `maw-cli`
+- revise `init` to create the new target-project scaffold
+- revise `dev` and `start` to require a workflow argument
+- generate workflow-local `langgraph.json` files from `maw-cli`
+- add test coverage for multi-workflow scaffolding and isolated execution
+- update smoke tests to exercise the standalone `maw-cli` flow
 
-### 4b. `maw-cli ov:index`
-
-- [ ] complete
-
-- Scans target project for file types OpenViking can't parse
-- Builds an exclusion list (binary formats, large files, etc.)
-- Ensures OpenViking server is running (offers to start it)
-- Executes `ov add-resource <workspace-path>` with ignore flags
-- Reports indexing status
-
-### 4c. Graph integration
+### Phase 2: `langgraph-ts-template` targeted refactor
 
 - [ ] complete
 
-A dedicated node in the graph calls OpenViking's HTTP API for context retrieval:
+- remove the `maw-cli` dependency from the workflow template
+- shrink the scaffold contract to workflow-owned files only
+- add a workflow-local `config.json` scaffold asset for agent/skill declarations
+- update runtime config loading to read `maw.json` plus the workflow-local graph config
+- expose whatever metadata `maw-cli prompt:preview` needs to locate embedded templates
+- update tests to reflect the new scaffold contract
 
-```ts
-const context = await ovClient.find(userQuery, {
-    targetUri: 'viking://resources/project',
-});
-```
+### Phase 3: Prompt management commands
 
-Context gets injected into the Nunjucks template rendering for the `project-context` snippet.
+- [ ] complete
+
+- implement `maw-cli prompt:list <workflow>`
+- implement `maw-cli prompt:preview <workflow> <agent>`
+- add smoke tests that prove prompt composition and custom template overrides are working
+- ensure this verification path exists before further workflow/template expansion
+
+### Phase 4: OpenViking integration
+
+- [ ] complete
+
+- keep OpenViking configuration project-wide in `.maw/ov.conf`
+- implement `maw-cli ov:init`
+- implement `maw-cli ov:index`
+- verify that workflows retrieve context from the same project-level OpenViking database
+- keep OpenViking model/provider config out of workflow-specific config
+
+### Phase 5: Runtime-backed skills design and implementation
+
+- [ ] complete
+
+- design a declarative config format for runtime-backed skills
+- decide where runtime metadata is installed and resolved
+- ensure runtime-backed skills are injected deterministically, not autoloaded opportunistically
+- implement only after prompt preview and prompt composition flows are stable
+
+## Verification Gates
+
+### `maw-cli`
+
+- `bun run build`
+- `bun run lint`
+- `bun run test`
+- smoke: `init`, `dev <workflow>`, `prompt:list`, `prompt:preview`
+
+### `langgraph-ts-template`
+
+- `bun run build`
+- `bun run typecheck`
+- `bun run test`
+- `bun run test:int`
+- scaffold tests covering workflow-local `graph.ts` and `config.json`
+
+### Cross-repo acceptance checks
+
+- a target project with two installed workflows gets two directories under `.maw/graphs/`
+- `maw-cli dev docs-agent` only uses `.maw/graphs/docs-agent/langgraph.json`
+- `maw-cli prompt:list docs-agent` shows the configured agent skill order
+- `maw-cli prompt:preview docs-agent researcher` prints the expected composed prompt
+- a custom override in `.maw/templates/security.njk` is reflected in prompt preview
+- OpenViking is initialized once and both workflows can query the same indexed project context
 
 ## Execution Order
 
-```
-Phase 1a (bun)
-   → Phase 1b (vitest)
-      → Phase 1c (changesets + VERSIONING.md)
-         → Phase 2 (restructure)
-            → Phase 3 (maw-cli package — separate repo)
+```text
+Phase 0 (plan realignment)
+   → Phase 1 (maw-cli targeted refactor)
+      → Phase 2 (langgraph-ts-template targeted refactor)
+         → Phase 3 (prompt management commands)
             → Phase 4 (OpenViking integration)
+               → Phase 5 (runtime-backed skills)
 ```
 
-Phases 3 and 4 can be parallelized once Phase 2 is complete.
+After the targeted refactors land, follow-on implementation can run in parallel where safe, but planning and sequencing should still begin with `maw-cli` and move into the workflow template.
 
 ## Installation Model
 
-Workflows are installed into target projects via git URL (no npm publishing required):
+Workflow packages are installed into target projects via git URL or other standard package distribution mechanisms.
+
+Example:
 
 ```bash
 bun add docs-agent@git+https://github.com/org/docs-agent.git
-# or SSH:
-bun add docs-agent@git+ssh://git@github.com/org/docs-agent.git
 ```
 
-The `maw-cli` package follows the same model — it can be installed globally or used via `npx`/`bunx` without publishing to npm.
+`maw-cli` is installed separately and is not a workflow dependency.
+
+Examples:
+
+```bash
+bunx maw-cli init
+bunx maw-cli dev docs-agent
+```
+
+or install it explicitly in the target project as a separate tool dependency if preferred.
