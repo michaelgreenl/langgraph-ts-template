@@ -46,13 +46,13 @@ That tooling change is support work for the verification gate, not a change to t
 
 ## Handoff Into Phase 3d
 
-Phase `3d` (`maw-cli dev` / `maw-cli start`) should consume this reader instead of opening `.maw/config.json` directly.
+Phase `3d` (`maw-cli dev` / `maw-cli start`) should reuse the config-path contract from this phase rather than reimplementing filesystem conventions.
 
 Carry-forward assumptions:
 
-- reuse `readConfig(root)` as the one config-loading path
+- use `readConfig(root)` only when a command actually needs resolved config values
 - do not reimplement `${VAR}` interpolation inside command handlers
 - preserve the existing Phase `2e` target-project contract around `langgraph.json` and `.maw/graph.ts`
-- keep command-side failures loud and specific when the MAW config is missing or references an unset env var
+- keep command-side failures loud and specific when the MAW config is missing; unresolved `${VAR}` placeholders only matter for commands that truly consume the resolved values
 
 With `3c` complete, `3d` can focus on LangGraph CLI delegation and target-project verification instead of config parsing.

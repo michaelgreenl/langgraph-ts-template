@@ -312,12 +312,12 @@ maw-cli ov:index   # Scan for incompatible files, then index project
 
 ### 3d. `maw-cli dev` & `maw-cli start`
 
-- [ ] complete
+- [x] complete
 
 - Add `@langchain/langgraph-cli` as a runtime dependency
-- Implement `dev`: read `.maw/config.json` via `utils/config`, generate/verify `langgraph.json` in target project root (matching spec in 2e), exec `langgraphjs dev` (binary from `@langchain/langgraph-cli`)
+- Implement `dev`: verify `.maw/config.json` exists, generate/verify `langgraph.json` in target project root (matching spec in 2e), exec `langgraphjs dev` (binary from `@langchain/langgraph-cli`)
 - Implement `start`: mirrors `dev` but invokes `langgraphjs start`
-- Tests: config-not-found error path, correct `langgraph.json` shape generated, delegation to `langgraphjs`
+- Tests: config-not-found error path, unresolved config env vars do not block command startup, correct `langgraph.json` shape generated, delegation to `langgraphjs`
 
 ## Phase 4: OpenViking Integration
 
