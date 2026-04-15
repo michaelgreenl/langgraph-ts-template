@@ -40,9 +40,12 @@ Needs targeted refactor from the current implementation:
 - Workflow packages scaffold only workflow-specific files.
 - `maw-cli dev <workflow>` and `maw-cli start <workflow>` execute a single workflow in isolation.
 - Agent skill selection lives in each workflow's `.maw/graphs/<workflow>/config.json`.
+- The base workflow template must be able to work on the target project's codebase before MVP is considered complete.
+- The default base workflow agents are `planner` and `coder`.
+- Shell execution for the base codebase workflow is restricted to an allow-list.
 - Custom template overrides live in `.maw/templates/` at the project level.
 - Prompt/skill injection must be deterministic and inspectable before execution.
-- Runtime-backed skills are a later design phase and must still resolve deterministically, not via LLM autoloading.
+- Runtime-backed skills are post-MVP and tracked in a separate queued initiative.
 
 ## Architecture
 
@@ -82,15 +85,15 @@ Needs targeted refactor from the current implementation:
 
 | Concern                                       | Owner                                                  |
 | --------------------------------------------- | ------------------------------------------------------ |
-| `maw.json`                                      | `maw-cli`                                                |
-| `.maw/ov.conf`                                  | `maw-cli`                                                |
-| `.maw/templates/` directory                     | `maw-cli` creates it, target project owns its contents   |
-| `.maw/graphs/<workflow>/langgraph.json`         | `maw-cli`                                                |
-| `.maw/graphs/<workflow>/graph.ts`               | workflow package                                       |
-| `.maw/graphs/<workflow>/config.json`            | workflow package                                       |
+| `maw.json`                                    | `maw-cli`                                              |
+| `.maw/ov.conf`                                | `maw-cli`                                              |
+| `.maw/templates/` directory                   | `maw-cli` creates it, target project owns its contents |
+| `.maw/graphs/<workflow>/langgraph.json`       | `maw-cli`                                              |
+| `.maw/graphs/<workflow>/graph.ts`             | workflow package                                       |
+| `.maw/graphs/<workflow>/config.json`          | workflow package                                       |
 | Embedded default snippets                     | workflow package                                       |
-| Prompt list / prompt preview commands         | `maw-cli`                                                |
-| OpenViking indexing and lifecycle commands    | `maw-cli`                                                |
+| Prompt list / prompt preview commands         | `maw-cli`                                              |
+| OpenViking indexing and lifecycle commands    | `maw-cli`                                              |
 | Agent model/provider wiring                   | workflow package                                       |
 | OpenViking context retrieval inside the graph | workflow package                                       |
 
@@ -180,8 +183,8 @@ Proposed shape:
 ```json
 {
     "agents": {
-        "researcher": {
-            "skills": ["general-coding", "security", "project-context", "research-rules", "python"]
+        "planner": {
+            "skills": ["general-coding", "security", "project-context", "research-rules"]
         },
         "coder": {
             "skills": ["general-coding", "security", "project-context", "typescript"]
@@ -317,18 +320,38 @@ The plan intentionally separates two concerns:
 
 If workflow-specific template-body overrides are needed later, that can be added as a follow-on feature. It is not required for this refactor.
 
-## Runtime-Backed Skills
+## MVP Definition
 
-There is a follow-on need to support skills that require a runtime, such as installed skill packages that generate context or prompt fragments.
+The MVP for this initiative is not just scaffolding and prompt composition.
 
-That support is out of scope for the current refactor, but the direction is now clear:
+The MVP is reached when a workflow built from this template can be installed into a target project and then:
 
-- skills must remain declarative and deterministic
-- they should be resolved before graph execution or at graph build time
-- they must not depend on the model deciding whether to autoload them
-- if supported, they should be configured through MAW config, not installed manually on a per-agent runtime basis
+- inspect the target project's codebase
+- retrieve shared OpenViking context for that project
+- use deterministic planner/coder prompts
+- run a controlled tool loop against the target project
+- be manually exercised in a test project end-to-end
 
-This should be treated as a later design and implementation phase.
+Concretely, the base workflow must be able to operate on the target project's codebase in the same broad class of tasks as a coding agent:
+
+- read files
+- write files
+- perform targeted edits
+- list directories
+- glob for files
+- grep file contents
+- run allowed shell commands
+- run allowed git commands
+
+Anything beyond that baseline is post-MVP.
+
+## Post-MVP Follow-On
+
+Runtime-backed skills are intentionally out of scope for this MVP plan.
+
+They are tracked separately in:
+
+- `docs/agents/initiatives/queued/runtime-backed-skills/plan.md`
 
 ## Current State Assessment
 
@@ -341,6 +364,9 @@ These parts of the current implementation conflict with the finalized architectu
 - the current target scaffold uses `.maw/graph.ts` instead of `.maw/graphs/<workflow>/graph.ts`
 - the current `maw-cli dev` and `maw-cli start` do not require a workflow argument
 - the current plan/task docs assume a single shared workflow config at `.maw/config.json`
+- the current graph is still a stub that returns a hardcoded greeting
+- the current workflow template exposes no file, shell, or git tools for working on a target project codebase
+- no model provider package is wired for the base workflow yet
 
 ## Execution Plan
 
@@ -394,14 +420,22 @@ These parts of the current implementation conflict with the finalized architectu
 - verify that workflows retrieve context from the same project-level OpenViking database
 - keep OpenViking model/provider config out of workflow-specific config
 
-### Phase 5: Runtime-backed skills design and implementation
+### Phase 5: Base codebase agent MVP
 
 - [ ] complete
 
-- design a declarative config format for runtime-backed skills
-- decide where runtime metadata is installed and resolved
-- ensure runtime-backed skills are injected deterministically, not autoloaded opportunistically
-- implement only after prompt preview and prompt composition flows are stable
+- replace the current hardcoded graph stub with a real LLM-backed coding workflow
+- wire Anthropic as the initial model provider for the base template workflow
+- build the graph loop manually instead of using `createReactAgent`
+- add filesystem tools using MCP adapters plus the MCP filesystem server
+- add shell execution using LangChain community tooling
+- support git operations through the controlled shell tool set
+- restrict shell and git execution to an allow-list suitable for local development workflows
+- update the workflow-local default agent config to `planner` and `coder`
+- add verification coverage for file creation, file updates, and targeted edits in the target project
+- add verification coverage showing those edits are visible through allowed git commands
+- add smoke coverage proving the base workflow can inspect and act on a target project's codebase
+- treat this phase as the MVP gate for the combined `maw-cli` + workflow-template system
 
 ## Verification Gates
 
@@ -424,10 +458,17 @@ These parts of the current implementation conflict with the finalized architectu
 
 - a target project with two installed workflows gets two directories under `.maw/graphs/`
 - `maw-cli dev docs-agent` only uses `.maw/graphs/docs-agent/langgraph.json`
-- `maw-cli prompt:list docs-agent` shows the configured agent skill order
-- `maw-cli prompt:preview docs-agent researcher` prints the expected composed prompt
+- `maw-cli prompt:list docs-agent` shows the configured `planner` and `coder` skill order
+- `maw-cli prompt:preview docs-agent planner` prints the expected composed prompt
 - a custom override in `.maw/templates/security.njk` is reflected in prompt preview
 - OpenViking is initialized once and both workflows can query the same indexed project context
+- the base workflow can list files in the target project through its tool loop
+- the base workflow can read a target-project file and answer about it
+- the base workflow can create a new file in the target project through its tool loop
+- the base workflow can apply a targeted edit to an existing target-project file through its tool loop
+- the base workflow can rewrite or update an existing target-project file through its tool loop
+- the base workflow can execute an allowed shell or git command against the target project
+- the base workflow can surface the resulting code changes through an allowed git status or diff command
 
 ## Execution Order
 
@@ -437,10 +478,12 @@ Phase 0 (plan realignment)
       → Phase 2 (langgraph-ts-template targeted refactor)
          → Phase 3 (prompt management commands)
             → Phase 4 (OpenViking integration)
-               → Phase 5 (runtime-backed skills)
+               → Phase 5 (base codebase agent MVP)
 ```
 
 After the targeted refactors land, follow-on implementation can run in parallel where safe, but planning and sequencing should still begin with `maw-cli` and move into the workflow template.
+
+Runtime-backed skills are planned separately as a post-MVP initiative.
 
 ## Installation Model
 
