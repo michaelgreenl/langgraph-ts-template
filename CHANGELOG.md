@@ -1,3 +1,9 @@
+## [0.2.1](https://github.com/michaelgreenl/langgraph-ts-template/compare/v0.2.0...v0.2.1) (2026-04-15)
+
+### Bug Fixes
+
+* remove env check from dev/start commands ([f3e2c2a](https://github.com/michaelgreenl/langgraph-ts-template/commit/f3e2c2acabf9979fdc6e9865b5b4552a4162b984))
+
 ## [0.2.0](https://github.com/michaelgreenl/langgraph-ts-template/compare/v0.1.0...v0.2.0) (2026-04-12)
 
 ### Features
