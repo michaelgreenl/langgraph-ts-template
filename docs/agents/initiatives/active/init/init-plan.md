@@ -250,7 +250,7 @@ maw-cli start <workflow>
 maw-cli prompt:list <workflow>
 maw-cli prompt:preview <workflow> <agent>
 maw-cli ov:init
-maw-cli ov:index
+maw-cli ov:index [target-path]
 ```
 
 ### `maw-cli init`
@@ -416,9 +416,12 @@ These parts of the current implementation conflict with the finalized architectu
 
 - keep OpenViking configuration project-wide in `.maw/ov.conf`
 - implement `maw-cli ov:init`
-- implement `maw-cli ov:index`
+- implement `maw-cli ov:index [target-path]`
+- default `ov:index` to the project workspace when no target path is provided
+- pass an optional target path through to the wrapped OpenViking indexing command so specific subtrees or files can be reindexed
 - verify that workflows retrieve context from the same project-level OpenViking database
 - keep OpenViking model/provider config out of workflow-specific config
+- keep change-aware reindex heuristics or prepare-script automation out of MVP scope, but preserve it as a future OpenViking optimization
 
 ### Phase 5: Base codebase agent MVP
 
@@ -461,6 +464,8 @@ These parts of the current implementation conflict with the finalized architectu
 - `maw-cli prompt:list docs-agent` shows the configured `planner` and `coder` skill order
 - `maw-cli prompt:preview docs-agent planner` prints the expected composed prompt
 - a custom override in `.maw/templates/security.njk` is reflected in prompt preview
+- `maw-cli ov:index` indexes the project workspace when no target path is provided
+- `maw-cli ov:index <target-path>` forwards the requested target path to OpenViking so a specific subtree or file can be reindexed
 - OpenViking is initialized once and both workflows can query the same indexed project context
 - the base workflow can list files in the target project through its tool loop
 - the base workflow can read a target-project file and answer about it
