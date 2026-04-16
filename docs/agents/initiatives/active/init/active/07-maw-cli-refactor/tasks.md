@@ -130,13 +130,13 @@ Step 4 consumes the discovered `workflow` names for `.maw/graphs/<workflow>/` cr
 
 ### 5. Generate Workflow-Local `langgraph.json`
 
-- [ ] Replace the root-level `LANGGRAPH_JSON` constant with a generator that produces `.maw/graphs/<workflow>/langgraph.json`
-- [ ] Key the `graphs` map by workflow name instead of the old hardcoded `agent` key
-- [ ] Generate the graph entry relative to the workflow directory, pointing at `./graph.ts:graph`
-- [ ] Generate `env` as `../../../.env` so each workflow uses the target project's root `.env`
-- [ ] Omit `dependencies` from workflow-local `langgraph.json`
-- [ ] Add regression coverage so the old root-level `['.']` value is not copied into the nested config
-- [ ] Add a helper that validates required workflow-local files exist before `dev` launch
+- [x] Replace the root-level `LANGGRAPH_JSON` constant with a generator that produces `.maw/graphs/<workflow>/langgraph.json`
+- [x] Key the `graphs` map by workflow name instead of the old hardcoded `agent` key
+- [x] Generate the graph entry relative to the workflow directory, pointing at `./graph.ts:graph`
+- [x] Generate `env` as `../../../.env` so each workflow uses the target project's root `.env`
+- [x] Omit `dependencies` from workflow-local `langgraph.json`
+- [x] Add regression coverage so the old root-level `['.']` value is not copied into the nested config
+- [x] Add a helper that validates required workflow-local files exist before `dev` launch
 
 ### 6. Require Workflow Arguments in `dev` and Remove `start`
 
@@ -157,7 +157,7 @@ Step 4 consumes the discovered `workflow` names for `.maw/graphs/<workflow>/` cr
 - [x] `maw-cli/tests/init.test.ts` covers multi-workflow discovery, no-workflow bootstrap-and-warn behavior, workflow-name collisions, new project scaffold files, rerun preservation, and absence of legacy root files
 - [x] `maw-cli/tests/init.test.ts` also covers `.gitignore` appending `.maw/openviking/` exactly once and not adding `maw.json` or `.maw/ov.conf`
 - [ ] `maw-cli/tests/dev.test.ts` covers missing workflow arg, missing `maw.json`, missing workflow dir, missing workflow-local files, and forwarded extra args
-- [ ] `maw-cli/tests/config.test.ts` covers the new `maw.json` shape and literal-only parsing behavior
+- [x] `maw-cli/tests/config.test.ts` covers the new `maw.json` shape and literal-only parsing behavior
 - [ ] `maw-cli/tests/cli.test.ts` covers updated help output and confirms `start` is no longer listed as a valid command
 - [ ] Remove or replace any test file that exists only to cover the retired `start` command
 
@@ -195,8 +195,8 @@ Step 4 consumes the discovered `workflow` names for `.maw/graphs/<workflow>/` cr
 - [x] Workflow directory names come from `scaffold.workflow`, not npm package names
 - [x] Rerunning `maw-cli init` preserves existing project-owned and workflow-local files
 - [x] `.gitignore` only appends `.maw/openviking/`
-- [ ] Workflow-local `langgraph.json` uses `./graph.ts:graph`, `../../../.env`, and omits `dependencies`
-- [ ] `maw.json` is treated as literal-only project config with no env interpolation behavior
+- [x] Workflow-local `langgraph.json` uses `./graph.ts:graph`, `../../../.env`, and omits `dependencies`
+- [x] `maw.json` is treated as literal-only project config with no env interpolation behavior
 - [ ] `maw-cli dev <workflow>` fails fast when the workflow arg or required workflow-local files are missing
 - [ ] `maw-cli dev docs-agent` launches `langgraphjs` with `--config .maw/graphs/docs-agent`
 - [ ] `start` is no longer part of the `maw-cli` command surface
