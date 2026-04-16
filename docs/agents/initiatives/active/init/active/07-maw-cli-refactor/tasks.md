@@ -91,8 +91,8 @@ Refactor `maw-cli` so it owns project-level MAW infrastructure and no longer ass
 
 ### 3. Redesign Workflow Discovery Around the Next Scaffold Contract
 
-- [ ] Replace `loadWorkflow()` in `maw-cli/src/commands/init.ts` with `loadWorkflows()` that returns every installed workflow package exposing `./scaffold`
-- [ ] Update the `maw-cli`-side workflow module contract to use `scaffold.workflow` as the short workflow identifier, for example:
+- [x] Replace `loadWorkflow()` in `maw-cli/src/commands/init.ts` with `loadWorkflows()` that returns every installed workflow package exposing `./scaffold`
+- [x] Update the `maw-cli`-side workflow module contract to use `scaffold.workflow` as the short workflow identifier, for example:
 
     ```ts
     interface WorkflowScaffold {
@@ -108,10 +108,10 @@ Refactor `maw-cli` so it owns project-level MAW infrastructure and no longer ass
     }
     ```
 
-- [ ] Sort discovered workflows by `workflow` so `init` output is deterministic
-- [ ] Return an empty workflow list when none are found
-- [ ] Fail when two workflow packages claim the same `workflow` name
-- [ ] Add fixture workflow packages in `maw-cli/tests/` that implement the new contract so Phase 1 can be built and tested without waiting for Phase 2
+- [x] Sort discovered workflows by `workflow` so `init` output is deterministic
+- [x] Return an empty workflow list when none are found
+- [x] Fail when two workflow packages claim the same `workflow` name
+- [x] Add fixture workflow packages in `maw-cli/tests/` that implement the new contract so Phase 1 can be built and tested without waiting for Phase 2
 
 Step 4 consumes the discovered `workflow` names for `.maw/graphs/<workflow>/` creation and zero-workflow bootstrap-and-warn behavior.
 
