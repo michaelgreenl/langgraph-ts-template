@@ -65,8 +65,8 @@ Refactor `maw-cli` so it owns project-level MAW infrastructure and no longer ass
 
 ### 2. Move Project-Owned Scaffold Assets into `maw-cli`
 
-- [ ] Add `maw-cli`-owned generators or constants for `maw.json` and `.maw/ov.conf`; these files should no longer come from the workflow package scaffold
-- [ ] Generate `maw.json` with the new minimal project-level shape:
+- [x] Add `maw-cli`-owned generators or constants for `maw.json` and `.maw/ov.conf`; these files should no longer come from the workflow package scaffold
+- [x] Generate `maw.json` with the new minimal project-level shape:
 
     ```json
     {
@@ -82,11 +82,11 @@ Refactor `maw-cli` so it owns project-level MAW infrastructure and no longer ass
     }
     ```
 
-- [ ] Replace every `maw-cli` path assumption for `.maw/config.json` with the root-level `maw.json`
-- [ ] Generate `.maw/ov.conf` from `maw-cli` with project-wide OpenViking placeholders and no workflow-specific content
-- [ ] Create `.maw/templates/` and `.maw/graphs/` from `maw-cli init`
-- [ ] Append `.maw/openviking/` to `.gitignore` if missing, and do not add any other MAW scaffold paths
-- [ ] Remove the assumption that project-level directories come from workflow-owned `scaffold.directories`
+- [x] Replace every `maw-cli` path assumption for `.maw/config.json` with the root-level `maw.json`
+- [x] Generate `.maw/ov.conf` from `maw-cli` with project-wide OpenViking placeholders and no workflow-specific content
+- [x] Create `.maw/templates/` and `.maw/graphs/` from `maw-cli init`
+- [x] Append `.maw/openviking/` to `.gitignore` if missing, and do not add any other MAW scaffold paths
+- [x] Remove the assumption that project-level directories come from workflow-owned `scaffold.directories`
 
 ### 3. Redesign Workflow Discovery Around the Next Scaffold Contract
 
@@ -180,9 +180,9 @@ Refactor `maw-cli` so it owns project-level MAW infrastructure and no longer ass
 
 ## Verification
 
-- [ ] `bun run build` in `maw-cli/`
-- [ ] `bun run lint` in `maw-cli/`
-- [ ] `bun run test` in `maw-cli/`
+- [x] `bun run build` in `maw-cli/`
+- [x] `bun run lint` in `maw-cli/`
+- [x] `bun run test` in `maw-cli/`
 - [ ] Smoke: `bun run smoke:init` in `maw-smoke/maw-smoke-1/`
 - [ ] Smoke: `bun run smoke:dev` in `maw-smoke/maw-smoke-1/`
 
