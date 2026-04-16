@@ -36,6 +36,7 @@ Refactor `maw-cli` so it owns project-level MAW infrastructure and no longer ass
 - `langgraphjs --config <dir>` resolves `langgraph.json` inside that directory, and graph and env paths are relative to that workflow directory. Phase 1 should therefore generate `./graph.ts:graph` and `../../../.env`.
 - Workflow-local `langgraph.json` omits `dependencies` in Phase 1.
 - `start` is removed from `maw-cli` in Phase 1; `dev <workflow>` is the only runtime command in scope.
+- Step 3 is discovery-only: it updates the scaffold contract, fixture coverage, sort order, and collision handling. Step 4 consumes discovered workflows in `init`, Step 5 defines workflow-local `langgraph.json`, and Step 6 moves `dev` onto `.maw/graphs/<workflow>/`.
 
 ## Work Plan
 
@@ -107,20 +108,21 @@ Refactor `maw-cli` so it owns project-level MAW infrastructure and no longer ass
     }
     ```
 
-- [ ] Treat `workflow` as the directory name for `.maw/graphs/<workflow>/`
 - [ ] Sort discovered workflows by `workflow` so `init` output is deterministic
-- [ ] Return an empty workflow list when none are found; `init` handles bootstrap-and-warn behavior
+- [ ] Return an empty workflow list when none are found
 - [ ] Fail when two workflow packages claim the same `workflow` name
 - [ ] Add fixture workflow packages in `maw-cli/tests/` that implement the new contract so Phase 1 can be built and tested without waiting for Phase 2
+
+Step 4 consumes the discovered `workflow` names for `.maw/graphs/<workflow>/` creation and zero-workflow bootstrap-and-warn behavior.
 
 ### 4. Rewrite `maw-cli init` for Multi-Workflow Project Scaffolding
 
 - [ ] Update `runInit()` so it creates `maw.json` if missing
 - [ ] Update `runInit()` so it creates `.maw/templates/`, `.maw/graphs/`, and `.maw/ov.conf` if missing
 - [ ] If no workflows are discovered, print a warning and return `0` after project-level scaffold creation completes
-- [ ] For each discovered workflow, create `.maw/graphs/<workflow>/`
+- [ ] For each discovered workflow, create `.maw/graphs/<workflow>/` using `scaffold.workflow` as the directory name
 - [ ] Write workflow-owned `graph.ts` and `config.json` into `.maw/graphs/<workflow>/`
-- [ ] Generate workflow-local `langgraph.json` from `maw-cli`, not from the workflow package
+- [ ] Generate workflow-local `langgraph.json` from `maw-cli`, not from the workflow package; Step 5 defines its exact shape
 - [ ] Preserve existing files on rerun at every layer: `maw.json`, `.maw/ov.conf`, `.maw/templates/`, and per-workflow files
 - [ ] Stop writing legacy files from `maw-cli init`: `.maw/config.json`, `.maw/graph.ts`, and root `langgraph.json`
 - [ ] Update success and warning output so the command clearly distinguishes zero-workflow bootstrap from initialized workflows
