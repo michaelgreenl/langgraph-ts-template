@@ -41,9 +41,8 @@ Refactor `maw-cli` so it owns project-level MAW infrastructure and no longer ass
 
 ### 1. Narrow Project Config Handling to `maw.json`
 
-- [ ] Replace every `maw-cli` path assumption for `.maw/config.json` with the root-level `maw.json`
-- [ ] Shrink the config type to project-level fields only; do not keep workflow-specific prompt, agent, graph, or model settings in `maw.json`
-- [ ] Replace the current `MawConfig` shape in `maw-cli/src/utils/config.ts` with the Phase 1 project config shape:
+- [x] Shrink the config type to project-level fields only; do not keep workflow-specific prompt, agent, graph, or model settings in `maw.json`
+- [x] Replace the current `MawConfig` shape in `maw-cli/src/utils/config.ts` with the Phase 1 project config shape:
 
     ```ts
     export interface MawProjectConfig {
@@ -59,10 +58,10 @@ Refactor `maw-cli` so it owns project-level MAW infrastructure and no longer ass
     }
     ```
 
-- [ ] Drop env interpolation logic from the project config reader; `maw.json` should be parsed as literal JSON only
-- [ ] Update `ensureConfig(root)` or replace it with a clearer helper that validates `maw.json`
-- [ ] Update `maw-cli/tests/config.test.ts` for the new file path, reduced config shape, and literal-only parsing behavior
-- [ ] Update the public export from `maw-cli/src/index.ts` if the config type name changes
+- [x] Drop env interpolation logic from the project config reader; `maw.json` should be parsed as literal JSON only
+- [x] Update `ensureConfig(root)` or replace it with a clearer helper that validates `maw.json`
+- [x] Update `maw-cli/tests/config.test.ts` for the new file path, reduced config shape, and literal-only parsing behavior
+- [x] Update the public export from `maw-cli/src/index.ts` if the config type name changes
 
 ### 2. Move Project-Owned Scaffold Assets into `maw-cli`
 
@@ -83,6 +82,7 @@ Refactor `maw-cli` so it owns project-level MAW infrastructure and no longer ass
     }
     ```
 
+- [ ] Replace every `maw-cli` path assumption for `.maw/config.json` with the root-level `maw.json`
 - [ ] Generate `.maw/ov.conf` from `maw-cli` with project-wide OpenViking placeholders and no workflow-specific content
 - [ ] Create `.maw/templates/` and `.maw/graphs/` from `maw-cli init`
 - [ ] Append `.maw/openviking/` to `.gitignore` if missing, and do not add any other MAW scaffold paths
