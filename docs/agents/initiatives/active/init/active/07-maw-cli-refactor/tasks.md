@@ -117,16 +117,16 @@ Step 4 consumes the discovered `workflow` names for `.maw/graphs/<workflow>/` cr
 
 ### 4. Rewrite `maw-cli init` for Multi-Workflow Project Scaffolding
 
-- [ ] Update `runInit()` so it creates `maw.json` if missing
-- [ ] Update `runInit()` so it creates `.maw/templates/`, `.maw/graphs/`, and `.maw/ov.conf` if missing
-- [ ] If no workflows are discovered, print a warning and return `0` after project-level scaffold creation completes
-- [ ] For each discovered workflow, create `.maw/graphs/<workflow>/` using `scaffold.workflow` as the directory name
-- [ ] Write workflow-owned `graph.ts` and `config.json` into `.maw/graphs/<workflow>/`
-- [ ] Generate workflow-local `langgraph.json` from `maw-cli`, not from the workflow package; Step 5 defines its exact shape
-- [ ] Preserve existing files on rerun at every layer: `maw.json`, `.maw/ov.conf`, `.maw/templates/`, and per-workflow files
-- [ ] Stop writing legacy files from `maw-cli init`: `.maw/config.json`, `.maw/graph.ts`, and root `langgraph.json`
-- [ ] Update success and warning output so the command clearly distinguishes zero-workflow bootstrap from initialized workflows
-- [ ] Update `maw-cli/tests/init.test.ts` to cover zero, one, and multiple workflow packages plus rerun preservation and `.gitignore` behavior
+- [x] Update `runInit()` so it creates `maw.json` if missing
+- [x] Update `runInit()` so it creates `.maw/templates/`, `.maw/graphs/`, and `.maw/ov.conf` if missing
+- [x] If no workflows are discovered, print a warning and return `0` after project-level scaffold creation completes
+- [x] For each discovered workflow, create `.maw/graphs/<workflow>/` using `scaffold.workflow` as the directory name
+- [x] Write workflow-owned `graph.ts` and `config.json` into `.maw/graphs/<workflow>/`
+- [x] Generate workflow-local `langgraph.json` from `maw-cli`, not from the workflow package; Step 5 defines its exact shape
+- [x] Preserve existing files on rerun at every layer: `maw.json`, `.maw/ov.conf`, `.maw/templates/`, and per-workflow files
+- [x] Stop writing legacy files from `maw-cli init`: `.maw/config.json`, `.maw/graph.ts`, and root `langgraph.json`
+- [x] Update success and warning output so the command clearly distinguishes zero-workflow bootstrap from initialized workflows
+- [x] Update `maw-cli/tests/init.test.ts` to cover zero, one, and multiple workflow packages plus rerun preservation and `.gitignore` behavior
 
 ### 5. Generate Workflow-Local `langgraph.json`
 
@@ -154,8 +154,8 @@ Step 4 consumes the discovered `workflow` names for `.maw/graphs/<workflow>/` cr
 
 ### 7. Expand Unit Coverage for the Refactor
 
-- [ ] `maw-cli/tests/init.test.ts` covers multi-workflow discovery, no-workflow bootstrap-and-warn behavior, workflow-name collisions, new project scaffold files, rerun preservation, and absence of legacy root files
-- [ ] `maw-cli/tests/init.test.ts` also covers `.gitignore` appending `.maw/openviking/` exactly once and not adding `maw.json` or `.maw/ov.conf`
+- [x] `maw-cli/tests/init.test.ts` covers multi-workflow discovery, no-workflow bootstrap-and-warn behavior, workflow-name collisions, new project scaffold files, rerun preservation, and absence of legacy root files
+- [x] `maw-cli/tests/init.test.ts` also covers `.gitignore` appending `.maw/openviking/` exactly once and not adding `maw.json` or `.maw/ov.conf`
 - [ ] `maw-cli/tests/dev.test.ts` covers missing workflow arg, missing `maw.json`, missing workflow dir, missing workflow-local files, and forwarded extra args
 - [ ] `maw-cli/tests/config.test.ts` covers the new `maw.json` shape and literal-only parsing behavior
 - [ ] `maw-cli/tests/cli.test.ts` covers updated help output and confirms `start` is no longer listed as a valid command
@@ -190,11 +190,11 @@ Step 4 consumes the discovered `workflow` names for `.maw/graphs/<workflow>/` cr
 
 ## Exit Criteria
 
-- [ ] `maw-cli init` creates `maw.json`, `.maw/templates/`, `.maw/ov.conf`, and one `.maw/graphs/<workflow>/` directory per discovered workflow
-- [ ] `maw-cli init` still bootstraps `maw.json`, `.maw/templates/`, `.maw/graphs/`, and `.maw/ov.conf` when no workflows are installed, and warns instead of failing
-- [ ] Workflow directory names come from `scaffold.workflow`, not npm package names
-- [ ] Rerunning `maw-cli init` preserves existing project-owned and workflow-local files
-- [ ] `.gitignore` only appends `.maw/openviking/`
+- [x] `maw-cli init` creates `maw.json`, `.maw/templates/`, `.maw/ov.conf`, and one `.maw/graphs/<workflow>/` directory per discovered workflow
+- [x] `maw-cli init` still bootstraps `maw.json`, `.maw/templates/`, `.maw/graphs/`, and `.maw/ov.conf` when no workflows are installed, and warns instead of failing
+- [x] Workflow directory names come from `scaffold.workflow`, not npm package names
+- [x] Rerunning `maw-cli init` preserves existing project-owned and workflow-local files
+- [x] `.gitignore` only appends `.maw/openviking/`
 - [ ] Workflow-local `langgraph.json` uses `./graph.ts:graph`, `../../../.env`, and omits `dependencies`
 - [ ] `maw.json` is treated as literal-only project config with no env interpolation behavior
 - [ ] `maw-cli dev <workflow>` fails fast when the workflow arg or required workflow-local files are missing
