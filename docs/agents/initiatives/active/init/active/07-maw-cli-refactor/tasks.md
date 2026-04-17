@@ -163,8 +163,8 @@ Step 4 consumes the discovered `workflow` names for `.maw/graphs/<workflow>/` cr
 
 ### 8. Update Smoke Coverage for the Standalone `maw-cli` Flow
 
-- [ ] Update `maw-smoke/maw-smoke-1/` so `maw-cli` is exercised as a standalone tool alongside fixture workflow packages that implement the next scaffold contract
-- [ ] Add or replace a smoke script for `init` that proves `maw-cli init` creates:
+- [x] Update `maw-smoke/maw-smoke-1/` so `maw-cli` is exercised as a standalone tool alongside fixture workflow packages that implement the next scaffold contract
+- [x] Add or replace a smoke script for `init` that proves `maw-cli init` creates:
     - `maw.json`
     - `.maw/templates/`
     - `.maw/ov.conf`
@@ -173,20 +173,20 @@ Step 4 consumes the discovered `workflow` names for `.maw/graphs/<workflow>/` cr
     - `.maw/graphs/docs-agent/langgraph.json`
     - `.maw/graphs/code-agent/...`
 
-- [ ] The `init` smoke test also proves `.gitignore` only adds `.maw/openviking/`
-- [ ] The `init` smoke test also proves workflow-local `langgraph.json` uses `./graph.ts:graph`, `../../../.env`, and omits `dependencies`
-- [ ] The `init` smoke test reruns `maw-cli init` after editing one generated file and confirms the file is preserved
-- [ ] Update `smoke:dev` so it exercises `maw-cli dev docs-agent`, not bare `maw-cli dev`
-- [ ] The `dev` smoke test proves the command targets `.maw/graphs/docs-agent/langgraph.json` and does not depend on a shared root `langgraph.json`
-- [ ] Keep smoke fixtures phase-local; do not block Phase 1 on the real `langgraph-ts-template` package contract landing first
+- [x] The `init` smoke test also proves `.gitignore` only adds `.maw/openviking/`
+- [x] The `init` smoke test also proves workflow-local `langgraph.json` uses `./graph.ts:graph`, `../../../.env`, and omits `dependencies`
+- [x] The `init` smoke test reruns `maw-cli init` after editing one generated file and confirms the file is preserved
+- [x] Update `smoke:dev` so it exercises `maw-cli dev docs-agent`, not bare `maw-cli dev`
+- [x] The `dev` smoke test proves the command targets `.maw/graphs/docs-agent/langgraph.json` and does not depend on a shared root `langgraph.json`
+- [x] Keep smoke fixtures phase-local; do not block Phase 1 on the real `langgraph-ts-template` package contract landing first
 
 ## Verification
 
 - [x] `bun run build` in `maw-cli/`
 - [x] `bun run lint` in `maw-cli/`
 - [x] `bun run test` in `maw-cli/`
-- [ ] Smoke: `bun run smoke:init` in `maw-smoke/maw-smoke-1/`
-- [ ] Smoke: `bun run smoke:dev` in `maw-smoke/maw-smoke-1/`
+- [x] Smoke: `bun run smoke:init` in `maw-smoke/maw-smoke-1/`
+- [x] Smoke: `bun run smoke:dev` in `maw-smoke/maw-smoke-1/`
 
 ## Exit Criteria
 
@@ -200,4 +200,4 @@ Step 4 consumes the discovered `workflow` names for `.maw/graphs/<workflow>/` cr
 - [x] `maw-cli dev <workflow>` fails fast when the workflow arg or required workflow-local files are missing
 - [x] `maw-cli dev docs-agent` launches `langgraphjs` with `--config .maw/graphs/docs-agent`
 - [x] `start` is no longer part of the `maw-cli` command surface
-- [ ] Multi-workflow unit tests and standalone smoke coverage pass without relying on temporary backward-compatibility code for the old scaffold contract or any Docker-based launch path
+- [x] Multi-workflow unit tests and standalone smoke coverage pass without relying on temporary backward-compatibility code for the old scaffold contract or any Docker-based launch path
