@@ -12,6 +12,7 @@
         "noUnusedLocals": true,
         "noUnusedParameters": true,
         "useDefineForClassFields": true,
+        "exactOptionalPropertyTypes": true,
         "allowJs": true,
         "strict": true,
         "noUncheckedIndexedAccess": true,
