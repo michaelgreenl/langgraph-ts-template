@@ -390,7 +390,7 @@ These parts of the current implementation conflict with the finalized architectu
 
 ### Phase 1: `maw-cli` targeted refactor
 
-- [ ] complete
+- [x] complete
 
 - move project-level config handling from `.maw/config.json` to `maw.json`
 - move `ov.conf` ownership into `maw-cli`
