@@ -48,7 +48,10 @@ const resolveValue = (value, env) => {
     }
     return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, resolveValue(item, env)]));
 };
-export const createConfig = () => mawConfigSchema.parse(JSON.parse(readScaffoldAsset('config')));
+export const createConfig = () => {
+    const raw = JSON.parse(readScaffoldAsset('config'));
+    return mawConfigSchema.parse(raw);
+};
 export const resolveEnvVars = (value, env = hostEnv()) => resolveValue(value, env);
 export const parseConfig = (value) => mawConfigSchema.parse(value);
 export const loadConfig = async (file = DEFAULT_CONFIG_PATH, env = hostEnv()) => {

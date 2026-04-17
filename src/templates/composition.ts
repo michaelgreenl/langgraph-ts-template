@@ -1,10 +1,10 @@
 export interface AgentComposition {
-    snippets: string[];
+    readonly snippets: readonly string[];
 }
 
 export interface TemplateComposition {
-    globalSnippets: string[];
-    agents: Record<string, AgentComposition>;
+    readonly globalSnippets: readonly string[];
+    readonly agents: Readonly<Record<string, AgentComposition>>;
 }
 
 export const PROMPT_BREAK = '\n\n';
@@ -21,4 +21,4 @@ export const resolveSnippets = (cfg: TemplateComposition, agent: string): string
     return [...cfg.globalSnippets, ...entry.snippets];
 };
 
-export const joinPrompt = (parts: string[]): string => parts.map(normalize).join(PROMPT_BREAK);
+export const joinPrompt = (parts: readonly string[]): string => parts.map(normalize).join(PROMPT_BREAK);

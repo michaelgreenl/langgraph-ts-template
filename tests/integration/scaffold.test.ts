@@ -9,13 +9,6 @@ import { createScaffoldFiles, scaffold } from '../../src/scaffold/index.js';
 const roots: string[] = [];
 const run = promisify(execFile);
 
-interface LangGraphConfig {
-    node_version: string;
-    graphs: Record<string, string>;
-    env: string;
-    dependencies: string[];
-}
-
 const exists = async (file: string): Promise<boolean> => {
     try {
         await access(file);
@@ -73,16 +66,18 @@ describe('scaffold handoff', () => {
         const graph = join(root, '.maw/graph.ts');
         const langgraph = join(root, 'langgraph.json');
         const ignore = join(root, '.gitignore');
-        const cfg = JSON.parse(await readFile(langgraph, 'utf8')) as LangGraphConfig;
+        const cfg: unknown = JSON.parse(await readFile(langgraph, 'utf8'));
 
         expect(await exists(join(root, '.maw/templates'))).toBe(true);
         expect(config).toContain('${OPENAI_API_KEY}');
         expect(ov).toContain('${OPENAI_API_KEY}');
         expect(await readFile(graph, 'utf8')).toContain("import { createGraph } from 'docs-agent';");
-        expect(cfg.node_version).toBe('20');
-        expect(cfg.graphs.agent).toBe('./.maw/graph.ts:graph');
-        expect(cfg.env).toBe('.env');
-        expect(cfg.dependencies).toEqual(['.']);
+        expect(cfg).toMatchObject({
+            node_version: '20',
+            graphs: { agent: './.maw/graph.ts:graph' },
+            env: '.env',
+            dependencies: ['.'],
+        });
 
         await run('bun', [join(process.cwd(), 'scripts/checkLanggraphPaths.js'), root]);
 

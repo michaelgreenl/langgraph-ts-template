@@ -20,12 +20,11 @@ const fileExists = async (file) => {
         return false;
     }
 };
-const sourceError = (dir) => new Error(`Missing template source directory: ${dir}`);
-const repoDirs = async (root, strict) => {
+const repoDirs = async (root, mode) => {
     const dir = resolve(root, '.maw/template-repos');
     if (!(await fileExists(dir))) {
-        if (strict) {
-            throw sourceError(dir);
+        if (mode === 'strict') {
+            throw new Error(`Missing template source directory: ${dir}`);
         }
         return [];
     }
@@ -37,19 +36,18 @@ const repoDirs = async (root, strict) => {
 };
 const sources = async ({ config, root = process.cwd(), strict = true, }) => {
     const dirs = [];
+    const mode = strict ? 'strict' : 'fallback';
     if (config.templates.sources.includes('custom')) {
         const dir = resolve(root, config.templates.customPath);
-        if (!(await fileExists(dir))) {
-            if (strict) {
-                throw sourceError(dir);
-            }
-        }
-        else {
+        if (await fileExists(dir)) {
             dirs.push({ dir, type: 'custom' });
+        }
+        else if (mode === 'strict') {
+            throw new Error(`Missing template source directory: ${dir}`);
         }
     }
     if (config.templates.sources.includes('git')) {
-        for (const dir of await repoDirs(root, strict)) {
+        for (const dir of await repoDirs(root, mode)) {
             dirs.push({ dir, type: 'git' });
         }
     }
@@ -67,19 +65,16 @@ const resolveSnippet = async (name, dirs) => {
     }
     throw new Error(`Unable to resolve snippet: ${name}`);
 };
-const message = (err) => {
-    if (!err || typeof err !== 'object' || !('message' in err) || typeof err.message !== 'string') {
-        return String(err);
-    }
-    return err.message;
-};
 const render = async (env, file, name, vars) => {
     const text = await readFile(file, 'utf8');
     try {
         return env.renderString(text, vars);
     }
     catch (err) {
-        throw new Error(`Unable to render snippet ${name}: ${message(err)}`);
+        const text = err && typeof err === 'object' && 'message' in err && typeof err.message === 'string'
+            ? err.message
+            : String(err);
+        throw new Error(`Unable to render snippet ${name}: ${text}`);
     }
 };
 export const createTemplateEngine = (opts) => {
@@ -88,10 +83,6 @@ export const createTemplateEngine = (opts) => {
         throwOnUndefined: true,
     });
     let dirs;
-    const load = () => {
-        dirs ??= sources(opts);
-        return dirs;
-    };
     return {
         compose: async (agent, vars = {}) => {
             const names = resolveSnippets(opts.config.templates, agent);
@@ -99,7 +90,7 @@ export const createTemplateEngine = (opts) => {
                 workspacePath: opts.config.workspace,
                 ...vars,
             };
-            const roots = await load();
+            const roots = await (dirs ??= sources(opts));
             const parts = await Promise.all(names.map(async (name) => render(env, await resolveSnippet(name, roots), name, bag)));
             return joinPrompt(parts);
         },

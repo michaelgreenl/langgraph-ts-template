@@ -1,5 +1,8 @@
 export interface OpenVikingConfig {
-    host: string;
-    port: number;
+    readonly host: string;
+    readonly port: number;
 }
-export declare const DEFAULT_OPENVIKING_CONFIG: OpenVikingConfig;
+export declare const DEFAULT_OPENVIKING_CONFIG: {
+    readonly host: "localhost";
+    readonly port: 1933;
+};

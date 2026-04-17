@@ -26,15 +26,17 @@ const resolveAsset = (file: string): string => {
     throw new Error(`Unable to locate scaffold asset: ${file}`);
 };
 
-const readPackage = (): { name: string } => {
-    const pkg = JSON.parse(readFileSync(packagePath, 'utf8')) as { name?: unknown };
+const pkg: unknown = JSON.parse(readFileSync(packagePath, 'utf8'));
 
-    if (typeof pkg.name === 'string' && pkg.name.length > 0) {
-        return { name: pkg.name };
-    }
-
+if (
+    typeof pkg !== 'object' ||
+    pkg === null ||
+    !('name' in pkg) ||
+    typeof pkg.name !== 'string' ||
+    pkg.name.length === 0
+) {
     throw new Error('Unable to determine the installed workflow package name.');
-};
+}
 
 export type ScaffoldAssetName = keyof typeof assetFiles;
 
@@ -56,7 +58,7 @@ export interface MawScaffold {
     rules: ScaffoldRules;
 }
 
-export const WORKFLOW_PACKAGE_NAME = readPackage().name;
+export const WORKFLOW_PACKAGE_NAME = pkg.name;
 
 export const SCAFFOLD_DIRECTORIES = ['.maw/templates'] as const;
 
@@ -83,8 +85,7 @@ export const scaffold: MawScaffold = {
             source: resolveAsset(assetFiles.graph),
             target: '.maw/graph.ts',
         },
-        // node_version and dependencies are used by langgraphjs deployment commands
-        // (build/docker). env points at an optional local .env file.
+        // LangGraph deployment commands read these keys directly from langgraph.json.
         langgraph: {
             source: resolveAsset(assetFiles.langgraph),
             target: 'langgraph.json',

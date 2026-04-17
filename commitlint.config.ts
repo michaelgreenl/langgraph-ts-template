@@ -1,4 +1,6 @@
-module.exports = {
+import type { UserConfig } from '@commitlint/types';
+
+const cfg = {
     extends: ['@commitlint/config-conventional'],
     rules: {
         'body-max-line-length': [0, 'always', 0],
@@ -22,4 +24,6 @@ module.exports = {
             ],
         ],
     },
-};
+} satisfies UserConfig;
+
+module.exports = cfg;

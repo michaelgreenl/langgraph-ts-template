@@ -1,5 +1,7 @@
 import { defineConfig } from 'vitest/config';
 
+const exclude = ['dist/**', 'node_modules/**'] as const;
+
 export default defineConfig(({ mode }) => ({
     test: {
         environment: 'node',
@@ -7,9 +9,6 @@ export default defineConfig(({ mode }) => ({
         passWithNoTests: true,
         testTimeout: 20_000,
         include: mode === 'integration' ? ['tests/**/*.test.ts'] : ['tests/**/*.spec.ts'],
-        exclude:
-            mode === 'integration'
-                ? ['dist/**', 'node_modules/**']
-                : ['dist/**', 'node_modules/**', 'tests/**/*.test.ts'],
+        exclude: mode === 'integration' ? [...exclude] : [...exclude, 'tests/**/*.test.ts'],
     },
 }));

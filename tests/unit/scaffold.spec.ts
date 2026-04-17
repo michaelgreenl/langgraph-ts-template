@@ -38,16 +38,13 @@ describe('MAW scaffold contract', () => {
 
     it('renders the target langgraph config for the scaffolded graph entry', () => {
         const files = createScaffoldFiles('docs-agent');
-        const config = JSON.parse(files['langgraph.json']) as {
-            node_version: string;
-            graphs: Record<string, string>;
-            env: string;
-            dependencies: string[];
-        };
+        const cfg: unknown = JSON.parse(files['langgraph.json']);
 
-        expect(config.node_version).toBe('20');
-        expect(config.graphs.agent).toBe('./.maw/graph.ts:graph');
-        expect(config.env).toBe('.env');
-        expect(config.dependencies).toEqual(['.']);
+        expect(cfg).toMatchObject({
+            node_version: '20',
+            graphs: { agent: './.maw/graph.ts:graph' },
+            env: '.env',
+            dependencies: ['.'],
+        });
     });
 });

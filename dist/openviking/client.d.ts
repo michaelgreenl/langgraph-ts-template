@@ -1,9 +1,9 @@
 export interface OpenVikingFindInput {
-    query: string;
-    targetUri: string;
+    readonly query: string;
+    readonly targetUri: string;
 }
 export interface OpenVikingFindResult {
-    content: string;
+    readonly content: string;
 }
 export interface OpenVikingClient {
     find(input: OpenVikingFindInput): Promise<OpenVikingFindResult[]>;

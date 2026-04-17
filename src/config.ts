@@ -62,7 +62,11 @@ const resolveValue = (value: unknown, env: NodeJS.ProcessEnv): unknown => {
     return Object.fromEntries(Object.entries(value).map(([key, item]) => [key, resolveValue(item, env)]));
 };
 
-export const createConfig = (): MawConfig => mawConfigSchema.parse(JSON.parse(readScaffoldAsset('config')) as unknown);
+export const createConfig = (): MawConfig => {
+    const raw: unknown = JSON.parse(readScaffoldAsset('config'));
+
+    return mawConfigSchema.parse(raw);
+};
 
 export const resolveEnvVars = <T>(value: T, env: NodeJS.ProcessEnv = hostEnv()): T => resolveValue(value, env) as T;
 
@@ -73,7 +77,7 @@ export const loadConfig = async (
     env: NodeJS.ProcessEnv = hostEnv(),
 ): Promise<MawConfig> => {
     const text = await readFile(file, 'utf8');
-    const raw = JSON.parse(text) as unknown;
+    const raw: unknown = JSON.parse(text);
 
     return parseConfig(resolveEnvVars(raw, env));
 };
