@@ -23,6 +23,8 @@ Your job is to drive the execution of a single phase's `tasks.md`, one step at a
 2. Read the full `tasks.md`: understand the Goal, Scope, Execution Notes, and every step.
 3. Identify already-completed steps (all boxes checked) and skip them.
 4. Confirm with the user which step to start from.
+5. Identify the repo the phase or step is to be executed in. 
+    - If the repo the step/phase targets is not the cwd: Surface and confirm with the user where the target repo is located.
 
 ---
 
