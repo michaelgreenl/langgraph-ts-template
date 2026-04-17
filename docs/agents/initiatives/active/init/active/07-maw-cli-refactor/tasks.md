@@ -140,26 +140,26 @@ Step 4 consumes the discovered `workflow` names for `.maw/graphs/<workflow>/` cr
 
 ### 6. Require Workflow Arguments in `dev` and Remove `start`
 
-- [ ] Update command summaries and help text in `maw-cli/src/index.ts` to show `maw-cli dev <workflow>` as the only runtime command
-- [ ] Remove `start` from the command registry and delete `maw-cli/src/commands/start.ts`
-- [ ] Simplify or replace the old shared `runLanggraph` abstraction so it no longer models both `dev` and `start`
-- [ ] Parse the first positional arg as the workflow name and forward the remaining args to `langgraphjs`
-- [ ] Missing workflow name returns exit code `1` with a clear usage error
-- [ ] Validate that `maw.json` exists before launching
-- [ ] Validate that `.maw/graphs/<workflow>/` exists before launching
-- [ ] Validate that `.maw/graphs/<workflow>/graph.ts`, `config.json`, and `langgraph.json` all exist before launching
-- [ ] Invoke `langgraphjs dev --config .maw/graphs/<workflow>`
-- [ ] Stop calling the old root-level `ensureLanggraphJson(root)` path from `dev`
-- [ ] Update `maw-cli/tests/dev.test.ts` and `maw-cli/tests/cli.test.ts` for the new argument contract and command surface
+- [x] Update command summaries and help text in `maw-cli/src/index.ts` to show `maw-cli dev <workflow>` as the only runtime command
+- [x] Remove `start` from the command registry and delete `maw-cli/src/commands/start.ts`
+- [x] Simplify or replace the old shared `runLanggraph` abstraction so it no longer models both `dev` and `start`
+- [x] Parse the first positional arg as the workflow name and forward the remaining args to `langgraphjs`
+- [x] Missing workflow name returns exit code `1` with a clear usage error
+- [x] Validate that `maw.json` exists before launching
+- [x] Validate that `.maw/graphs/<workflow>/` exists before launching
+- [x] Validate that `.maw/graphs/<workflow>/graph.ts`, `config.json`, and `langgraph.json` all exist before launching
+- [x] Invoke `langgraphjs dev --config .maw/graphs/<workflow>`
+- [x] Stop calling the old root-level `ensureLanggraphJson(root)` path from `dev`
+- [x] Update `maw-cli/tests/dev.test.ts` and `maw-cli/tests/cli.test.ts` for the new argument contract and command surface
 
 ### 7. Expand Unit Coverage for the Refactor
 
 - [x] `maw-cli/tests/init.test.ts` covers multi-workflow discovery, no-workflow bootstrap-and-warn behavior, workflow-name collisions, new project scaffold files, rerun preservation, and absence of legacy root files
 - [x] `maw-cli/tests/init.test.ts` also covers `.gitignore` appending `.maw/openviking/` exactly once and not adding `maw.json` or `.maw/ov.conf`
-- [ ] `maw-cli/tests/dev.test.ts` covers missing workflow arg, missing `maw.json`, missing workflow dir, missing workflow-local files, and forwarded extra args
+- [x] `maw-cli/tests/dev.test.ts` covers missing workflow arg, missing `maw.json`, missing workflow dir, missing workflow-local files, and forwarded extra args
 - [x] `maw-cli/tests/config.test.ts` covers the new `maw.json` shape and literal-only parsing behavior
-- [ ] `maw-cli/tests/cli.test.ts` covers updated help output and confirms `start` is no longer listed as a valid command
-- [ ] Remove or replace any test file that exists only to cover the retired `start` command
+- [x] `maw-cli/tests/cli.test.ts` covers updated help output and confirms `start` is no longer listed as a valid command
+- [x] Remove or replace any test file that exists only to cover the retired `start` command
 
 ### 8. Update Smoke Coverage for the Standalone `maw-cli` Flow
 
@@ -197,7 +197,7 @@ Step 4 consumes the discovered `workflow` names for `.maw/graphs/<workflow>/` cr
 - [x] `.gitignore` only appends `.maw/openviking/`
 - [x] Workflow-local `langgraph.json` uses `./graph.ts:graph`, `../../../.env`, and omits `dependencies`
 - [x] `maw.json` is treated as literal-only project config with no env interpolation behavior
-- [ ] `maw-cli dev <workflow>` fails fast when the workflow arg or required workflow-local files are missing
-- [ ] `maw-cli dev docs-agent` launches `langgraphjs` with `--config .maw/graphs/docs-agent`
-- [ ] `start` is no longer part of the `maw-cli` command surface
+- [x] `maw-cli dev <workflow>` fails fast when the workflow arg or required workflow-local files are missing
+- [x] `maw-cli dev docs-agent` launches `langgraphjs` with `--config .maw/graphs/docs-agent`
+- [x] `start` is no longer part of the `maw-cli` command surface
 - [ ] Multi-workflow unit tests and standalone smoke coverage pass without relying on temporary backward-compatibility code for the old scaffold contract or any Docker-based launch path
