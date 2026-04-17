@@ -49,15 +49,18 @@ Check:
 - Does the Summary account for every task in the step?
 - Does the Remaining section list anything that was in scope for this step?
 
-### 3. Update the Task Checklist
+### 3. Verify Integrity of the Task Checklist
 
 Cross-reference the step log against the tasks.md.
 
-- Check off `[x]` every task the coder completed and verified.
-- Leave `[ ]` any task not completed — do not check it off.
+- Were any tasks marked complete that were only partially implemented? 
+- Were any tasks left incomplete due to concerns during implementation?
+- Were there any issues or ambiguities logged by the coder?
 
-### 4. Commit or Surface
-
+If any of these questions return "yes", surface and report to HITL
+                                       
+### 4. Commit or Surface               
+                                       
 **If the step is clean (all tasks checked, verification passed, no unresolved issues):**
 
 1. Run `git status` in both `langgraph-ts-template` and `../maw-cli` to determine which repos were modified.
@@ -78,7 +81,7 @@ Stop. Do NOT commit anything. Surface the problem clearly to the user and wait f
 
 Pause and report to the user before continuing when:
 
-1. The coder's pre-flight flags a **blocker** (contract conflict, plan flaw, missing context)
+1. The coder's pre-flight flags a **blocker** (contract conflict, plan flaw, missing context, etc.)
 2. Any task from the step is **incomplete** after the coder's run
 3. Verification commands **failed** and the coder could not resolve them after 3 attempts
 4. The implementation **deviates from the plan** in a way that affects scope or downstream steps
@@ -93,5 +96,4 @@ Do not make key decisions unilaterally. When in doubt, surface it.
 
 - Never commit if any task is incomplete or any issue is unresolved
 - Never skip reading the step log before updating the task checklist
-- Never modify tasks outside the current step
 - One coder dispatch per step attempt; surface before retrying if a step fails

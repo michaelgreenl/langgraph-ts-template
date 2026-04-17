@@ -8,6 +8,18 @@
                     "coder": "deny"
                 }
             }
+        },
+        "manager": {
+            "model": "google/gemini-3.1-pro-preview",
+            "variant": "high"
+        },
+        "planner": {
+            "model": "anthropic/claude-sonnet-4-6",
+            "variant": "max"
+        },
+        "coder": {
+            "model": "openai/gpt-5.4",
+            "variant": "xhigh"
         }
     }
 }
