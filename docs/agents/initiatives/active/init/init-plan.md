@@ -189,12 +189,11 @@ Proposed shape:
 
 ```json
 {
-    "agents": {
-        "planner": {
-            "skills": ["general-coding", "security", "project-context", "research-rules"]
-        },
-        "coder": {
-            "skills": ["general-coding", "security", "project-context", "typescript"]
+    "prompts": {
+        "global": ["general", "security"],
+        "agents": {
+            "planner": ["research-rules"],
+            "coder": ["typescript"]
         }
     }
 }
@@ -224,7 +223,7 @@ Conceptual shape:
 
 Paths inside `langgraph.json` are relative to `.maw/graphs/<workflow>/`, so the generated file should use `./graph.ts:graph` and `../../../.env`.
 
-The MVP generator should omit `dependencies` because Docker-backed LangGraph launch is out of scope for this initiative.
+The MVP generator should omit `dependencies` because Docker-backed LangGraph launch is not needed for this project.
 
 ## Workflow Package Contract
 
