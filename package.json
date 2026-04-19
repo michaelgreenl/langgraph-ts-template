@@ -40,7 +40,8 @@
         "lint:all": "bun run lint && bun run format:check",
         "test:all": "bun run test && bun run test:int && bun run lint:all",
         "release": "semantic-release",
-        "hooks": "husky"
+        "hooks": "husky",
+        "prepare": "bun run build"
     },
     "dependencies": {
         "@langchain/core": "^1.1.40",

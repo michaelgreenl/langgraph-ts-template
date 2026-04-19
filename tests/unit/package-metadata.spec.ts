@@ -13,9 +13,6 @@ describe('package metadata', () => {
             dependencies: { husky: expect.any(String) },
         });
         expect(pkg).not.toMatchObject({
-            scripts: { prepare: expect.any(String) },
-        });
-        expect(pkg).not.toMatchObject({
             scripts: { prepare: expect.stringContaining('husky') },
         });
     });
