@@ -1,3 +1,9 @@
+## [0.2.2](https://github.com/michaelgreenl/langgraph-ts-template/compare/v0.2.1...v0.2.2) (2026-04-19)
+
+### Bug Fixes
+
+* commit index files in dist/ ([6c2e249](https://github.com/michaelgreenl/langgraph-ts-template/commit/6c2e2495049327882466a11833e84a05f42f7d01))
+
 ## [0.2.1](https://github.com/michaelgreenl/langgraph-ts-template/compare/v0.2.0...v0.2.1) (2026-04-15)
 
 ### Bug Fixes
