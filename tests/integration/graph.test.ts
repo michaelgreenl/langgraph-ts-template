@@ -25,7 +25,7 @@ const makeConfig = () => ({
         sources: ['embedded', 'custom'] as const,
         customPath: '.maw/templates',
         gitRepos: [],
-        globalSnippets: ['general-coding', 'security', 'project-context'],
+        globalSnippets: ['general', 'security'],
         agents: {
             researcher: {
                 snippets: ['research-rules', 'python'],
@@ -59,7 +59,7 @@ describe('Graph', () => {
             root,
         };
 
-        await writeFile(join(root, '.maw/templates/general-coding.njk'), 'override general\n');
+        await writeFile(join(root, '.maw/templates/general.njk'), 'override general\n');
 
         const app = createGraph(cfg);
         const first = await app.invoke({ messages: ['Hello'] });
@@ -69,10 +69,7 @@ describe('Graph', () => {
         const prompt = text(first.messages[0].content);
         expect(prompt).toContain('override general');
         expect(prompt.indexOf('override general')).toBeLessThan(prompt.indexOf('Never inspect secrets'));
-        expect(prompt.indexOf('Never inspect secrets')).toBeLessThan(prompt.indexOf('Workspace path: .'));
-        expect(prompt.indexOf('Workspace path: .')).toBeLessThan(
-            prompt.indexOf('Verify claims against repository evidence'),
-        );
+        expect(prompt.indexOf('Never inspect secrets')).toBeLessThan(prompt.indexOf('Verify claims against repository evidence'));
         expect(prompt.indexOf('Verify claims against repository evidence')).toBeLessThan(
             prompt.indexOf('Prefer clear Python'),
         );

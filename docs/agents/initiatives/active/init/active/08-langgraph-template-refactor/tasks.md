@@ -216,23 +216,23 @@ Verify:
 
 Keep this step limited to template assets and the tests that directly depend on them. Do not pull the scaffold-contract rewrite into this step.
 
-- [ ] Delete `src/templates/defaults/project-context.njk`
-- [ ] Rename `src/templates/defaults/general-coding.njk` → `src/templates/defaults/general.njk`
-- [ ] Update still-current references to the old snippet names while preserving the legacy config/runtime API for this step:
+- [x] Delete `src/templates/defaults/project-context.njk`
+- [x] Rename `src/templates/defaults/general-coding.njk` → `src/templates/defaults/general.njk`
+- [x] Update still-current references to the old snippet names while preserving the legacy config/runtime API for this step:
   - `src/scaffold/assets/config.json`
   - `tests/unit/templates.spec.ts`
   - `tests/integration/graph.test.ts`
-- [ ] `tests/unit/templates.spec.ts`:
-  - Replace `'general-coding'` references with `'general'`
-  - Remove assertions that depended on embedded `project-context`
-  - Add or keep coverage proving a custom `.maw/templates/*.njk` snippet can still render `{{ workspacePath }}` when `workspace` is provided by the caller
-- [ ] `tests/integration/graph.test.ts`:
-  - Update snippet names to `'general'`
-  - Remove `Workspace path:` ordering assertions that depended on the deleted embedded snippet
+- [x] `tests/unit/templates.spec.ts`:
+  - [x] Replace `'general-coding'` references with `'general'`
+  - [x] Remove assertions that depended on embedded `project-context`
+  - [x] Add or keep coverage proving a custom `.maw/templates/*.njk` snippet can still render `{{ workspacePath }}` when `workspace` is provided by the caller
+- [x] `tests/integration/graph.test.ts`:
+  - [x] Update snippet names to `'general'`
+  - [x] Remove `Workspace path:` ordering assertions that depended on the deleted embedded snippet
 
 Verify:
-- [ ] `bun run test -- tests/unit/templates.spec.ts`
-- [ ] `bun run test:int -- tests/integration/graph.test.ts`
+- [x] `bun run test -- tests/unit/templates.spec.ts`
+- [x] `bun run test:int -- tests/integration/graph.test.ts`
 
 ### 3. Shrink the scaffold contract and publish template metadata
 
@@ -406,8 +406,8 @@ Verify:
 ### Per-step verification
 
 - [x] Step 1: `bun run test -- tests/unit/package-metadata.spec.ts`
-- [ ] Step 2: `bun run test -- tests/unit/templates.spec.ts`
-- [ ] Step 2: `bun run test:int -- tests/integration/graph.test.ts`
+- [x] Step 2: `bun run test -- tests/unit/templates.spec.ts`
+- [x] Step 2: `bun run test:int -- tests/integration/graph.test.ts`
 - [ ] Step 3: `bun run test -- tests/unit/package-metadata.spec.ts tests/unit/scaffold.spec.ts`
 - [ ] Step 3: `bun run test:int -- tests/integration/scaffold.test.ts`
 - [ ] Step 4: `bun run typecheck`

@@ -17,7 +17,7 @@
         "sources": ["embedded", "custom"],
         "customPath": ".maw/templates",
         "gitRepos": [],
-        "globalSnippets": ["general-coding", "security", "project-context"],
+        "globalSnippets": ["general", "security"],
         "agents": {
             "researcher": {
                 "snippets": ["research-rules", "python"]

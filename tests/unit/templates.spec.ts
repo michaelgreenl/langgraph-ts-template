@@ -25,7 +25,7 @@ const makeConfig = () => ({
         sources: ['embedded', 'custom', 'git'] as const,
         customPath: '.maw/templates',
         gitRepos: [],
-        globalSnippets: ['general-coding', 'security', 'project-context'],
+        globalSnippets: ['general', 'security'],
         agents: {
             researcher: {
                 snippets: ['research-rules', 'python'],
@@ -54,20 +54,34 @@ describe('template engine', () => {
         const cfg = makeConfig();
 
         await mkdir(join(root, '.maw/template-repos/acme'), { recursive: true });
-        await writeFile(join(root, '.maw/templates/general-coding.njk'), 'custom general {{ projectType }}\n');
+        await writeFile(join(root, '.maw/templates/general.njk'), 'custom general {{ projectType }}\n');
         await writeFile(join(root, '.maw/template-repos/acme/security.njk'), 'repo security\n');
 
         const engine = createTemplateEngine({ config: cfg, root });
 
-        await expect(
-            engine.compose('researcher', {
-                projectType: 'bun',
-                workspacePath: '/repo',
-            }),
-        ).resolves.toBe(
+        await expect(engine.compose('researcher', { projectType: 'bun' })).resolves.toBe(
             [
                 'custom general bun',
                 'repo security',
+                'Verify claims against repository evidence and call out assumptions when evidence is incomplete.',
+                'Prefer clear Python with standard library primitives, explicit errors, and small functions.',
+            ].join('\n\n'),
+        );
+    });
+
+    it('renders workspacePath in a custom snippet when workspace is configured', async () => {
+        const root = await createRoot();
+        const cfg = makeConfig();
+        cfg.workspace = '/repo';
+        cfg.templates.globalSnippets = ['workspace-note'];
+
+        await mkdir(join(root, '.maw/template-repos'), { recursive: true });
+        await writeFile(join(root, '.maw/templates/workspace-note.njk'), 'Workspace path: {{ workspacePath }}\n');
+
+        const engine = createTemplateEngine({ config: cfg, root });
+
+        await expect(engine.compose('researcher')).resolves.toBe(
+            [
                 'Workspace path: /repo',
                 'Verify claims against repository evidence and call out assumptions when evidence is incomplete.',
                 'Prefer clear Python with standard library primitives, explicit errors, and small functions.',
