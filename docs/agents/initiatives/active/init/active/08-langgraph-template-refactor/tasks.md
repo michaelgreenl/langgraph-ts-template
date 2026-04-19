@@ -56,7 +56,7 @@ Derive `WORKFLOW_ID` from `WORKFLOW_PACKAGE_NAME` by stripping any `@scope/` pre
 ```ts
 const WORKFLOW_ID = WORKFLOW_PACKAGE_NAME.replace(/^@[^/]+\//, '');
 ```
-For `langgraph-ts-template` this produces `langgraph-ts-template`. For `@org/docs-agent` it produces `docs-agent`. Template forks inherit the correct ID automatically when they rename their package.
+For `langgraph-ts-template` this produces `langgraph-ts-template`. For `@org/coding` it produces `coding`. Template forks inherit the correct ID automatically when they rename their package.
 
 ### New scaffold contract
 `maw-cli init` validates exactly these fields from a package's `./scaffold` export:
@@ -71,8 +71,8 @@ Remove `directories`, `gitignore`, `rules`, and `assets` from the scaffold objec
 ### `graph.ts.template` dual-token substitution
 Add a second token `__WORKFLOW_ID__` alongside the existing `__WORKFLOW_PACKAGE__`. Both are substituted in `createScaffoldFiles()`. The generated target-project file must become:
 ```ts
-import { createGraph } from 'docs-agent';
-export const graph = createGraph({ workflow: 'docs-agent' });
+import { createGraph } from 'coding';
+export const graph = createGraph({ workflow: 'coding' });
 ```
 `__WORKFLOW_PACKAGE__` → package name (the import), `__WORKFLOW_ID__` → workflow id (the runtime config path lookup). `createScaffoldFiles()` takes no arguments and reads `WORKFLOW_PACKAGE_NAME` / `WORKFLOW_ID` directly.
 

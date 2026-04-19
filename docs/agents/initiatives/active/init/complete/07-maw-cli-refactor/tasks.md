@@ -168,16 +168,16 @@ Step 4 consumes the discovered `workflow` names for `.maw/graphs/<workflow>/` cr
     - `maw.json`
     - `.maw/templates/`
     - `.maw/ov.conf`
-    - `.maw/graphs/docs-agent/graph.ts`
-    - `.maw/graphs/docs-agent/config.json`
-    - `.maw/graphs/docs-agent/langgraph.json`
+    - `.maw/graphs/coding/graph.ts`
+    - `.maw/graphs/coding/config.json`
+    - `.maw/graphs/coding/langgraph.json`
     - `.maw/graphs/code-agent/...`
 
 - [x] The `init` smoke test also proves `.gitignore` only adds `.maw/openviking/`
 - [x] The `init` smoke test also proves workflow-local `langgraph.json` uses `./graph.ts:graph`, `../../../.env`, and omits `dependencies`
 - [x] The `init` smoke test reruns `maw-cli init` after editing one generated file and confirms the file is preserved
-- [x] Update `smoke:dev` so it exercises `maw-cli dev docs-agent`, not bare `maw-cli dev`
-- [x] The `dev` smoke test proves the command targets `.maw/graphs/docs-agent/langgraph.json` and does not depend on a shared root `langgraph.json`
+- [x] Update `smoke:dev` so it exercises `maw-cli dev coding`, not bare `maw-cli dev`
+- [x] The `dev` smoke test proves the command targets `.maw/graphs/coding/langgraph.json` and does not depend on a shared root `langgraph.json`
 - [x] Keep smoke fixtures phase-local; do not block Phase 1 on the real `langgraph-ts-template` package contract landing first
 
 ## Verification
@@ -198,6 +198,6 @@ Step 4 consumes the discovered `workflow` names for `.maw/graphs/<workflow>/` cr
 - [x] Workflow-local `langgraph.json` uses `./graph.ts:graph`, `../../../.env`, and omits `dependencies`
 - [x] `maw.json` is treated as literal-only project config with no env interpolation behavior
 - [x] `maw-cli dev <workflow>` fails fast when the workflow arg or required workflow-local files are missing
-- [x] `maw-cli dev docs-agent` launches `langgraphjs` with `--config .maw/graphs/docs-agent`
+- [x] `maw-cli dev coding` launches `langgraphjs` with `--config .maw/graphs/coding`
 - [x] `start` is no longer part of the `maw-cli` command surface
 - [x] Multi-workflow unit tests and standalone smoke coverage pass without relying on temporary backward-compatibility code for the old scaffold contract or any Docker-based launch path

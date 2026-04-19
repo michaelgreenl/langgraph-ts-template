@@ -14,12 +14,12 @@
 - `../maw-cli/src/commands/init.ts`
 - `../maw-cli/tests/init.test.ts`
 - `../maw-cli/tests/support.ts`
-- `../maw-cli/tests/fixtures/workflows/docs-agent/package.json`
-- `../maw-cli/tests/fixtures/workflows/docs-agent/scaffold.js`
+- `../maw-cli/tests/fixtures/workflows/coding/package.json`
+- `../maw-cli/tests/fixtures/workflows/coding/scaffold.js`
 - `../maw-cli/tests/fixtures/workflows/code-agent/package.json`
 - `../maw-cli/tests/fixtures/workflows/code-agent/scaffold.js`
-- `../maw-cli/tests/fixtures/workflows/docs-agent-alt/package.json`
-- `../maw-cli/tests/fixtures/workflows/docs-agent-alt/scaffold.js`
+- `../maw-cli/tests/fixtures/workflows/coding-alt/package.json`
+- `../maw-cli/tests/fixtures/workflows/coding-alt/scaffold.js`
 - `../maw-cli/dist/commands/init.js`
 - `../maw-cli/dist/commands/init.d.ts`
 - `docs/agents/initiatives/active/init/active/07-maw-cli-refactor/tasks.md`

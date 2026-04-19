@@ -3,7 +3,7 @@
 ## Summary
 
 - Replaced the old root-scaffold smoke coverage with standalone `maw-cli` smoke flows that install `maw-cli` into temp projects and exercise local phase-only workflow fixtures.
-- Added local `mock-docs-agent` and `mock-code-agent` scaffold fixtures, plus shared smoke helpers, to prove `maw-cli init` and `maw-cli dev docs-agent` follow the new Phase 1 contract.
+- Added local `mock-coding` and `mock-code-agent` scaffold fixtures, plus shared smoke helpers, to prove `maw-cli init` and `maw-cli dev coding` follow the new Phase 1 contract.
 - Removed obsolete smoke scripts and stale root scaffold artifacts that depended on the retired `.maw/config.json` / root `langgraph.json` contract.
 
 ## Files
@@ -11,9 +11,9 @@
 - `../maw-smoke/maw-smoke-1/package.json`
 - `../maw-smoke/maw-smoke-1/.gitignore`
 - `../maw-smoke/maw-smoke-1/bun.lock`
-- `../maw-smoke/maw-smoke-1/fixtures/workflows/mock-docs-agent/package.json`
-- `../maw-smoke/maw-smoke-1/fixtures/workflows/mock-docs-agent/index.js`
-- `../maw-smoke/maw-smoke-1/fixtures/workflows/mock-docs-agent/scaffold.js`
+- `../maw-smoke/maw-smoke-1/fixtures/workflows/mock-coding/package.json`
+- `../maw-smoke/maw-smoke-1/fixtures/workflows/mock-coding/index.js`
+- `../maw-smoke/maw-smoke-1/fixtures/workflows/mock-coding/scaffold.js`
 - `../maw-smoke/maw-smoke-1/fixtures/workflows/mock-code-agent/package.json`
 - `../maw-smoke/maw-smoke-1/fixtures/workflows/mock-code-agent/index.js`
 - `../maw-smoke/maw-smoke-1/fixtures/workflows/mock-code-agent/scaffold.js`

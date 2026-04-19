@@ -112,7 +112,7 @@ maw.json
 .maw/
   templates/
   graphs/
-    docs-agent/
+    coding/
       graph.ts
       config.json
       langgraph.json
@@ -176,9 +176,9 @@ It is the workflow-specific LangGraph entry point in the target project.
 Example shape:
 
 ```ts
-import { createGraph } from 'docs-agent';
+import { createGraph } from 'coding';
 
-export const graph = createGraph({ workflow: 'docs-agent' });
+export const graph = createGraph({ workflow: 'coding' });
 ```
 
 ### `.maw/graphs/<workflow>/config.json`
@@ -348,7 +348,7 @@ The MVP is reached when a workflow built from this template can be installed int
 - run a controlled tool loop against the target project
 - be manually exercised in a test project end-to-end
 
-Concretely, the base workflow must be able to operate on the target project's codebase in the same broad class of tasks as a coding agent:
+Concretely, the base workflow must be able to operate on the target project's codebase in the same broad class of tasks as a coding workflow:
 
 - read files
 - write files
@@ -442,7 +442,7 @@ These parts of the current implementation conflict with the finalized architectu
 - keep OpenViking model/provider config out of workflow-specific config
 - keep change-aware reindex heuristics or prepare-script automation out of MVP scope, but preserve it as a future OpenViking optimization
 
-### Phase 5: Base codebase agent MVP
+### Phase 5: Base codebase workflow MVP
 
 - [ ] complete
 
@@ -481,11 +481,11 @@ These parts of the current implementation conflict with the finalized architectu
 - `maw-cli init` with no installed workflows still creates `maw.json`, `.maw/templates/`, `.maw/graphs/`, and `.maw/ov.conf`, then warns
 - a target project with two installed workflows gets two directories under `.maw/graphs/`
 - `.gitignore` gets `.maw/openviking/` and does not add `maw.json` or `.maw/ov.conf`
-- `maw-cli dev docs-agent` only uses `.maw/graphs/docs-agent/langgraph.json`
-- `.maw/graphs/docs-agent/langgraph.json` points at `./graph.ts:graph` and `../../../.env`
-- `.maw/graphs/docs-agent/langgraph.json` omits `dependencies`
-- `maw-cli prompt:list docs-agent` shows the configured `planner` and `coder` skill order
-- `maw-cli prompt:preview docs-agent planner` prints the expected composed prompt
+- `maw-cli dev coding` only uses `.maw/graphs/coding/langgraph.json`
+- `.maw/graphs/coding/langgraph.json` points at `./graph.ts:graph` and `../../../.env`
+- `.maw/graphs/coding/langgraph.json` omits `dependencies`
+- `maw-cli prompt:list coding` shows the configured `planner` and `coder` skill order
+- `maw-cli prompt:preview coding planner` prints the expected composed prompt
 - a custom override in `.maw/templates/security.njk` is reflected in prompt preview
 - `maw-cli ov:index` indexes the project workspace when no target path is provided
 - `maw-cli ov:index <target-path>` forwards the requested target path to OpenViking so a specific subtree or file can be reindexed
@@ -520,7 +520,7 @@ Workflow packages are installed into target projects via git URL or other standa
 Example:
 
 ```bash
-bun add docs-agent@git+https://github.com/org/docs-agent.git
+bun add coding@git+https://github.com/org/coding.git
 ```
 
 `maw-cli` is installed separately and is not a workflow dependency.
@@ -529,7 +529,7 @@ Examples:
 
 ```bash
 bunx maw-cli init
-bunx maw-cli dev docs-agent
+bunx maw-cli dev coding
 ```
 
 or install it explicitly in the target project as a separate tool dependency if preferred.
