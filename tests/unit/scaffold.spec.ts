@@ -1,5 +1,6 @@
 import { existsSync, readdirSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
+import { parseWorkflowConfig } from '../../src/config.js';
 import {
     WORKFLOW_ID,
     WORKFLOW_PACKAGE_NAME,
@@ -24,11 +25,14 @@ describe('scaffold contract', () => {
 
     it('creates only graph and config scaffold files', () => {
         const files = createScaffoldFiles();
+        const cfg = parseWorkflowConfig(JSON.parse(files['config.json']));
 
         expect(Object.keys(files).sort()).toEqual(['config.json', 'graph.ts']);
         expect(files['graph.ts']).toContain(`import { createGraph } from '${scaffold.packageName}';`);
         expect(files['graph.ts']).toContain(`createGraph({ workflow: '${scaffold.workflow}' })`);
-        expect(() => JSON.parse(files['config.json'])).not.toThrow();
+        expect(cfg.prompts?.global?.length ?? 0).toBeGreaterThan(0);
+        expect(cfg.prompts?.agents?.planner?.length ?? 0).toBeGreaterThan(0);
+        expect(cfg.prompts?.agents?.coder?.length ?? 0).toBeGreaterThan(0);
     });
 
     it('resolves the embedded template directory', () => {

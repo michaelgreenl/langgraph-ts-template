@@ -1,11 +1,12 @@
-import type { MawConfig } from '../config.js';
+import { type TemplateComposition } from './composition.js';
 export type TemplateVars = Record<string, unknown>;
 export interface TemplateEngine {
     compose(agent: string, vars?: TemplateVars): Promise<string>;
 }
 export interface CreateTemplateEngineOptions {
-    config: MawConfig;
+    prompts: TemplateComposition;
+    workspace?: string;
+    customPath?: string;
     root?: string;
-    strict?: boolean;
 }
 export declare const createTemplateEngine: (opts: CreateTemplateEngineOptions) => TemplateEngine;

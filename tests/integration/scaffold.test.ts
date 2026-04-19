@@ -30,7 +30,27 @@ describe('scaffold handoff', () => {
         expect(await readFile(join(root, 'graph.ts'), 'utf8')).toContain(
             `createGraph({ workflow: '${scaffold.workflow}' })`,
         );
-        expect(() => JSON.parse(files['config.json'])).not.toThrow();
+
+        const cfg: unknown = JSON.parse(files['config.json']);
+
+        if (typeof cfg !== 'object' || cfg === null) {
+            throw new Error('Expected scaffold config.json to contain an object.');
+        }
+
+        const prompts = (cfg as Record<string, unknown>).prompts;
+
+        if (typeof prompts !== 'object' || prompts === null) {
+            throw new Error('Expected scaffold config.json to contain a prompts object.');
+        }
+
+        const global = (prompts as Record<string, unknown>).global;
+        const agents = (prompts as Record<string, unknown>).agents;
+
+        expect(Array.isArray(global)).toBe(true);
+        expect(global).toHaveLength(2);
+        expect(typeof agents).toBe('object');
+        expect(agents).not.toBeNull();
+        expect(Object.keys((agents as Record<string, unknown>) ?? {})).not.toHaveLength(0);
         expect(createScaffoldFiles()).toEqual(files);
     });
 

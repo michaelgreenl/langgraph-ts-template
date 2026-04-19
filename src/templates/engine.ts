@@ -1,10 +1,9 @@
 import { existsSync } from 'node:fs';
-import { access, readdir, readFile } from 'node:fs/promises';
+import { access, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import nunjucks from 'nunjucks';
-import type { MawConfig } from '../config.js';
-import { joinPrompt, resolveSnippets } from './composition.js';
+import { joinPrompt, resolveSnippets, type TemplateComposition } from './composition.js';
 
 export type TemplateVars = Record<string, unknown>;
 
@@ -13,16 +12,15 @@ export interface TemplateEngine {
 }
 
 export interface CreateTemplateEngineOptions {
-    config: MawConfig;
+    prompts: TemplateComposition;
+    workspace?: string;
+    customPath?: string;
     root?: string;
-    strict?: boolean;
 }
-
-type Mode = 'strict' | 'fallback';
 
 interface Source {
     dir: string;
-    type: 'custom' | 'git' | 'embedded';
+    type: 'custom' | 'embedded';
 }
 
 const defaultDir = (): string => {
@@ -44,52 +42,18 @@ const fileExists = async (file: string): Promise<boolean> => {
     }
 };
 
-const repoDirs = async (root: string, mode: Mode): Promise<string[]> => {
-    const dir = resolve(root, '.maw/template-repos');
-
-    if (!(await fileExists(dir))) {
-        if (mode === 'strict') {
-            throw new Error(`Missing template source directory: ${dir}`);
-        }
-
-        return [];
-    }
-
-    const dirs = await readdir(dir, { withFileTypes: true });
-
-    return dirs
-        .filter((entry) => entry.isDirectory())
-        .map((entry) => resolve(dir, entry.name))
-        .sort((left, right) => left.localeCompare(right));
-};
-
 const sources = async ({
-    config,
+    customPath = '.maw/templates',
     root = process.cwd(),
-    strict = true,
 }: CreateTemplateEngineOptions): Promise<Source[]> => {
     const dirs: Source[] = [];
-    const mode: Mode = strict ? 'strict' : 'fallback';
+    const dir = resolve(root, customPath);
 
-    if (config.templates.sources.includes('custom')) {
-        const dir = resolve(root, config.templates.customPath);
-
-        if (await fileExists(dir)) {
-            dirs.push({ dir, type: 'custom' });
-        } else if (mode === 'strict') {
-            throw new Error(`Missing template source directory: ${dir}`);
-        }
+    if (await fileExists(dir)) {
+        dirs.push({ dir, type: 'custom' });
     }
 
-    if (config.templates.sources.includes('git')) {
-        for (const dir of await repoDirs(root, mode)) {
-            dirs.push({ dir, type: 'git' });
-        }
-    }
-
-    if (config.templates.sources.includes('embedded')) {
-        dirs.push({ dir: defaultDir(), type: 'embedded' });
-    }
+    dirs.push({ dir: defaultDir(), type: 'embedded' });
 
     return dirs;
 };
@@ -112,12 +76,12 @@ const render = async (env: nunjucks.Environment, file: string, name: string, var
     try {
         return env.renderString(text, vars);
     } catch (err) {
-        const text =
+        const msg =
             err && typeof err === 'object' && 'message' in err && typeof err.message === 'string'
                 ? err.message
                 : String(err);
 
-        throw new Error(`Unable to render snippet ${name}: ${text}`);
+        throw new Error(`Unable to render snippet ${name}: ${msg}`);
     }
 };
 
@@ -130,9 +94,9 @@ export const createTemplateEngine = (opts: CreateTemplateEngineOptions): Templat
 
     return {
         compose: async (agent, vars = {}) => {
-            const names = resolveSnippets(opts.config.templates, agent);
+            const names = resolveSnippets(opts.prompts, agent);
             const bag = {
-                workspacePath: opts.config.workspace,
+                workspacePath: opts.workspace ?? '',
                 ...vars,
             };
             const roots = await (dirs ??= sources(opts));

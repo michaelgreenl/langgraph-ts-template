@@ -1,36 +1,23 @@
 import { z } from 'zod';
-export declare const mawConfigSchema: z.ZodObject<{
-    workspace: z.ZodString;
-    graph: z.ZodObject<{
-        name: z.ZodString;
-        agent: z.ZodString;
-    }, z.core.$strip>;
-    openviking: z.ZodObject<{
-        enabled: z.ZodBoolean;
-        host: z.ZodString;
-        port: z.ZodNumber;
-    }, z.core.$strip>;
-    llm: z.ZodObject<{
-        provider: z.ZodString;
-        apiKey: z.ZodString;
-    }, z.core.$strip>;
-    templates: z.ZodObject<{
-        sources: z.ZodArray<z.ZodEnum<{
-            custom: "custom";
-            embedded: "embedded";
-            git: "git";
-        }>>;
-        customPath: z.ZodString;
-        gitRepos: z.ZodArray<z.ZodString>;
-        globalSnippets: z.ZodArray<z.ZodString>;
-        agents: z.ZodRecord<z.ZodString, z.ZodObject<{
-            snippets: z.ZodArray<z.ZodString>;
-        }, z.core.$strip>>;
-    }, z.core.$strip>;
+export type WorkflowConfig = {
+    prompts?: {
+        global?: readonly string[];
+        agents?: Readonly<Record<string, readonly string[]>>;
+    };
+};
+export type ResolvedWorkflowConfig = {
+    prompts: {
+        global: readonly string[];
+        agents: Readonly<Record<string, readonly string[]>>;
+    };
+};
+export declare const workflowConfigSchema: z.ZodObject<{
+    prompts: z.ZodOptional<z.ZodOptional<z.ZodObject<{
+        global: z.ZodOptional<z.ZodOptional<z.ZodArray<z.ZodString>>>;
+        agents: z.ZodOptional<z.ZodOptional<z.ZodRecord<z.ZodString, z.ZodArray<z.ZodString>>>>;
+    }, z.core.$strip>>>;
 }, z.core.$strip>;
-export type MawConfig = z.infer<typeof mawConfigSchema>;
-export declare const DEFAULT_CONFIG_PATH = ".maw/config.json";
-export declare const createConfig: () => MawConfig;
-export declare const resolveEnvVars: <T>(value: T, env?: NodeJS.ProcessEnv) => T;
-export declare const parseConfig: (value: unknown) => MawConfig;
-export declare const loadConfig: (file?: string, env?: NodeJS.ProcessEnv) => Promise<MawConfig>;
+export declare const parseWorkflowConfig: (value: unknown) => WorkflowConfig;
+export declare const DEFAULT_WORKFLOW_CONFIG: ResolvedWorkflowConfig;
+export declare const loadWorkflowConfig: (path: string) => Promise<WorkflowConfig>;
+export declare const resolveWorkflowConfig: (value?: WorkflowConfig) => ResolvedWorkflowConfig;

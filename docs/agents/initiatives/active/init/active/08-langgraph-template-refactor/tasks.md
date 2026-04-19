@@ -287,7 +287,7 @@ Verify:
 
 This is the smallest safe runtime slice. `src/config.ts`, `src/templates/composition.ts`, `src/templates/engine.ts`, `src/agent/graph.ts`, and the related unit tests are currently coupled and must move together.
 
-- [ ] `src/scaffold/assets/config.json`: replace with the finalized prompt-only shape from `init-plan.md`:
+- [x] `src/scaffold/assets/config.json`: replace with the finalized prompt-only shape from `init-plan.md`:
   ```json
   {
       "prompts": {
@@ -300,7 +300,7 @@ This is the smallest safe runtime slice. `src/config.ts`, `src/templates/composi
   }
   ```
 
-- [ ] `src/config.ts`:
+- [x] `src/config.ts`:
   - Remove: `mawConfigSchema`, `MawConfig`, `DEFAULT_CONFIG_PATH`, `createConfig`, `parseConfig`, `loadConfig`, `resolveEnvVars`, `envPattern`, `resolveValue`, `hostEnv`, `agentSchema`
   - Add partial `WorkflowConfig` and resolved `ResolvedWorkflowConfig` (see Execution Notes)
   - Add `workflowConfigSchema` (Zod): validates the optional/partial `prompts` shape
@@ -310,12 +310,12 @@ This is the smallest safe runtime slice. `src/config.ts`, `src/templates/composi
   - Add `DEFAULT_WORKFLOW_CONFIG` by parsing `src/scaffold/assets/config.json`; do not duplicate the literal defaults inline
   - Implement merge semantics from the resolved decisions section: missing keys and explicit empty arrays inherit defaults
 
-- [ ] `src/templates/composition.ts`:
+- [x] `src/templates/composition.ts`:
   - Replace `AgentComposition` and `TemplateComposition` with the resolved `TemplateComposition` interface: `{ global: readonly string[]; agents: Record<string, readonly string[]> }`
   - Remove `AgentComposition` interface entirely — per-agent entries are plain `string[]`
   - Update `resolveSnippets(cfg: TemplateComposition, agent: string)` to return `[...cfg.global, ...agentSnippets]`
 
-- [ ] `src/templates/engine.ts`:
+- [x] `src/templates/engine.ts`:
   - Replace `CreateTemplateEngineOptions.config: MawConfig` with:
     - `prompts: TemplateComposition`
     - `workspace?: string` (defaults `workspacePath` bag entry to `''`)
@@ -327,7 +327,7 @@ This is the smallest safe runtime slice. `src/config.ts`, `src/templates/composi
   - Update `compose()`: call `resolveSnippets(opts.prompts, agent)`; set `workspacePath: opts.workspace ?? ''` in the bag
   - Import `TemplateComposition` from `'./composition.js'`; remove `MawConfig` import
 
-- [ ] `src/agent/graph.ts`:
+- [x] `src/agent/graph.ts`:
   - Replace `config?: MawConfig` with `workflowConfig?: WorkflowConfig` in `GraphConfig`
   - Replace `configPath?: string` with `workflow?: string` in `GraphConfig`
   - Add internal `ProjectConfig` interface: `{ workspace: string; templates: { customPath: string } }`
@@ -339,13 +339,13 @@ This is the smallest safe runtime slice. `src/config.ts`, `src/templates/composi
   - Catch prompt-composition failures caused by configured snippet names, emit a loud warning, and retry once with `DEFAULT_WORKFLOW_CONFIG`
   - Update `graph.name` assignment to `cfg.name ?? cfg.workflow ?? DEFAULT_GRAPH_NAME`
 
-- [ ] `src/index.ts`:
+- [x] `src/index.ts`:
   - Remove from config re-exports: `DEFAULT_CONFIG_PATH`, `createConfig`, `loadConfig`, `mawConfigSchema`, `parseConfig`, `resolveEnvVars`, `MawConfig`
   - Remove from scaffold re-exports: `SCAFFOLD_DIRECTORIES`, `SCAFFOLD_GITIGNORE`, `SCAFFOLD_RULES`, `MawScaffold`, `ScaffoldAsset`, `ScaffoldAssetName`, `ScaffoldRules`, `readScaffoldAsset`
   - Add to config re-exports: `WorkflowConfig`, `ResolvedWorkflowConfig`, `workflowConfigSchema`, `parseWorkflowConfig`, `loadWorkflowConfig`, `resolveWorkflowConfig`, `DEFAULT_WORKFLOW_CONFIG`
   - Add to scaffold re-exports: `WORKFLOW_ID`, `templateDir`
 
-- [ ] `tests/unit/config.spec.ts`: rewrite:
+- [x] `tests/unit/config.spec.ts`: rewrite:
   - Test `workflowConfigSchema.parse` accepts valid partial `WorkflowConfig` objects, including `{}`
   - Test `parseWorkflowConfig` throws on invalid input (wrong types, non-string entries, malformed nested values)
   - Test `loadWorkflowConfig` reads and returns valid partial config from a temp JSON file
@@ -355,7 +355,7 @@ This is the smallest safe runtime slice. `src/config.ts`, `src/templates/composi
   - Test `DEFAULT_WORKFLOW_CONFIG.prompts.agents` has `planner` and `coder` entries as non-empty arrays
   - Remove all tests for `createConfig`, `loadConfig`, `resolveEnvVars`
 
-- [ ] `tests/unit/templates.spec.ts`: update:
+- [x] `tests/unit/templates.spec.ts`: update:
   - Replace `makeConfig()` with resolved prompt fixtures for the new engine options shape
   - Keep using snippet names that exist in `src/templates/defaults/` (`'general'`, `'security'`, `'research-rules'`, `'typescript'`) to avoid resolution failures
   - Update all `createTemplateEngine()` calls to `{ prompts: ..., root }`
@@ -365,41 +365,41 @@ This is the smallest safe runtime slice. `src/config.ts`, `src/templates/composi
   - Keep or adapt the custom `workspacePath` coverage added in Step 2 so custom templates still render it correctly
   - Update the "unknown agent" and "missing snippet" tests to use the new options shape
 
-- [ ] `tests/unit/scaffold.spec.ts`: update final `config.json` assertions to the prompt-only shape:
+- [x] `tests/unit/scaffold.spec.ts`: update final `config.json` assertions to the prompt-only shape:
   - `prompts.global` is a non-empty array
   - `prompts.agents.planner` and `prompts.agents.coder` are non-empty arrays
 
-- [ ] `tests/unit/public-api.spec.ts`: verify `createGraph({ name: 'Docs Agent' })` still compiles and `app.invoke` succeeds; adjust only if the new `GraphConfig` signature causes a type error
+- [x] `tests/unit/public-api.spec.ts`: verify `createGraph({ name: 'Docs Agent' })` still compiles and `app.invoke` succeeds; adjust only if the new `GraphConfig` signature causes a type error
 
 Verify:
-- [ ] `bun run typecheck`
-- [ ] `bun run build`
-- [ ] `bun run test -- tests/unit/config.spec.ts tests/unit/templates.spec.ts tests/unit/scaffold.spec.ts tests/unit/public-api.spec.ts`
+- [x] `bun run typecheck`
+- [x] `bun run build`
+- [x] `bun run test -- tests/unit/config.spec.ts tests/unit/templates.spec.ts tests/unit/scaffold.spec.ts tests/unit/public-api.spec.ts`
 
 ### 5. Update integration coverage for the final runtime contract
 
 These tests touch the filesystem and require the built source, so they run in the `test:int` mode separately from unit tests after Step 4 lands.
 
-- [ ] `tests/integration/scaffold.test.ts`: finish the final assertions for the new scaffold payload:
-  - Assert `files['config.json']` parses with a non-empty `prompts.global` array and `prompts.agents` record
-  - Keep the idempotency and `templateDir` assertions from Step 3
+- [x] `tests/integration/scaffold.test.ts`: finish the final assertions for the new scaffold payload:
+  - [x] Assert `files['config.json']` parses with a non-empty `prompts.global` array and `prompts.agents` record
+  - [x] Keep the idempotency and `templateDir` assertions from Step 3
 
-- [ ] `tests/integration/graph.test.ts`: update:
-  - Replace `makeConfig()` with partial `WorkflowConfig` fixtures
-  - First test: pass `workflowConfig` to `createGraph()` and assert partial overrides merge with defaults instead of replacing them wholesale
-  - Update the prompt-ordering assertion to reflect the final composition: resolved global snippets first, then agent-specific
-  - Disk-loading happy-path test:
-     - Write `maw.json` to `root` with `{ workspace: '.', openviking: { enabled: false, host: 'localhost', port: 1933 }, templates: { customPath: '.maw/templates' } }`
-     - Create `root/.maw/graphs/test-workflow/` and write `config.json` with a `WorkflowConfig` in the new shape
-     - Call `createGraph({ root, workflow: 'test-workflow' })`
-     - Assert the composed prompt contains the coder agent's TypeScript skill content
-  - Add a missing-workflow-config test: `createGraph({ root, workflow: 'missing' })` falls back to embedded defaults
-  - Add an invalid-workflow-config test: malformed `.maw/graphs/<workflow>/config.json` triggers a loud warning and falls back to embedded defaults
-  - Add a missing-snippet test: valid workflow config that references a missing snippet name triggers a loud warning and falls back to embedded defaults
-  - Add an invalid-`maw.json` test: malformed existing `maw.json` rejects instead of silently defaulting
+- [x] `tests/integration/graph.test.ts`: update:
+  - [x] Replace `makeConfig()` with partial `WorkflowConfig` fixtures
+  - [x] First test: pass `workflowConfig` to `createGraph()` and assert partial overrides merge with defaults instead of replacing them wholesale
+  - [x] Update the prompt-ordering assertion to reflect the final composition: resolved global snippets first, then agent-specific
+  - [x] Disk-loading happy-path test:
+     - [x] Write `maw.json` to `root` with `{ workspace: '.', openviking: { enabled: false, host: 'localhost', port: 1933 }, templates: { customPath: '.maw/templates' } }`
+     - [x] Create `root/.maw/graphs/test-workflow/` and write `config.json` with a `WorkflowConfig` in the new shape
+     - [x] Call `createGraph({ root, workflow: 'test-workflow' })`
+     - [x] Assert the composed prompt contains the coder agent's TypeScript skill content
+  - [x] Add a missing-workflow-config test: `createGraph({ root, workflow: 'missing' })` falls back to embedded defaults
+  - [x] Add an invalid-workflow-config test: malformed `.maw/graphs/<workflow>/config.json` triggers a loud warning and falls back to embedded defaults
+  - [x] Add a missing-snippet test: valid workflow config that references a missing snippet name triggers a loud warning and falls back to embedded defaults
+  - [x] Add an invalid-`maw.json` test: malformed existing `maw.json` rejects instead of silently defaulting
 
 Verify:
-- [ ] `bun run test:int`
+- [x] `bun run test:int`
 
 ## Verification
 
@@ -410,30 +410,30 @@ Verify:
 - [x] Step 2: `bun run test:int -- tests/integration/graph.test.ts`
 - [x] Step 3: `bun run test -- tests/unit/package-metadata.spec.ts tests/unit/scaffold.spec.ts`
 - [x] Step 3: `bun run test:int -- tests/integration/scaffold.test.ts`
-- [ ] Step 4: `bun run typecheck`
-- [ ] Step 4: `bun run build`
-- [ ] Step 4: `bun run test -- tests/unit/config.spec.ts tests/unit/templates.spec.ts tests/unit/scaffold.spec.ts tests/unit/public-api.spec.ts`
-- [ ] Step 5: `bun run test:int`
+- [x] Step 4: `bun run typecheck`
+- [x] Step 4: `bun run build`
+- [x] Step 4: `bun run test -- tests/unit/config.spec.ts tests/unit/templates.spec.ts tests/unit/scaffold.spec.ts tests/unit/public-api.spec.ts`
+- [x] Step 5: `bun run test:int`
 
 ### Phase completion
 
-- [ ] `bun run typecheck` in `langgraph-ts-template`
-- [ ] `bun run build` in `langgraph-ts-template`
-- [ ] `bun run lint` in `langgraph-ts-template`
-- [ ] `bun run test` in `langgraph-ts-template`
-- [ ] `bun run test:int` in `langgraph-ts-template`
+- [x] `bun run typecheck` in `langgraph-ts-template`
+- [x] `bun run build` in `langgraph-ts-template`
+- [x] `bun run lint` in `langgraph-ts-template`
+- [x] `bun run test` in `langgraph-ts-template`
+- [x] `bun run test:int` in `langgraph-ts-template`
 
 ## Exit Criteria
 
-- [ ] `langgraph-ts-template/package.json` has no `maw-cli` in `dependencies`, no `bin` field, no `lint:langgraph-json` script
-- [ ] `src/bin.ts` and `scripts/checkLanggraphPaths.js` do not exist
-- [ ] `src/scaffold/assets/` contains only `config.json` and `graph.ts.template`; `ov.conf` and `langgraph.json.template` are gone
-- [ ] `src/templates/defaults/project-context.njk` does not exist; `src/templates/defaults/general.njk` exists (renamed from `general-coding.njk`)
-- [ ] `scaffold.workflow` is a non-empty string; `scaffold.directories`, `scaffold.gitignore`, `scaffold.rules`, `scaffold.assets` do not exist on the object
-- [ ] `createScaffoldFiles()` (no args) returns exactly `{ 'graph.ts': string, 'config.json': string }`; the `graph.ts` value contains `createGraph({ workflow: '...' })`; the `config.json` value parses with `prompts.global` and `prompts.agents`
-- [ ] `templateDir` is exported from `./scaffold` and resolves to the embedded templates directory
-- [ ] `./config` export exposes `WorkflowConfig`, `ResolvedWorkflowConfig`, `workflowConfigSchema`, `parseWorkflowConfig`, `loadWorkflowConfig`, `resolveWorkflowConfig`, and `DEFAULT_WORKFLOW_CONFIG`; `MawConfig`, `resolveEnvVars`, and all old symbols are absent
-- [ ] `DEFAULT_WORKFLOW_CONFIG` is derived from the scaffold asset, not duplicated inline in code
-- [ ] `WorkflowConfig` accepts partial prompt overrides; missing keys and explicit empty arrays inherit the embedded defaults
-- [ ] `createGraph({ workflow: 'test' })` constructs the config path as `.maw/graphs/test/config.json` from `process.cwd()`; falls back to `DEFAULT_WORKFLOW_CONFIG` when the file is missing or invalid, and throws when an existing `maw.json` is invalid
-- [ ] `bun run build && bun run lint && bun run test && bun run test:int` all pass in `langgraph-ts-template`
+- [x] `langgraph-ts-template/package.json` has no `maw-cli` in `dependencies`, no `bin` field, no `lint:langgraph-json` script
+- [x] `src/bin.ts` and `scripts/checkLanggraphPaths.js` do not exist
+- [x] `src/scaffold/assets/` contains only `config.json` and `graph.ts.template`; `ov.conf` and `langgraph.json.template` are gone
+- [x] `src/templates/defaults/project-context.njk` does not exist; `src/templates/defaults/general.njk` exists (renamed from `general-coding.njk`)
+- [x] `scaffold.workflow` is a non-empty string; `scaffold.directories`, `scaffold.gitignore`, `scaffold.rules`, `scaffold.assets` do not exist on the object
+- [x] `createScaffoldFiles()` (no args) returns exactly `{ 'graph.ts': string, 'config.json': string }`; the `graph.ts` value contains `createGraph({ workflow: '...' })`; the `config.json` value parses with `prompts.global` and `prompts.agents`
+- [x] `templateDir` is exported from `./scaffold` and resolves to the embedded templates directory
+- [x] `./config` export exposes `WorkflowConfig`, `ResolvedWorkflowConfig`, `workflowConfigSchema`, `parseWorkflowConfig`, `loadWorkflowConfig`, `resolveWorkflowConfig`, and `DEFAULT_WORKFLOW_CONFIG`; `MawConfig`, `resolveEnvVars`, and all old symbols are absent
+- [x] `DEFAULT_WORKFLOW_CONFIG` is derived from the scaffold asset, not duplicated inline in code
+- [x] `WorkflowConfig` accepts partial prompt overrides; missing keys and explicit empty arrays inherit the embedded defaults
+- [x] `createGraph({ workflow: 'test' })` constructs the config path as `.maw/graphs/test/config.json` from `process.cwd()`; falls back to `DEFAULT_WORKFLOW_CONFIG` when the file is missing or invalid, and throws when an existing `maw.json` is invalid
+- [x] `bun run build && bun run lint && bun run test && bun run test:int` all pass in `langgraph-ts-template`

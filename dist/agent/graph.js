@@ -1,11 +1,28 @@
 import { SystemMessage } from '@langchain/core/messages';
 import { StateGraph } from '@langchain/langgraph';
-import { access } from 'node:fs/promises';
+import { access, readFile } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { DEFAULT_CONFIG_PATH, createConfig, loadConfig } from '../config.js';
+import { z } from 'zod';
+import { DEFAULT_WORKFLOW_CONFIG, loadWorkflowConfig, resolveWorkflowConfig, } from '../config.js';
 import { createTemplateEngine } from '../templates/engine.js';
 import { MAW_SYSTEM_ID, StateAnnotation } from './state.js';
 const DEFAULT_GRAPH_NAME = 'New Agent';
+const projectConfigSchema = z
+    .object({
+    workspace: z.string().min(1),
+    templates: z
+        .object({
+        customPath: z.string().min(1),
+    })
+        .passthrough(),
+})
+    .passthrough();
+const DEFAULT_PROJECT_CONFIG = {
+    workspace: '.',
+    templates: {
+        customPath: '.maw/templates',
+    },
+};
 const fileExists = async (file) => {
     try {
         await access(file);
@@ -15,32 +32,48 @@ const fileExists = async (file) => {
         return false;
     }
 };
+const message = (err) => err && typeof err === 'object' && 'message' in err && typeof err.message === 'string' ? err.message : String(err);
+const loadProjectConfig = async (root) => {
+    const file = resolve(root, 'maw.json');
+    if (!(await fileExists(file))) {
+        return DEFAULT_PROJECT_CONFIG;
+    }
+    try {
+        const text = await readFile(file, 'utf8');
+        const value = JSON.parse(text);
+        return projectConfigSchema.parse(value);
+    }
+    catch (err) {
+        throw new Error(`Invalid maw.json at ${file}: ${message(err)}`);
+    }
+};
 const loadRuntime = async (cfg) => {
     const root = cfg.root ?? process.cwd();
-    if (cfg.config) {
-        return {
-            agent: cfg.agent ?? cfg.config.graph.agent,
-            config: cfg.config,
-            root,
-            strict: true,
-        };
+    const projectConfig = await loadProjectConfig(root);
+    let workflowConfig = DEFAULT_WORKFLOW_CONFIG;
+    if (cfg.workflowConfig) {
+        workflowConfig = resolveWorkflowConfig(cfg.workflowConfig);
     }
-    const file = resolve(root, cfg.configPath ?? DEFAULT_CONFIG_PATH);
-    if (await fileExists(file)) {
-        const config = await loadConfig(file);
-        return {
-            agent: cfg.agent ?? config.graph.agent,
-            config,
-            root,
-            strict: true,
-        };
+    else if (cfg.workflow) {
+        const file = resolve(root, '.maw/graphs', cfg.workflow, 'config.json');
+        if (await fileExists(file)) {
+            try {
+                workflowConfig = resolveWorkflowConfig(await loadWorkflowConfig(file));
+            }
+            catch (err) {
+                console.warn(`[langgraph-ts-template] Invalid workflow config at ${file}; falling back to embedded defaults. ${message(err)}`);
+            }
+        }
     }
-    const config = createConfig();
+    const agent = cfg.agent ?? Object.keys(workflowConfig.prompts.agents)[0];
+    if (!agent) {
+        throw new Error('No prompt agents configured.');
+    }
     return {
-        agent: cfg.agent ?? config.graph.agent,
-        config,
+        agent,
+        projectConfig,
         root,
-        strict: false,
+        workflowConfig,
     };
 };
 const isPrompt = (message, prompt) => {
@@ -51,15 +84,28 @@ const isPrompt = (message, prompt) => {
 };
 const prompt = async (cfg) => {
     const runtime = await loadRuntime(cfg);
-    const engine = createTemplateEngine({
-        config: runtime.config,
+    const opts = {
+        prompts: runtime.workflowConfig.prompts,
+        workspace: runtime.projectConfig.workspace,
+        customPath: runtime.projectConfig.templates.customPath,
         root: runtime.root,
-        strict: runtime.strict,
-    });
-    return engine.compose(runtime.agent, {
-        workspacePath: runtime.config.workspace,
-        ...cfg.vars,
-    });
+    };
+    try {
+        return await createTemplateEngine(opts).compose(runtime.agent, cfg.vars);
+    }
+    catch (err) {
+        const msg = message(err);
+        if (runtime.workflowConfig === DEFAULT_WORKFLOW_CONFIG || !msg.startsWith('Unable to resolve snippet:')) {
+            throw err;
+        }
+        console.warn(`[langgraph-ts-template] ${msg} Falling back to embedded workflow defaults for agent ${runtime.agent}.`);
+        return createTemplateEngine({
+            prompts: DEFAULT_WORKFLOW_CONFIG.prompts,
+            workspace: runtime.projectConfig.workspace,
+            customPath: runtime.projectConfig.templates.customPath,
+            root: runtime.root,
+        }).compose(runtime.agent, cfg.vars);
+    }
 };
 const ensurePrompt = (cached) => {
     return async (state) => {
@@ -103,7 +149,7 @@ export const createGraph = (cfg = {}) => {
         .addEdge('ensurePrompt', 'callModel')
         .addConditionalEdges('callModel', route)
         .compile();
-    graph.name = cfg.name ?? cfg.config?.graph.name ?? DEFAULT_GRAPH_NAME;
+    graph.name = cfg.name ?? cfg.workflow ?? DEFAULT_GRAPH_NAME;
     return graph;
 };
 export const graph = createGraph();

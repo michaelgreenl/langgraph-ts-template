@@ -1,11 +1,11 @@
 import { type BaseMessage } from '@langchain/core/messages';
-import { type MawConfig } from '../config.js';
+import { type WorkflowConfig } from '../config.js';
 import { type TemplateVars } from '../templates/engine.js';
 import { StateAnnotation } from './state.js';
 export interface GraphConfig {
     agent?: string;
-    config?: MawConfig;
-    configPath?: string;
+    workflowConfig?: WorkflowConfig;
+    workflow?: string;
     name?: string;
     root?: string;
     vars?: TemplateVars;

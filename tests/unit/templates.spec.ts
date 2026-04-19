@@ -6,41 +6,22 @@ import { createTemplateEngine } from '../../src/templates/engine.js';
 
 const roots: string[] = [];
 
-const makeConfig = () => ({
-    workspace: '.',
-    graph: {
-        name: 'agent',
-        agent: 'researcher',
-    },
-    openviking: {
-        enabled: false,
-        host: 'localhost',
-        port: 1933,
-    },
-    llm: {
-        provider: 'openai',
-        apiKey: 'sk-test',
-    },
-    templates: {
-        sources: ['embedded', 'custom', 'git'] as const,
-        customPath: '.maw/templates',
-        gitRepos: [],
-        globalSnippets: ['general', 'security'],
-        agents: {
-            researcher: {
-                snippets: ['research-rules', 'python'],
-            },
-            coder: {
-                snippets: ['typescript'],
-            },
-        },
+const makePrompts = () => ({
+    global: ['general', 'security'],
+    agents: {
+        planner: ['research-rules'],
+        coder: ['typescript'],
     },
 });
 
-const createRoot = async (): Promise<string> => {
+const createRoot = async (custom = true): Promise<string> => {
     const root = await mkdtemp(join(tmpdir(), 'maw-templates-'));
     roots.push(root);
-    await mkdir(join(root, '.maw/templates'), { recursive: true });
+
+    if (custom) {
+        await mkdir(join(root, '.maw/templates'), { recursive: true });
+    }
+
     return root;
 };
 
@@ -49,92 +30,77 @@ afterEach(async () => {
 });
 
 describe('template engine', () => {
-    it('composes snippets in config order with deterministic source precedence', async () => {
+    it('composes global snippets before agent snippets and prefers custom overrides', async () => {
         const root = await createRoot();
-        const cfg = makeConfig();
+        const engine = createTemplateEngine({ prompts: makePrompts(), root });
 
-        await mkdir(join(root, '.maw/template-repos/acme'), { recursive: true });
-        await writeFile(join(root, '.maw/templates/general.njk'), 'custom general {{ projectType }}\n');
-        await writeFile(join(root, '.maw/template-repos/acme/security.njk'), 'repo security\n');
+        await writeFile(join(root, '.maw/templates/security.njk'), 'custom security\n');
 
-        const engine = createTemplateEngine({ config: cfg, root });
-
-        await expect(engine.compose('researcher', { projectType: 'bun' })).resolves.toBe(
+        await expect(engine.compose('planner')).resolves.toBe(
             [
-                'custom general bun',
-                'repo security',
+                'Favor small, reversible changes and prefer the simplest correct implementation.',
+                'custom security',
                 'Verify claims against repository evidence and call out assumptions when evidence is incomplete.',
-                'Prefer clear Python with standard library primitives, explicit errors, and small functions.',
             ].join('\n\n'),
         );
     });
 
     it('renders workspacePath in a custom snippet when workspace is configured', async () => {
         const root = await createRoot();
-        const cfg = makeConfig();
-        cfg.workspace = '/repo';
-        cfg.templates.globalSnippets = ['workspace-note'];
-
-        await mkdir(join(root, '.maw/template-repos'), { recursive: true });
         await writeFile(join(root, '.maw/templates/workspace-note.njk'), 'Workspace path: {{ workspacePath }}\n');
 
-        const engine = createTemplateEngine({ config: cfg, root });
+        const engine = createTemplateEngine({
+            prompts: {
+                global: ['workspace-note'],
+                agents: {
+                    planner: ['research-rules'],
+                },
+            },
+            root,
+            workspace: '/repo',
+        });
 
-        await expect(engine.compose('researcher')).resolves.toBe(
+        await expect(engine.compose('planner')).resolves.toBe(
             [
                 'Workspace path: /repo',
                 'Verify claims against repository evidence and call out assumptions when evidence is incomplete.',
-                'Prefer clear Python with standard library primitives, explicit errors, and small functions.',
             ].join('\n\n'),
         );
     });
 
-    it('lets a local override beat repo and embedded snippets with the same name', async () => {
-        const root = await createRoot();
-        const cfg = makeConfig();
+    it('uses embedded templates when the custom source directory is missing', async () => {
+        const root = await createRoot(false);
+        const engine = createTemplateEngine({ prompts: makePrompts(), root });
 
-        await mkdir(join(root, '.maw/template-repos/acme'), { recursive: true });
-        await writeFile(join(root, '.maw/templates/security.njk'), 'local security\n');
-        await writeFile(join(root, '.maw/template-repos/acme/security.njk'), 'repo security\n');
-
-        const engine = createTemplateEngine({ config: cfg, root });
-        const prompt = await engine.compose('coder');
-
-        expect(prompt).toContain('local security');
-        expect(prompt).not.toContain('repo security');
-        expect(prompt).not.toContain('Never inspect secrets');
+        await expect(engine.compose('coder')).resolves.toBe(
+            [
+                'Favor small, reversible changes and prefer the simplest correct implementation.',
+                'Never inspect secrets or .env files. Prefer environment-variable references for sensitive configuration.',
+                'Prefer TypeScript with explicit types, narrow public APIs, and small composable functions.',
+            ].join('\n\n'),
+        );
     });
 
     it('fails for an unknown agent', async () => {
         const root = await createRoot();
-        const engine = createTemplateEngine({ config: makeConfig(), root });
+        const engine = createTemplateEngine({ prompts: makePrompts(), root });
 
         await expect(engine.compose('missing')).rejects.toThrow('Unknown prompt agent: missing');
     });
 
     it('fails when a configured snippet cannot be resolved', async () => {
         const root = await createRoot();
-        const cfg = makeConfig();
 
-        await mkdir(join(root, '.maw/template-repos/acme'), { recursive: true });
-        cfg.templates.agents.researcher.snippets = ['missing-snippet'];
+        const engine = createTemplateEngine({
+            prompts: {
+                global: ['general', 'security'],
+                agents: {
+                    planner: ['missing-snippet'],
+                },
+            },
+            root,
+        });
 
-        const engine = createTemplateEngine({ config: cfg, root });
-
-        await expect(engine.compose('researcher')).rejects.toThrow('Unable to resolve snippet: missing-snippet');
-    });
-
-    it('fails when an enabled source directory is missing', async () => {
-        const root = await mkdtemp(join(tmpdir(), 'maw-templates-missing-'));
-        roots.push(root);
-
-        const cfg = makeConfig();
-        cfg.templates.sources = ['custom'];
-
-        const engine = createTemplateEngine({ config: cfg, root });
-
-        await expect(engine.compose('researcher')).rejects.toThrow(
-            `Missing template source directory: ${join(root, '.maw/templates')}`,
-        );
+        await expect(engine.compose('planner')).rejects.toThrow('Unable to resolve snippet: missing-snippet');
     });
 });
