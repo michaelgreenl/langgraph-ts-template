@@ -180,21 +180,21 @@ Verify:
 
 This step prepares the `maw-cli` and smoke harness for prompt commands without implementing the commands yet.
 
-- [ ] Create `maw-cli/src/utils/workflows.ts` and move workflow-package discovery out of `maw-cli/src/commands/init.ts`
-- [ ] Add an exact-match workflow resolver that throws `Workflow not found: <workflow>` when the requested workflow id is not installed
-- [ ] Update `maw-cli/src/commands/init.ts` to import the shared workflow loader and keep existing scaffold behavior unchanged
-- [ ] Upgrade `maw-cli/tests/fixtures/workflows/*/package.json` exports to include `./config`, `./templates`, and `.`
-- [ ] Add side-effect-free `config.js` and `templates/index.js` files to each `maw-cli` workflow fixture package
-- [ ] Add embedded `.njk` snippets to each `maw-cli` workflow fixture package so preview tests can assert override precedence and ordering
-- [ ] Update each `maw-cli` fixture `scaffold.js` to:
-  - [ ] return prompt-only `config.json`
-  - [ ] generate `createGraph({ workflow: '...' })`
-  - [ ] export `templateDir` alongside `scaffold` and `createScaffoldFiles`
-- [ ] Update `maw-cli/tests/init.test.ts` assertions that still reference the retired `general-coding` snippet name or `createGraph()` without a workflow id
+- [x] Create `maw-cli/src/utils/workflows.ts` and move workflow-package discovery out of `maw-cli/src/commands/init.ts`
+- [x] Add an exact-match workflow resolver that throws `Workflow not found: <workflow>` when the requested workflow id is not installed
+- [x] Update `maw-cli/src/commands/init.ts` to import the shared workflow loader and keep existing scaffold behavior unchanged
+- [x] Upgrade `maw-cli/tests/fixtures/workflows/*/package.json` exports to include `./config`, `./templates`, and `.`
+- [x] Add side-effect-free `config.js` and `templates/index.js` files to each `maw-cli` workflow fixture package
+- [x] Add embedded `.njk` snippets to each `maw-cli` workflow fixture package so preview tests can assert override precedence and ordering
+- [x] Update each `maw-cli` fixture `scaffold.js` to:
+  - [x] return prompt-only `config.json`
+  - [x] generate `createGraph({ workflow: '...' })`
+  - [x] export `templateDir` alongside `scaffold` and `createScaffoldFiles`
+- [x] Update `maw-cli/tests/init.test.ts` assertions that still reference the retired `general-coding` snippet name or `createGraph()` without a workflow id
 
 Verify:
 
-- [ ] `bun run test -- tests/init.test.ts` in `maw-cli`
+- [x] `bun run test -- tests/init.test.ts` in `maw-cli`
 
 ### 3. Implement `prompt:list <workflow>`
 
@@ -304,7 +304,7 @@ Verify:
 
 - [x] Step 1: `bun run build` in `langgraph-ts-template`
 - [x] Step 1: `bun run test -- tests/unit/package-metadata.spec.ts` in `langgraph-ts-template`
-- [ ] Step 2: `bun run test -- tests/init.test.ts` in `maw-cli`
+- [x] Step 2: `bun run test -- tests/init.test.ts` in `maw-cli`
 - [ ] Step 3: `bun run test -- tests/prompt-list.test.ts tests/cli.test.ts` in `maw-cli`
 - [ ] Step 4: `bun run test -- tests/prompt-preview.test.ts tests/config.test.ts tests/cli.test.ts` in `maw-cli`
 - [ ] Step 5: `bun run smoke:init` in `maw-smoke/maw-smoke-1`
