@@ -20,9 +20,9 @@ describe('package metadata', () => {
         });
     });
 
-    it('publishes scaffold assets and subpath exports for maw-cli init', () => {
+    it('publishes scaffold assets, templates, and subpath exports', () => {
         expect(pkg).toMatchObject({
-            files: expect.arrayContaining(['src/scaffold/assets']),
+            files: expect.arrayContaining(['src/scaffold/assets', 'src/templates/defaults']),
             exports: {
                 './config': expect.anything(),
                 './scaffold': {

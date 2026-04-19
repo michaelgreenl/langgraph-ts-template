@@ -11,15 +11,11 @@ export {
 } from './config.js';
 export { createTemplateEngine, type TemplateEngine, type TemplateVars } from './templates/engine.js';
 export {
-    SCAFFOLD_DIRECTORIES,
-    SCAFFOLD_GITIGNORE,
-    SCAFFOLD_RULES,
+    WORKFLOW_ID,
     WORKFLOW_PACKAGE_NAME,
     createScaffoldFiles,
     readScaffoldAsset,
     scaffold,
-    type MawScaffold,
-    type ScaffoldAsset,
+    templateDir,
     type ScaffoldAssetName,
-    type ScaffoldRules,
 } from './scaffold/index.js';

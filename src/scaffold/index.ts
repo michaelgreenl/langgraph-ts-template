@@ -2,13 +2,12 @@ import { existsSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const packagePath = fileURLToPath(new URL('../../package.json', import.meta.url));
-const graphToken = '__WORKFLOW_PACKAGE__';
+const packageToken = '__WORKFLOW_PACKAGE__';
+const workflowToken = '__WORKFLOW_ID__';
 
 const assetFiles = {
     config: 'config.json',
-    ov: 'ov.conf',
     graph: 'graph.ts.template',
-    langgraph: 'langgraph.json.template',
 } as const;
 
 const resolveAsset = (file: string): string => {
@@ -40,67 +39,33 @@ if (
 
 export type ScaffoldAssetName = keyof typeof assetFiles;
 
-export interface ScaffoldAsset {
-    source: string;
-    target: string;
-}
+export const toWorkflowId = (name: string): string => name.replace(/^@[^/]+\//, '');
 
-export interface ScaffoldRules {
-    overwrite: 'preserve';
-    gitignoreMerge: 'append-once';
-}
+const resolveTemplateDir = (): string => {
+    const local = fileURLToPath(new URL('../templates/defaults', import.meta.url));
 
-export interface MawScaffold {
-    packageName: string;
-    directories: readonly string[];
-    assets: Record<ScaffoldAssetName, ScaffoldAsset>;
-    gitignore: readonly string[];
-    rules: ScaffoldRules;
-}
+    if (existsSync(local)) {
+        return local;
+    }
 
-export const WORKFLOW_PACKAGE_NAME = pkg.name;
-
-export const SCAFFOLD_DIRECTORIES = ['.maw/templates'] as const;
-
-export const SCAFFOLD_GITIGNORE = ['.maw/config.json', '.maw/ov.conf', '.maw/openviking/'] as const;
-
-export const SCAFFOLD_RULES: ScaffoldRules = {
-    overwrite: 'preserve',
-    gitignoreMerge: 'append-once',
+    return fileURLToPath(new URL('../../src/templates/defaults', import.meta.url));
 };
 
-export const scaffold: MawScaffold = {
+export const WORKFLOW_PACKAGE_NAME = pkg.name;
+export const WORKFLOW_ID = toWorkflowId(WORKFLOW_PACKAGE_NAME);
+export const templateDir = resolveTemplateDir();
+
+export const scaffold: { packageName: string; workflow: string } = {
     packageName: WORKFLOW_PACKAGE_NAME,
-    directories: SCAFFOLD_DIRECTORIES,
-    assets: {
-        config: {
-            source: resolveAsset(assetFiles.config),
-            target: '.maw/config.json',
-        },
-        ov: {
-            source: resolveAsset(assetFiles.ov),
-            target: '.maw/ov.conf',
-        },
-        graph: {
-            source: resolveAsset(assetFiles.graph),
-            target: '.maw/graph.ts',
-        },
-        // LangGraph deployment commands read these keys directly from langgraph.json.
-        langgraph: {
-            source: resolveAsset(assetFiles.langgraph),
-            target: 'langgraph.json',
-        },
-    },
-    gitignore: SCAFFOLD_GITIGNORE,
-    rules: SCAFFOLD_RULES,
+    workflow: WORKFLOW_ID,
 };
 
 export const readScaffoldAsset = (name: ScaffoldAssetName): string =>
-    readFileSync(scaffold.assets[name].source, 'utf8');
+    readFileSync(resolveAsset(assetFiles[name]), 'utf8');
 
-export const createScaffoldFiles = (name = scaffold.packageName): Record<string, string> => ({
-    [scaffold.assets.config.target]: readScaffoldAsset('config'),
-    [scaffold.assets.ov.target]: readScaffoldAsset('ov'),
-    [scaffold.assets.graph.target]: readScaffoldAsset('graph').replace(graphToken, name),
-    [scaffold.assets.langgraph.target]: readScaffoldAsset('langgraph'),
+export const createScaffoldFiles = (): Record<'graph.ts' | 'config.json', string> => ({
+    'config.json': readScaffoldAsset('config'),
+    'graph.ts': readScaffoldAsset('graph')
+        .replace(packageToken, WORKFLOW_PACKAGE_NAME)
+        .replace(workflowToken, WORKFLOW_ID),
 });

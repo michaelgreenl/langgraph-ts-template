@@ -1,50 +1,38 @@
+import { existsSync, readdirSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { createScaffoldFiles, readScaffoldAsset, scaffold } from '../../src/scaffold/index.js';
+import {
+    WORKFLOW_ID,
+    WORKFLOW_PACKAGE_NAME,
+    createScaffoldFiles,
+    scaffold,
+    templateDir,
+    toWorkflowId,
+} from '../../src/scaffold/index.js';
 
-describe('MAW scaffold contract', () => {
-    it('defines the maw-cli init handoff rules', () => {
+describe('scaffold contract', () => {
+    it('publishes package and workflow metadata', () => {
         expect(scaffold.packageName.length).toBeGreaterThan(0);
-        expect(scaffold.directories).toContain('.maw/templates');
-        expect(scaffold.gitignore).toEqual(['.maw/config.json', '.maw/ov.conf', '.maw/openviking/']);
-        expect(scaffold.rules).toEqual({
-            overwrite: 'preserve',
-            gitignoreMerge: 'append-once',
-        });
+        expect(scaffold.workflow.length).toBeGreaterThan(0);
+        expect(scaffold.packageName).toBe(WORKFLOW_PACKAGE_NAME);
+        expect(scaffold.workflow).toBe(WORKFLOW_ID);
     });
 
-    it('points maw-cli init at the packaged asset sources', () => {
-        expect(scaffold.assets.config.target).toBe('.maw/config.json');
-        expect(scaffold.assets.ov.target).toBe('.maw/ov.conf');
-        expect(scaffold.assets.graph.target).toBe('.maw/graph.ts');
-        expect('langgraph' in scaffold.assets).toBe(true);
-        expect(Object.values(scaffold.assets).map((asset) => asset.target)).toContain('langgraph.json');
-        expect(readScaffoldAsset('config')).toContain('"workspace": "."');
-        expect(readScaffoldAsset('ov')).toContain('${OPENAI_API_KEY}');
+    it('strips package scopes when deriving workflow ids', () => {
+        expect(toWorkflowId('@org/coding')).toBe('coding');
+        expect(toWorkflowId('langgraph-ts-template')).toBe('langgraph-ts-template');
     });
 
-    it('renders the target graph entry for the installed workflow package', () => {
-        const files = createScaffoldFiles('docs-agent');
+    it('creates only graph and config scaffold files', () => {
+        const files = createScaffoldFiles();
 
-        expect(files['.maw/graph.ts']).toContain("import { createGraph } from 'docs-agent';");
-        expect(files['.maw/graph.ts']).toContain('export const graph = createGraph();');
+        expect(Object.keys(files).sort()).toEqual(['config.json', 'graph.ts']);
+        expect(files['graph.ts']).toContain(`import { createGraph } from '${scaffold.packageName}';`);
+        expect(files['graph.ts']).toContain(`createGraph({ workflow: '${scaffold.workflow}' })`);
+        expect(() => JSON.parse(files['config.json'])).not.toThrow();
     });
 
-    it('keeps secret placeholders in scaffolded file contents', () => {
-        const files = createScaffoldFiles('docs-agent');
-
-        expect(files['.maw/config.json']).toContain('${OPENAI_API_KEY}');
-        expect(files['.maw/ov.conf']).toContain('${OPENAI_API_KEY}');
-    });
-
-    it('renders the target langgraph config for the scaffolded graph entry', () => {
-        const files = createScaffoldFiles('docs-agent');
-        const cfg: unknown = JSON.parse(files['langgraph.json']);
-
-        expect(cfg).toMatchObject({
-            node_version: '20',
-            graphs: { agent: './.maw/graph.ts:graph' },
-            env: '.env',
-            dependencies: ['.'],
-        });
+    it('resolves the embedded template directory', () => {
+        expect(existsSync(templateDir)).toBe(true);
+        expect(readdirSync(templateDir).some((name) => name.endsWith('.njk'))).toBe(true);
     });
 });

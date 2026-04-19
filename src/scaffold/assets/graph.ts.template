@@ -1,3 +1,3 @@
 import { createGraph } from '__WORKFLOW_PACKAGE__';
 
-export const graph = createGraph();
+export const graph = createGraph({ workflow: '__WORKFLOW_ID__' });

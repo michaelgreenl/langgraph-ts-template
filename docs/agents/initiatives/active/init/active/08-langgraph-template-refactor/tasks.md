@@ -238,14 +238,14 @@ Verify:
 
 This step changes the `./scaffold` handoff surface only. Do not mix the runtime config rewrite into it.
 
-- [ ] Delete `src/scaffold/assets/ov.conf`
-- [ ] Delete `src/scaffold/assets/langgraph.json.template`
-- [ ] `src/scaffold/assets/graph.ts.template`: add `__WORKFLOW_ID__` token:
+- [x] Delete `src/scaffold/assets/ov.conf`
+- [x] Delete `src/scaffold/assets/langgraph.json.template`
+- [x] `src/scaffold/assets/graph.ts.template`: add `__WORKFLOW_ID__` token:
   ```ts
   import { createGraph } from '__WORKFLOW_PACKAGE__';
   export const graph = createGraph({ workflow: '__WORKFLOW_ID__' });
   ```
-- [ ] `src/scaffold/index.ts`:
+- [x] `src/scaffold/index.ts`:
   - Remove `assetFiles.ov` and `assetFiles.langgraph` keys and their `resolveAsset` calls
   - Remove types: `ScaffoldAsset`, `ScaffoldRules`, `MawScaffold`
   - Remove exports: `SCAFFOLD_DIRECTORIES`, `SCAFFOLD_GITIGNORE`, `SCAFFOLD_RULES`
@@ -256,7 +256,7 @@ This step changes the `./scaffold` handoff surface only. Do not mix the runtime 
   - Revise `createScaffoldFiles()`: no parameters; substitute both `__WORKFLOW_PACKAGE__` and `__WORKFLOW_ID__` tokens; return `Record<'graph.ts' | 'config.json', string>` using only the `config` and `graph` assets
   - Update `ScaffoldAssetName` to `'config' | 'graph'` only (remove `'ov'` and `'langgraph'`)
   - Keep `readScaffoldAsset()` only if it is still required internally by `src/config.ts`
-- [ ] `tests/unit/scaffold.spec.ts`: rewrite:
+- [x] `tests/unit/scaffold.spec.ts`: rewrite:
   - Assert `scaffold.packageName` is a non-empty string
   - Assert `scaffold.workflow` is a non-empty string
   - Add direct coverage that scoped package names strip their scope when deriving `WORKFLOW_ID` (extract a tiny local helper only if needed for testability)
@@ -265,7 +265,7 @@ This step changes the `./scaffold` handoff surface only. Do not mix the runtime 
   - Assert `files['config.json']` parses as valid JSON; final prompt-shape assertions move to Step 4 when the runtime config model changes
   - Assert `templateDir` resolves to an existing directory containing `.njk` files
   - Remove all tests for: `scaffold.directories`, `scaffold.gitignore`, `scaffold.rules`, `scaffold.assets`, `readScaffoldAsset('ov')`, `readScaffoldAsset('langgraph')`, `langgraph.json`, `.maw/config.json`, `ov.conf`
-- [ ] `tests/integration/scaffold.test.ts`: rewrite:
+- [x] `tests/integration/scaffold.test.ts`: rewrite:
   - Import `scaffold`, `createScaffoldFiles`, `templateDir` from `'../../src/scaffold/index.js'`
   - Assert `scaffold.workflow` is a non-empty string
   - Assert `createScaffoldFiles()` returns an object with exactly the keys `'graph.ts'` and `'config.json'`
@@ -275,13 +275,13 @@ This step changes the `./scaffold` handoff surface only. Do not mix the runtime 
   - Assert `templateDir` resolves to an existing directory that contains at least one `.njk` file
   - Remove all assertions for `directories`, `gitignore`, `rules`, `assets`, `maw-cli` handoff fields
   - Remove the `scripts/checkLanggraphPaths.js` shell invocation
-- [ ] `tests/unit/package-metadata.spec.ts`:
+- [x] `tests/unit/package-metadata.spec.ts`:
   - Keep asserting `src/scaffold/assets` is published
   - Add or keep assertion that `src/templates/defaults` remains published because `templateDir` depends on it
 
 Verify:
-- [ ] `bun run test -- tests/unit/package-metadata.spec.ts tests/unit/scaffold.spec.ts`
-- [ ] `bun run test:int -- tests/integration/scaffold.test.ts`
+- [x] `bun run test -- tests/unit/package-metadata.spec.ts tests/unit/scaffold.spec.ts`
+- [x] `bun run test:int -- tests/integration/scaffold.test.ts`
 
 ### 4. Rewrite the workflow prompt config and runtime stack
 
@@ -408,8 +408,8 @@ Verify:
 - [x] Step 1: `bun run test -- tests/unit/package-metadata.spec.ts`
 - [x] Step 2: `bun run test -- tests/unit/templates.spec.ts`
 - [x] Step 2: `bun run test:int -- tests/integration/graph.test.ts`
-- [ ] Step 3: `bun run test -- tests/unit/package-metadata.spec.ts tests/unit/scaffold.spec.ts`
-- [ ] Step 3: `bun run test:int -- tests/integration/scaffold.test.ts`
+- [x] Step 3: `bun run test -- tests/unit/package-metadata.spec.ts tests/unit/scaffold.spec.ts`
+- [x] Step 3: `bun run test:int -- tests/integration/scaffold.test.ts`
 - [ ] Step 4: `bun run typecheck`
 - [ ] Step 4: `bun run build`
 - [ ] Step 4: `bun run test -- tests/unit/config.spec.ts tests/unit/templates.spec.ts tests/unit/scaffold.spec.ts tests/unit/public-api.spec.ts`
