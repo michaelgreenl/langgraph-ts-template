@@ -226,36 +226,36 @@ Verify:
 
 This step adds the rendering path and the project-config fallback behavior that matches the workflow runtime.
 
-- [ ] Create `maw-cli/src/commands/prompt-preview.ts`
-- [ ] Use the usage string `prompt:preview <workflow> <agent>`
-- [ ] Missing workflow or agent arg returns exit code `1` and prints `Usage: maw-cli prompt:preview <workflow> <agent>`
-- [ ] In `maw-cli/src/utils/config.ts`, add a new module export that returns the default project config when `maw.json` is missing but still throws when an existing `maw.json` is invalid
-- [ ] Keep the public `readConfig()` export and its missing-file failure behavior unchanged; `src/index.ts` should not export the new defaulting helper
-- [ ] Resolve the installed workflow package through `loadWorkflow(root, workflow)`
-- [ ] Validate `.maw/graphs/<workflow>/` exists before reading config
-- [ ] Import `${packageName}/config` and `${packageName}/templates` from the installed workflow package's subpath exports; do not import `${packageName}` root
-- [ ] Resolve workflow config with the same missing/invalid-file fallback rules as `prompt:list`
-- [ ] Load project config with the new defaulting helper and pass `workspace`, `customPath`, and `root` into `createTemplateEngine({ prompts, workspace, customPath, root })`
-- [ ] On `Unable to resolve snippet: ...`, emit a `Warning:` to stderr and retry once with `resolveWorkflowConfig()` defaults
-- [ ] Do not retry unknown agents or any other render failure
-- [ ] Print only the final rendered prompt to stdout, plus a trailing newline
-- [ ] Add `maw-cli/tests/prompt-preview.test.ts` covering:
-  - [ ] missing args
-  - [ ] missing `maw.json` -> default project config fallback
-  - [ ] invalid existing `maw.json` -> fatal error
-  - [ ] missing workflow-local `config.json` -> default prompt render
-  - [ ] invalid workflow-local `config.json` -> `Warning:` + default prompt render
-  - [ ] unknown agent -> fatal error
-  - [ ] missing configured snippet -> `Warning:` + default prompt render
-  - [ ] custom `.maw/templates/security.njk` override wins over embedded `security.njk`
-  - [ ] preview order is global snippets first, then agent-specific snippet content
-  - [ ] stdout contains only prompt text and no command banner
-- [ ] Update `maw-cli/tests/config.test.ts` to cover the new defaulting reader directly from `src/utils/config.ts`
-- [ ] Update `maw-cli/tests/cli.test.ts` to assert `prompt:preview` appears in help output and parses as a valid command
+- [x] Create `maw-cli/src/commands/prompt-preview.ts`
+- [x] Use the usage string `prompt:preview <workflow> <agent>`
+- [x] Missing workflow or agent arg returns exit code `1` and prints `Usage: maw-cli prompt:preview <workflow> <agent>`
+- [x] In `maw-cli/src/utils/config.ts`, add a new module export that returns the default project config when `maw.json` is missing but still throws when an existing `maw.json` is invalid
+- [x] Keep the public `readConfig()` export and its missing-file failure behavior unchanged; `src/index.ts` should not export the new defaulting helper
+- [x] Resolve the installed workflow package through `loadWorkflow(root, workflow)`
+- [x] Validate `.maw/graphs/<workflow>/` exists before reading config
+- [x] Import `${packageName}/config` and `${packageName}/templates` from the installed workflow package's subpath exports; do not import `${packageName}` root
+- [x] Resolve workflow config with the same missing/invalid-file fallback rules as `prompt:list`
+- [x] Load project config with the new defaulting helper and pass `workspace`, `customPath`, and `root` into `createTemplateEngine({ prompts, workspace, customPath, root })`
+- [x] On `Unable to resolve snippet: ...`, emit a `Warning:` to stderr and retry once with `resolveWorkflowConfig()` defaults
+- [x] Do not retry unknown agents or any other render failure
+- [x] Print only the final rendered prompt to stdout, plus a trailing newline
+- [x] Add `maw-cli/tests/prompt-preview.test.ts` covering:
+  - [x] missing args
+  - [x] missing `maw.json` -> default project config fallback
+  - [x] invalid existing `maw.json` -> fatal error
+  - [x] missing workflow-local `config.json` -> default prompt render
+  - [x] invalid workflow-local `config.json` -> `Warning:` + default prompt render
+  - [x] unknown agent -> fatal error
+  - [x] missing configured snippet -> `Warning:` + default prompt render
+  - [x] custom `.maw/templates/security.njk` override wins over embedded `security.njk`
+  - [x] preview order is global snippets first, then agent-specific snippet content
+  - [x] stdout contains only prompt text and no command banner
+- [x] Update `maw-cli/tests/config.test.ts` to cover the new defaulting reader directly from `src/utils/config.ts`
+- [x] Update `maw-cli/tests/cli.test.ts` to assert `prompt:preview` appears in help output and parses as a valid command
 
 Verify:
 
-- [ ] `bun run test -- tests/prompt-preview.test.ts tests/config.test.ts tests/cli.test.ts` in `maw-cli`
+- [x] `bun run test -- tests/prompt-preview.test.ts tests/config.test.ts tests/cli.test.ts` in `maw-cli`
 
 ### 5. Expand standalone smoke coverage for prompt inspection
 
@@ -306,7 +306,7 @@ Verify:
 - [x] Step 1: `bun run test -- tests/unit/package-metadata.spec.ts` in `langgraph-ts-template`
 - [x] Step 2: `bun run test -- tests/init.test.ts` in `maw-cli`
 - [x] Step 3: `bun run test -- tests/prompt-list.test.ts tests/cli.test.ts` in `maw-cli`
-- [ ] Step 4: `bun run test -- tests/prompt-preview.test.ts tests/config.test.ts tests/cli.test.ts` in `maw-cli`
+- [x] Step 4: `bun run test -- tests/prompt-preview.test.ts tests/config.test.ts tests/cli.test.ts` in `maw-cli`
 - [ ] Step 5: `bun run smoke:init` in `maw-smoke/maw-smoke-1`
 - [ ] Step 5: `bun run smoke:dev` in `maw-smoke/maw-smoke-1`
 - [ ] Step 5: `bun run smoke:prompt-list` in `maw-smoke/maw-smoke-1`
