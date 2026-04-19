@@ -20,6 +20,10 @@
             "import": "./dist/scaffold/index.js",
             "types": "./dist/scaffold/index.d.ts"
         },
+        "./templates": {
+            "import": "./dist/templates/index.js",
+            "types": "./dist/templates/index.d.ts"
+        },
         "./package.json": "./package.json"
     },
     "files": [

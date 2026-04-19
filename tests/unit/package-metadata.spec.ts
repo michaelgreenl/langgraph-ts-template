@@ -21,10 +21,17 @@ describe('package metadata', () => {
         expect(pkg).toMatchObject({
             files: expect.arrayContaining(['src/scaffold/assets', 'src/templates/defaults']),
             exports: {
-                './config': expect.anything(),
+                './config': {
+                    import: './dist/config.js',
+                    types: './dist/config.d.ts',
+                },
                 './scaffold': {
                     import: './dist/scaffold/index.js',
                     types: './dist/scaffold/index.d.ts',
+                },
+                './templates': {
+                    import: './dist/templates/index.js',
+                    types: './dist/templates/index.d.ts',
                 },
             },
         });

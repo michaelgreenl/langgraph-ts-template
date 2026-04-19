@@ -166,15 +166,15 @@ Warnings must go to stderr. Successful command output must stay on stdout.
 
 This step is additive packaging only. It exists so `maw-cli prompt:preview` can compose prompts without importing the workflow package root and accidentally constructing the default graph.
 
-- [ ] `langgraph-ts-template/src/templates/index.ts`: add a barrel that re-exports `createTemplateEngine`, `TemplateEngine`, and `TemplateVars`
-- [ ] `langgraph-ts-template/package.json`: add the `./templates` export pointing at `dist/templates/index.js` and `dist/templates/index.d.ts`
-- [ ] `langgraph-ts-template/tests/unit/package-metadata.spec.ts`: extend the subpath-export assertion to include `./templates`
-- [ ] Do not change `langgraph-ts-template/src/index.ts`, `src/templates/engine.ts`, or `src/agent/graph.ts` in this step
+- [x] `langgraph-ts-template/src/templates/index.ts`: add a barrel that re-exports `createTemplateEngine`, `TemplateEngine`, and `TemplateVars`
+- [x] `langgraph-ts-template/package.json`: add the `./templates` export pointing at `dist/templates/index.js` and `dist/templates/index.d.ts`
+- [x] `langgraph-ts-template/tests/unit/package-metadata.spec.ts`: extend the subpath-export assertion to include `./templates`
+- [x] Do not change `langgraph-ts-template/src/index.ts`, `src/templates/engine.ts`, or `src/agent/graph.ts` in this step
 
 Verify:
 
-- [ ] `bun run build` in `langgraph-ts-template`
-- [ ] `bun run test -- tests/unit/package-metadata.spec.ts` in `langgraph-ts-template`
+- [x] `bun run build` in `langgraph-ts-template`
+- [x] `bun run test -- tests/unit/package-metadata.spec.ts` in `langgraph-ts-template`
 
 ### 2. Extract shared workflow resolution and realign local fixtures
 
@@ -302,8 +302,8 @@ Verify:
 
 ### Per-step verification
 
-- [ ] Step 1: `bun run build` in `langgraph-ts-template`
-- [ ] Step 1: `bun run test -- tests/unit/package-metadata.spec.ts` in `langgraph-ts-template`
+- [x] Step 1: `bun run build` in `langgraph-ts-template`
+- [x] Step 1: `bun run test -- tests/unit/package-metadata.spec.ts` in `langgraph-ts-template`
 - [ ] Step 2: `bun run test -- tests/init.test.ts` in `maw-cli`
 - [ ] Step 3: `bun run test -- tests/prompt-list.test.ts tests/cli.test.ts` in `maw-cli`
 - [ ] Step 4: `bun run test -- tests/prompt-preview.test.ts tests/config.test.ts tests/cli.test.ts` in `maw-cli`
