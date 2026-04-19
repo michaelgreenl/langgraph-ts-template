@@ -410,7 +410,7 @@ These parts of the current implementation conflict with the finalized architectu
 
 ### Phase 2: `langgraph-ts-template` targeted refactor
 
-- [ ] complete
+- [x] complete
 
 - remove the `maw-cli` dependency from the workflow template
 - shrink the scaffold contract to workflow-owned files only
