@@ -199,18 +199,18 @@ The new workflow-local `config.json` contains only static snippet names — no `
 
 Couples `bin.ts` deletion with the only test that reads `bin.ts` at import time.
 
-- [ ] `package.json`: remove `maw-cli` from `dependencies`
-- [ ] `package.json`: remove the `bin` field (`"langgraph-ts-template": "./dist/bin.js"`)
-- [ ] `package.json`: remove the `lint:langgraph-json` script
-- [ ] `package.json`: update `lint:all` to `"bun run lint && bun run format:check"`
-- [ ] Delete `src/bin.ts`
-- [ ] Delete `scripts/checkLanggraphPaths.js`
-- [ ] `tests/unit/package-metadata.spec.ts`:
+- [x] `package.json`: remove `maw-cli` from `dependencies`
+- [x] `package.json`: remove the `bin` field (`"langgraph-ts-template": "./dist/bin.js"`)
+- [x] `package.json`: remove the `lint:langgraph-json` script
+- [x] `package.json`: update `lint:all` to `"bun run lint && bun run format:check"`
+- [x] Delete `src/bin.ts`
+- [x] Delete `scripts/checkLanggraphPaths.js`
+- [x] `tests/unit/package-metadata.spec.ts`:
   - Remove the `const bin = readFileSync(resolve(root, 'src/bin.ts'), 'utf8')` line
   - Delete the entire `'depends on and proxies to maw-cli'` test block
 
 Verify:
-- [ ] `bun run test -- tests/unit/package-metadata.spec.ts`
+- [x] `bun run test -- tests/unit/package-metadata.spec.ts`
 
 ### 2. Normalize embedded snippet names and remove `project-context`
 
@@ -405,7 +405,7 @@ Verify:
 
 ### Per-step verification
 
-- [ ] Step 1: `bun run test -- tests/unit/package-metadata.spec.ts`
+- [x] Step 1: `bun run test -- tests/unit/package-metadata.spec.ts`
 - [ ] Step 2: `bun run test -- tests/unit/templates.spec.ts`
 - [ ] Step 2: `bun run test:int -- tests/integration/graph.test.ts`
 - [ ] Step 3: `bun run test -- tests/unit/package-metadata.spec.ts tests/unit/scaffold.spec.ts`

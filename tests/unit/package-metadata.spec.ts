@@ -1,4 +1,4 @@
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
@@ -6,7 +6,6 @@ import { describe, expect, it } from 'vitest';
 const dir = dirname(fileURLToPath(import.meta.url));
 const root = resolve(dir, '../..');
 const pkg: unknown = JSON.parse(readFileSync(resolve(root, 'package.json'), 'utf8'));
-const bin = readFileSync(resolve(root, 'src/bin.ts'), 'utf8');
 
 describe('package metadata', () => {
     it('keeps husky out of the consumer install path', () => {
@@ -34,14 +33,20 @@ describe('package metadata', () => {
         });
     });
 
-    it('depends on and proxies to maw-cli', () => {
-        expect(pkg).toMatchObject({
+    it('does not publish the retired maw-cli proxy surface', () => {
+        expect(pkg).not.toMatchObject({
             dependencies: { 'maw-cli': expect.any(String) },
         });
+        expect(pkg).not.toHaveProperty('bin');
         expect(pkg).not.toMatchObject({
-            dependencies: { maw: expect.any(String) },
+            scripts: { 'lint:langgraph-json': expect.any(String) },
         });
-        expect(bin).toContain("spawn('maw-cli'");
-        expect(bin).toContain('Unable to start maw-cli');
+        expect(pkg).toMatchObject({
+            scripts: { 'lint:all': 'bun run lint && bun run format:check' },
+        });
+        expect(existsSync(resolve(root, 'dist/bin.js'))).toBe(false);
+        expect(existsSync(resolve(root, 'dist/bin.d.ts'))).toBe(false);
+        expect(existsSync(resolve(root, 'src/bin.ts'))).toBe(false);
+        expect(existsSync(resolve(root, 'scripts/checkLanggraphPaths.js'))).toBe(false);
     });
 });

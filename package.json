@@ -7,9 +7,6 @@
     "types": "./dist/index.d.ts",
     "author": "michaelgreenl",
     "type": "module",
-    "bin": {
-        "langgraph-ts-template": "./dist/bin.js"
-    },
     "exports": {
         ".": {
             "import": "./dist/index.js",
@@ -40,8 +37,7 @@
         "format": "prettier --write src",
         "format:check": "prettier --check src",
         "lint": "eslint src",
-        "lint:langgraph-json": "node scripts/checkLanggraphPaths.js",
-        "lint:all": "bun run lint && bun run lint:langgraph-json && bun run format:check",
+        "lint:all": "bun run lint && bun run format:check",
         "test:all": "bun run test && bun run test:int && bun run lint:all",
         "release": "semantic-release",
         "hooks": "husky"
@@ -49,7 +45,6 @@
     "dependencies": {
         "@langchain/core": "^1.1.40",
         "@langchain/langgraph": "^1.2.8",
-        "maw-cli": "git+https://github.com/michaelgreenl/maw-cli.git",
         "nunjucks": "^3.2.4",
         "zod": "^4.3.6"
     },

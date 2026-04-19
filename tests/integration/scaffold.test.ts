@@ -79,8 +79,6 @@ describe('scaffold handoff', () => {
             dependencies: ['.'],
         });
 
-        await run('bun', [join(process.cwd(), 'scripts/checkLanggraphPaths.js'), root]);
-
         await writeFile(graph, '// custom graph\n');
         await writeFile(langgraph, '{\n  "custom": true\n}\n');
         await applyScaffold(root, 'docs-agent');
