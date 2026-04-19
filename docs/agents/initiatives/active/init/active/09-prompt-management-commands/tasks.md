@@ -200,27 +200,27 @@ Verify:
 
 This step adds the first prompt-inspection command and its help/CLI coverage.
 
-- [ ] Create `maw-cli/src/commands/prompt-list.ts`
-- [ ] Use the usage string `prompt:list <workflow>`
-- [ ] Missing workflow arg returns exit code `1` and prints `Usage: maw-cli prompt:list <workflow>`
-- [ ] Resolve the installed workflow package through `loadWorkflow(root, workflow)`
-- [ ] Validate `.maw/graphs/<workflow>/` exists before reading config
-- [ ] Import `${packageName}/config` from the target project's installed workflow package, not from the repository source tree
-- [ ] Resolve prompt config with the finalized fallback rules from the execution notes
-- [ ] Print one line per agent in the exact format `<agent>: <snippet>, <snippet>, <snippet>` with no header or extra prose
-- [ ] Register `prompt:list` in `maw-cli/src/index.ts` so `COMMAND_NAMES`, help text, and command parsing all include it
-- [ ] Add `maw-cli/tests/prompt-list.test.ts` covering:
-  - [ ] missing workflow arg
-  - [ ] workflow id not installed
-  - [ ] missing `.maw/graphs/<workflow>/` directory
-  - [ ] missing `config.json` -> defaults
-  - [ ] invalid `config.json` -> `Warning:` to stderr + defaults
-  - [ ] resolved planner/coder output order using the finalized fixture defaults
-- [ ] Update `maw-cli/tests/cli.test.ts` to assert `prompt:list` appears in help output and parses as a valid command
+- [x] Create `maw-cli/src/commands/prompt-list.ts`
+- [x] Use the usage string `prompt:list <workflow>`
+- [x] Missing workflow arg returns exit code `1` and prints `Usage: maw-cli prompt:list <workflow>`
+- [x] Resolve the installed workflow package through `loadWorkflow(root, workflow)`
+- [x] Validate `.maw/graphs/<workflow>/` exists before reading config
+- [x] Import `${packageName}/config` from the target project's installed workflow package, not from the repository source tree
+- [x] Resolve prompt config with the finalized fallback rules from the execution notes
+- [x] Print one line per agent in the exact format `<agent>: <snippet>, <snippet>, <snippet>` with no header or extra prose
+- [x] Register `prompt:list` in `maw-cli/src/index.ts` so `COMMAND_NAMES`, help text, and command parsing all include it
+- [x] Add `maw-cli/tests/prompt-list.test.ts` covering:
+  - [x] missing workflow arg
+  - [x] workflow id not installed
+  - [x] missing `.maw/graphs/<workflow>/` directory
+  - [x] missing `config.json` -> defaults
+  - [x] invalid `config.json` -> `Warning:` to stderr + defaults
+  - [x] resolved planner/coder output order using the finalized fixture defaults
+- [x] Update `maw-cli/tests/cli.test.ts` to assert `prompt:list` appears in help output and parses as a valid command
 
 Verify:
 
-- [ ] `bun run test -- tests/prompt-list.test.ts tests/cli.test.ts` in `maw-cli`
+- [x] `bun run test -- tests/prompt-list.test.ts tests/cli.test.ts` in `maw-cli`
 
 ### 4. Implement `prompt:preview <workflow> <agent>`
 
@@ -305,7 +305,7 @@ Verify:
 - [x] Step 1: `bun run build` in `langgraph-ts-template`
 - [x] Step 1: `bun run test -- tests/unit/package-metadata.spec.ts` in `langgraph-ts-template`
 - [x] Step 2: `bun run test -- tests/init.test.ts` in `maw-cli`
-- [ ] Step 3: `bun run test -- tests/prompt-list.test.ts tests/cli.test.ts` in `maw-cli`
+- [x] Step 3: `bun run test -- tests/prompt-list.test.ts tests/cli.test.ts` in `maw-cli`
 - [ ] Step 4: `bun run test -- tests/prompt-preview.test.ts tests/config.test.ts tests/cli.test.ts` in `maw-cli`
 - [ ] Step 5: `bun run smoke:init` in `maw-smoke/maw-smoke-1`
 - [ ] Step 5: `bun run smoke:dev` in `maw-smoke/maw-smoke-1`
