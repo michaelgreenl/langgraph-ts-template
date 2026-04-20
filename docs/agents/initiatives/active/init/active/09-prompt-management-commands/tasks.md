@@ -261,42 +261,42 @@ Verify:
 
 This step proves the new commands work through the installed-bin flow in a temp target project, with local workflow fixtures and no live provider.
 
-- [ ] Upgrade `maw-smoke/maw-smoke-1/fixtures/workflows/*` to the same finalized fixture contract used in `maw-cli/tests/fixtures/workflows/*`:
-  - [ ] `./config` export
-  - [ ] `./templates` export
-  - [ ] `./scaffold` export with `templateDir`
-  - [ ] prompt-only `config.json`
-  - [ ] generated `createGraph({ workflow: '...' })`
-  - [ ] embedded `general.njk`, `security.njk`, `research-rules.njk`, and `typescript.njk`
-- [ ] Update `maw-smoke/maw-smoke-1/smoke/init.ts` only where the upgraded fixture contract changes stale assertions
-- [ ] Add `smoke:prompt-list` and `smoke:prompt-preview` scripts to `maw-smoke/maw-smoke-1/package.json`
-- [ ] Add `maw-smoke/maw-smoke-1/smoke/prompt-list.ts`:
-  - [ ] create a temp target project
-  - [ ] install local `maw-cli` plus local mock workflow packages
-  - [ ] run `maw-cli init`
-  - [ ] run `maw-cli prompt:list coding`
-  - [ ] assert exact stdout lines for planner and coder resolved snippet order
-  - [ ] assert no live model, `.env`, or LangGraph server is required
-- [ ] Add `maw-smoke/maw-smoke-1/smoke/prompt-preview.ts`:
-  - [ ] create a temp target project
-  - [ ] install local `maw-cli` plus local mock workflow packages
-  - [ ] run `maw-cli init`
-  - [ ] write `.maw/templates/security.njk` with override text
-  - [ ] run `maw-cli prompt:preview coding planner`
-  - [ ] run `maw-cli prompt:preview coding coder`
-  - [ ] assert the custom security override appears in both previews
-  - [ ] assert the global snippet text appears before the agent-specific snippet text
-  - [ ] assert stdout contains only the rendered prompt body
-  - [ ] assert the smoke path does not depend on a real model provider, `.env`, or OpenViking server
-- [ ] Update `maw-smoke/maw-smoke-1/smoke/support.ts` with any shared helpers needed by the new prompt smoke flows
-- [ ] Keep `smoke:init` and `smoke:dev` passing after the fixture upgrades
+- [x] Upgrade `maw-smoke/maw-smoke-1/fixtures/workflows/*` to the same finalized fixture contract used in `maw-cli/tests/fixtures/workflows/*`:
+  - [x] `./config` export
+  - [x] `./templates` export
+  - [x] `./scaffold` export with `templateDir`
+  - [x] prompt-only `config.json`
+  - [x] generated `createGraph({ workflow: '...' })`
+  - [x] embedded `general.njk`, `security.njk`, `research-rules.njk`, and `typescript.njk`
+- [x] Update `maw-smoke/maw-smoke-1/smoke/init.ts` only where the upgraded fixture contract changes stale assertions
+- [x] Add `smoke:prompt-list` and `smoke:prompt-preview` scripts to `maw-smoke/maw-smoke-1/package.json`
+- [x] Add `maw-smoke/maw-smoke-1/smoke/prompt-list.ts`:
+  - [x] create a temp target project
+  - [x] install local `maw-cli` plus local mock workflow packages
+  - [x] run `maw-cli init`
+  - [x] run `maw-cli prompt:list coding`
+  - [x] assert exact stdout lines for planner and coder resolved snippet order
+  - [x] assert no live model, `.env`, or LangGraph server is required
+- [x] Add `maw-smoke/maw-smoke-1/smoke/prompt-preview.ts`:
+  - [x] create a temp target project
+  - [x] install local `maw-cli` plus local mock workflow packages
+  - [x] run `maw-cli init`
+  - [x] write `.maw/templates/security.njk` with override text
+  - [x] run `maw-cli prompt:preview coding planner`
+  - [x] run `maw-cli prompt:preview coding coder`
+  - [x] assert the custom security override appears in both previews
+  - [x] assert the global snippet text appears before the agent-specific snippet text
+  - [x] assert stdout contains only the rendered prompt body
+  - [x] assert the smoke path does not depend on a real model provider, `.env`, or OpenViking server
+- [x] Update `maw-smoke/maw-smoke-1/smoke/support.ts` with any shared helpers needed by the new prompt smoke flows
+- [x] Keep `smoke:init` and `smoke:dev` passing after the fixture upgrades
 
 Verify:
 
-- [ ] `bun run smoke:init` in `maw-smoke/maw-smoke-1`
-- [ ] `bun run smoke:dev` in `maw-smoke/maw-smoke-1`
-- [ ] `bun run smoke:prompt-list` in `maw-smoke/maw-smoke-1`
-- [ ] `bun run smoke:prompt-preview` in `maw-smoke/maw-smoke-1`
+- [x] `bun run smoke:init` in `maw-smoke/maw-smoke-1`
+- [x] `bun run smoke:dev` in `maw-smoke/maw-smoke-1`
+- [x] `bun run smoke:prompt-list` in `maw-smoke/maw-smoke-1`
+- [x] `bun run smoke:prompt-preview` in `maw-smoke/maw-smoke-1`
 
 ## Verification
 
@@ -307,10 +307,10 @@ Verify:
 - [x] Step 2: `bun run test -- tests/init.test.ts` in `maw-cli`
 - [x] Step 3: `bun run test -- tests/prompt-list.test.ts tests/cli.test.ts` in `maw-cli`
 - [x] Step 4: `bun run test -- tests/prompt-preview.test.ts tests/config.test.ts tests/cli.test.ts` in `maw-cli`
-- [ ] Step 5: `bun run smoke:init` in `maw-smoke/maw-smoke-1`
-- [ ] Step 5: `bun run smoke:dev` in `maw-smoke/maw-smoke-1`
-- [ ] Step 5: `bun run smoke:prompt-list` in `maw-smoke/maw-smoke-1`
-- [ ] Step 5: `bun run smoke:prompt-preview` in `maw-smoke/maw-smoke-1`
+- [x] Step 5: `bun run smoke:init` in `maw-smoke/maw-smoke-1`
+- [x] Step 5: `bun run smoke:dev` in `maw-smoke/maw-smoke-1`
+- [x] Step 5: `bun run smoke:prompt-list` in `maw-smoke/maw-smoke-1`
+- [x] Step 5: `bun run smoke:prompt-preview` in `maw-smoke/maw-smoke-1`
 
 ### Phase completion
 
