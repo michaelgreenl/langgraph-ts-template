@@ -372,39 +372,39 @@ Verify:
 
 ### Phase completion
 
-- [ ] `bun run build` in `langgraph-ts-template`
-- [ ] `bun run test -- tests/unit/package-metadata.spec.ts` in `langgraph-ts-template`
-- [ ] `bun run typecheck` in `maw-cli`
-- [ ] `bun run build` in `maw-cli`
-- [ ] `bun run lint` in `maw-cli`
-- [ ] `bun run test` in `maw-cli`
-- [ ] `bun smoke-init phase3-prompt-commands` in `../maw-smoke`
-- [ ] In `../maw-smoke/tests/smoke-phase3-prompt-commands/`, run `bunx maw-cli init`
-- [ ] In `../maw-smoke/tests/smoke-phase3-prompt-commands/`, run `bunx maw-cli prompt:list langgraph-ts-template`
-- [ ] In `../maw-smoke/tests/smoke-phase3-prompt-commands/`, write `.maw/templates/security.njk` and run `bunx maw-cli prompt:preview langgraph-ts-template planner`
+- [x] `bun run build` in `langgraph-ts-template`
+- [x] `bun run test -- tests/unit/package-metadata.spec.ts` in `langgraph-ts-template`
+- [x] `bun run typecheck` in `maw-cli`
+- [x] `bun run build` in `maw-cli`
+- [x] `bun run lint` in `maw-cli`
+- [x] `bun run test` in `maw-cli`
+- [x] `bun smoke-init phase3-prompt-commands` in `../maw-smoke`
+- [x] In `../maw-smoke/tests/smoke-phase3-prompt-commands/`, run `bunx maw-cli init`
+- [x] In `../maw-smoke/tests/smoke-phase3-prompt-commands/`, run `bunx maw-cli prompt:list langgraph-ts-template`
+- [x] In `../maw-smoke/tests/smoke-phase3-prompt-commands/`, write `.maw/templates/security.njk` and run `bunx maw-cli prompt:preview langgraph-ts-template planner`
 
 ## Exit Criteria
 
-- [ ] `langgraph-ts-template/package.json` publishes prompt-command subpath exports (`./config`, `./templates`) in a shape that installed target projects can resolve
-- [ ] `langgraph-ts-template/src/templates/index.ts` exists and exports the template-engine surface without importing graph runtime code
-- [ ] `maw-cli` command help advertises `prompt:list <workflow>` and `prompt:preview <workflow> <agent>` alongside `init`, `dev`, and `ov:*`
-- [ ] `COMMAND_NAMES` in `maw-cli` becomes `['init', 'dev', 'prompt:list', 'prompt:preview', 'ov:init', 'ov:index']`
-- [ ] `maw-cli` prompt commands resolve workflows by `scaffold.workflow`, not npm package name
-- [ ] `maw-cli` prompt commands do not import workflow package root `.`
-- [ ] `maw-cli` automated prompt-command coverage includes a fixture package whose `exports` shape matches the real installed workflow package surface closely enough to catch the conditional-subpath regression
-- [ ] Fixture-generated `graph.ts` files use `createGraph({ workflow: '...' })`
-- [ ] `maw-cli prompt:list coding` prints:
+- [x] `langgraph-ts-template/package.json` publishes prompt-command subpath exports (`./config`, `./templates`) in a shape that installed target projects can resolve
+- [x] `langgraph-ts-template/src/templates/index.ts` exists and exports the template-engine surface without importing graph runtime code
+- [x] `maw-cli` command help advertises `prompt:list <workflow>` and `prompt:preview <workflow> <agent>` alongside `init`, `dev`, and `ov:*`
+- [x] `COMMAND_NAMES` in `maw-cli` becomes `['init', 'dev', 'prompt:list', 'prompt:preview', 'ov:init', 'ov:index']`
+- [x] `maw-cli` prompt commands resolve workflows by `scaffold.workflow`, not npm package name
+- [x] `maw-cli` prompt commands do not import workflow package root `.`
+- [x] `maw-cli` automated prompt-command coverage includes a fixture package whose `exports` shape matches the real installed workflow package surface closely enough to catch the conditional-subpath regression
+- [x] Fixture-generated `graph.ts` files use `createGraph({ workflow: '...' })`
+- [x] `maw-cli prompt:list coding` prints:
 
   ```text
   planner: general, security, research-rules
   coder: general, security, typescript
   ```
 
-- [ ] `maw-cli prompt:list <workflow>` falls back to embedded defaults when `.maw/graphs/<workflow>/config.json` is missing or invalid, and invalid files emit a `Warning:` to stderr
-- [ ] `maw-cli prompt:list langgraph-ts-template` works in a disposable smoke project created from local repo checkouts
-- [ ] `maw-cli prompt:preview langgraph-ts-template planner` and `maw-cli prompt:preview langgraph-ts-template coder` print only the rendered prompt body to stdout in that smoke project
-- [ ] `maw-cli prompt:preview` falls back to the default project config when `maw.json` is missing, but fails loudly when an existing `maw.json` is invalid
-- [ ] `maw-cli prompt:preview` retries once with embedded defaults when a configured snippet cannot be resolved, and emits a `Warning:` to stderr when that fallback happens
-- [ ] A custom override in `.maw/templates/security.njk` is visible in prompt preview output and outranks the embedded `security.njk`
-- [ ] `bun run typecheck && bun run build && bun run lint && bun run test` pass in `maw-cli`
-- [ ] The README-driven manual smoke flow passes without pushing changes first: `bun smoke-init <test-slug>`, `bunx maw-cli init`, `bunx maw-cli prompt:list langgraph-ts-template`, `bunx maw-cli prompt:preview langgraph-ts-template planner`, and a smoke log entry under `../maw-smoke/docs/agents/smoke-logs/`
+- [x] `maw-cli prompt:list <workflow>` falls back to embedded defaults when `.maw/graphs/<workflow>/config.json` is missing or invalid, and invalid files emit a `Warning:` to stderr
+- [x] `maw-cli prompt:list langgraph-ts-template` works in a disposable smoke project created from local repo checkouts
+- [x] `maw-cli prompt:preview langgraph-ts-template planner` and `maw-cli prompt:preview langgraph-ts-template coder` print only the rendered prompt body to stdout in that smoke project
+- [x] `maw-cli prompt:preview` falls back to the default project config when `maw.json` is missing, but fails loudly when an existing `maw.json` is invalid
+- [x] `maw-cli prompt:preview` retries once with embedded defaults when a configured snippet cannot be resolved, and emits a `Warning:` to stderr when that fallback happens
+- [x] A custom override in `.maw/templates/security.njk` is visible in prompt preview output and outranks the embedded `security.njk`
+- [x] `bun run typecheck && bun run build && bun run lint && bun run test` pass in `maw-cli`
+- [x] The README-driven manual smoke flow passes without pushing changes first: `bun smoke-init <test-slug>`, `bunx maw-cli init`, `bunx maw-cli prompt:list langgraph-ts-template`, `bunx maw-cli prompt:preview langgraph-ts-template planner`, and a smoke log entry under `../maw-smoke/docs/agents/smoke-logs/`

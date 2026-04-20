@@ -422,7 +422,7 @@ These parts of the current implementation conflict with the finalized architectu
 
 ### Phase 3: Prompt management commands
 
-- [ ] complete
+- [x] complete
 
 - implement `maw-cli prompt:list <workflow>`
 - implement `maw-cli prompt:preview <workflow> <agent>`
