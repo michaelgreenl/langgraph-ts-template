@@ -1,3 +1,11 @@
+## [0.3.0](https://github.com/michaelgreenl/langgraph-ts-template/compare/v0.2.2...v0.3.0) (2026-04-20)
+
+### Features
+
+* **phase3.1:** publish a side-effect-free template-engine subpath ([1d7971a](https://github.com/michaelgreenl/langgraph-ts-template/commit/1d7971ace11be3da6608f169919a084f519050e5))
+* **phase3.3:** implement prompt:list command ([7d221e8](https://github.com/michaelgreenl/langgraph-ts-template/commit/7d221e80be5218bfd7410ca63ae7d0cd9e17180b))
+* **phase3.4:** implement prompt:preview command ([4da7127](https://github.com/michaelgreenl/langgraph-ts-template/commit/4da71276f41931d6847d1bc449831619c74e918e))
+
 ## [0.2.2](https://github.com/michaelgreenl/langgraph-ts-template/compare/v0.2.1...v0.2.2) (2026-04-19)
 
 ### Bug Fixes
