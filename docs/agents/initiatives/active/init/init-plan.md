@@ -426,8 +426,8 @@ These parts of the current implementation conflict with the finalized architectu
 
 - implement `maw-cli prompt:list <workflow>`
 - implement `maw-cli prompt:preview <workflow> <agent>`
-- add smoke tests that prove prompt composition and custom template overrides are working
-- ensure this verification path exists before further workflow/template expansion
+- add manual smoke verification via `maw-smoke/README.md` that proves prompt composition and custom template overrides are working against locally installed repo checkouts
+- close any gap between fixture coverage and installed-package prompt-command behavior before marking the phase complete
 
 ### Phase 4: OpenViking integration
 
@@ -466,7 +466,7 @@ These parts of the current implementation conflict with the finalized architectu
 - `bun run build`
 - `bun run lint`
 - `bun run test`
-- smoke: `init`, `dev <workflow>`, `prompt:list`, `prompt:preview`
+- manual smoke via `maw-smoke/README.md` covering `init`, `dev <workflow>`, `prompt:list`, and `prompt:preview`
 
 ### `langgraph-ts-template`
 
@@ -475,6 +475,15 @@ These parts of the current implementation conflict with the finalized architectu
 - `bun run test`
 - `bun run test:int`
 - scaffold tests covering workflow-local `graph.ts` and `config.json`
+
+### Smoke methodology
+
+Smoke verification runs from `../maw-smoke/` following `README.md` and `docs/agents/smoke-tests.md`.
+
+- run `bun smoke-init <test-slug>` to create `tests/smoke-<test-slug>/`
+- the initializer must install local checkout paths for `../maw-cli` and workflow packages so uncommitted changes can be exercised without pushing
+- execute the relevant `bunx maw-cli ...` commands manually inside that disposable target project
+- log results, issues, and fixes to `../maw-smoke/docs/agents/smoke-logs/<test-slug>.md`
 
 ### Cross-repo acceptance checks
 
