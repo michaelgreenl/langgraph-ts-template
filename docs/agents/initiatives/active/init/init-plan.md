@@ -482,7 +482,7 @@ Smoke verification runs from `../maw-smoke/` following `README.md` and `docs/age
 
 - run `bun smoke-init <test-slug>` to create `tests/smoke-<test-slug>/`
 - the initializer must install local checkout paths for `../maw-cli` and workflow packages so uncommitted changes can be exercised without pushing
-- execute the relevant `bunx maw-cli ...` commands manually inside that disposable target project
+- from that disposable target project, run `bunx maw-cli init` and the relevant `bunx maw-cli ...` verification commands manually
 - log results, issues, and fixes to `../maw-smoke/docs/agents/smoke-logs/<test-slug>.md`
 
 ### Cross-repo acceptance checks

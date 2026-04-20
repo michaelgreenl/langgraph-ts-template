@@ -318,24 +318,24 @@ Verify:
 
 This issue step closes the gap between fixture coverage and the real installed `langgraph-ts-template` package surface.
 
-- [ ] Update the relevant prompt-command module-resolution path and/or workflow package export conditions so `${packageName}/config` and `${packageName}/templates` resolve from an installed target project when the workflow package uses conditional `exports`
-- [ ] Add regression coverage in `langgraph-ts-template/tests/unit/package-metadata.spec.ts` for the export conditions that `maw-cli prompt:list` and `maw-cli prompt:preview` rely on
-- [ ] Update `maw-cli/tests/fixtures/workflows/*/package.json` so at least one prompt-command fixture mirrors the real conditional subpath export shape instead of the earlier string-only form
-- [ ] Extend `maw-cli/tests/prompt-list.test.ts` and `maw-cli/tests/prompt-preview.test.ts` so the real-package export-shape regression is covered automatically
-- [ ] Verify `bunx maw-cli prompt:list langgraph-ts-template` works in a disposable smoke project created from local repo checkouts
-- [ ] Verify `bunx maw-cli prompt:preview langgraph-ts-template planner` works in that same disposable smoke project
+- [x] Update the relevant prompt-command module-resolution path and/or workflow package export conditions so `${packageName}/config` and `${packageName}/templates` resolve from an installed target project when the workflow package uses conditional `exports`
+- [x] Add regression coverage in `langgraph-ts-template/tests/unit/package-metadata.spec.ts` for the export conditions that `maw-cli prompt:list` and `maw-cli prompt:preview` rely on
+- [x] Update `maw-cli/tests/fixtures/workflows/*/package.json` so at least one prompt-command fixture mirrors the real conditional subpath export shape instead of the earlier string-only form
+- [x] Extend `maw-cli/tests/prompt-list.test.ts` and `maw-cli/tests/prompt-preview.test.ts` so the real-package export-shape regression is covered automatically
+- [x] Verify `bunx maw-cli prompt:list langgraph-ts-template` works in a disposable smoke project created from local repo checkouts
+- [x] Verify `bunx maw-cli prompt:preview langgraph-ts-template planner` works in that same disposable smoke project
 
 Verify:
 
-- [ ] `bun run build` in `langgraph-ts-template`
-- [ ] `bun run test -- tests/unit/package-metadata.spec.ts` in `langgraph-ts-template`
-- [ ] `bun run test -- tests/prompt-list.test.ts tests/prompt-preview.test.ts tests/cli.test.ts` in `maw-cli`
+- [x] `bun run build` in `langgraph-ts-template`
+- [x] `bun run test -- tests/unit/package-metadata.spec.ts` in `langgraph-ts-template`
+- [x] `bun run test -- tests/prompt-list.test.ts tests/prompt-preview.test.ts tests/cli.test.ts` in `maw-cli`
 
 ### 7. Replace the retired phase-local smoke harness with the manual local-repo smoke workflow
 
 This issue step makes the README-driven smoke flow the official Phase 3 verification path.
 
-- [x] Update `../maw-smoke/scripts/initialize-maw-smoke.sh` so `bun smoke-init <test-slug>` installs local checkout paths for `../maw-cli` and `../langgraph-ts-template` instead of GitHub URLs
+- [x] Update `../maw-smoke/scripts/initialize-maw-smoke.sh` so `bun smoke-init <test-slug>` installs local checkout paths for `../maw-cli` and `../langgraph-ts-template` instead of GitHub URLs, leaving `bunx maw-cli ...` execution to the manual smoke flow
 - [x] Update `docs/agents/initiatives/active/init/init-plan.md` so Phase 3 and the verification gates point at the README-driven manual smoke flow
 - [x] Update this Phase 3 plan so `../maw-smoke/README.md` + `docs/agents/smoke-tests.md` are the canonical smoke instructions and `maw-smoke-1` is no longer treated as the final verification path
 - [x] Define the manual Phase 3 smoke runbook in this plan:
@@ -348,9 +348,10 @@ This issue step makes the README-driven smoke flow the official Phase 3 verifica
 
 Verify:
 
-- [ ] `bun smoke-init phase3-prompt-commands` in `../maw-smoke`
-- [ ] In `../maw-smoke/tests/smoke-phase3-prompt-commands/`, run `bunx maw-cli prompt:list langgraph-ts-template`
-- [ ] In `../maw-smoke/tests/smoke-phase3-prompt-commands/`, run `bunx maw-cli prompt:preview langgraph-ts-template planner`
+- [x] `bun smoke-init phase3-prompt-commands` in `../maw-smoke`
+- [x] In `../maw-smoke/tests/smoke-phase3-prompt-commands/`, run `bunx maw-cli init`
+- [x] In `../maw-smoke/tests/smoke-phase3-prompt-commands/`, run `bunx maw-cli prompt:list langgraph-ts-template`
+- [x] In `../maw-smoke/tests/smoke-phase3-prompt-commands/`, write `.maw/templates/security.njk` and run `bunx maw-cli prompt:preview langgraph-ts-template planner`
 
 ## Verification
 
@@ -361,12 +362,13 @@ Verify:
 - [x] Step 2: `bun run test -- tests/init.test.ts` in `maw-cli`
 - [x] Step 3: `bun run test -- tests/prompt-list.test.ts tests/cli.test.ts` in `maw-cli`
 - [x] Step 4: `bun run test -- tests/prompt-preview.test.ts tests/config.test.ts tests/cli.test.ts` in `maw-cli`
-- [ ] Step 6: `bun run build` in `langgraph-ts-template`
-- [ ] Step 6: `bun run test -- tests/unit/package-metadata.spec.ts` in `langgraph-ts-template`
-- [ ] Step 6: `bun run test -- tests/prompt-list.test.ts tests/prompt-preview.test.ts tests/cli.test.ts` in `maw-cli`
-- [ ] Step 7: `bun smoke-init phase3-prompt-commands` in `../maw-smoke`
-- [ ] Step 7: in `../maw-smoke/tests/smoke-phase3-prompt-commands/`, run `bunx maw-cli prompt:list langgraph-ts-template`
-- [ ] Step 7: in `../maw-smoke/tests/smoke-phase3-prompt-commands/`, run `bunx maw-cli prompt:preview langgraph-ts-template planner`
+- [x] Step 6: `bun run build` in `langgraph-ts-template`
+- [x] Step 6: `bun run test -- tests/unit/package-metadata.spec.ts` in `langgraph-ts-template`
+- [x] Step 6: `bun run test -- tests/prompt-list.test.ts tests/prompt-preview.test.ts tests/cli.test.ts` in `maw-cli`
+- [x] Step 7: `bun smoke-init phase3-prompt-commands` in `../maw-smoke`
+- [x] Step 7: in `../maw-smoke/tests/smoke-phase3-prompt-commands/`, run `bunx maw-cli init`
+- [x] Step 7: in `../maw-smoke/tests/smoke-phase3-prompt-commands/`, run `bunx maw-cli prompt:list langgraph-ts-template`
+- [x] Step 7: in `../maw-smoke/tests/smoke-phase3-prompt-commands/`, write `.maw/templates/security.njk` and run `bunx maw-cli prompt:preview langgraph-ts-template planner`
 
 ### Phase completion
 
