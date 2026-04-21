@@ -444,10 +444,12 @@ These parts of the current implementation conflict with the finalized architectu
 
 ### Phase 5: Base codebase workflow MVP
 
+- **NOTE:** treat this phase as the MVP gate for the combined `maw-cli` + workflow-template system
+
 - [ ] complete
 
 - replace the current hardcoded graph stub with a real LLM-backed coding workflow
-- wire Anthropic as the initial model provider for the base template workflow
+- wire OpenAI as the initial model provider for the base template workflow
 - build the graph loop manually instead of using `createReactAgent`
 - add filesystem tools using MCP adapters plus the MCP filesystem server
 - add shell execution using LangChain community tooling
@@ -457,7 +459,6 @@ These parts of the current implementation conflict with the finalized architectu
 - add verification coverage for file creation, file updates, and targeted edits in the target project
 - add verification coverage showing those edits are visible through allowed git commands
 - add smoke coverage proving the base workflow can inspect and act on a target project's codebase
-- treat this phase as the MVP gate for the combined `maw-cli` + workflow-template system
 
 ## Verification Gates
 
