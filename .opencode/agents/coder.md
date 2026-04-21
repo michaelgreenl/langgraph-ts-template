@@ -71,7 +71,7 @@ If a command fails:
 
 The code you will generate will be thoroughly reviewed by a cluster of code-reviewer agents using claude-opus-4-8/max.
 
-If your code is does not pass the first review, a HITL gate is triggered
+If your code does not pass the first review, a HITL gate is triggered
 
 ---
 
