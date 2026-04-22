@@ -1,4 +1,4 @@
-export const DEFAULT_IGNORED_EXTENSIONS = [
+export const DEFAULT_OPENVIKING_IGNORED_EXTENSIONS = [
     '.png',
     '.jpg',
     '.jpeg',

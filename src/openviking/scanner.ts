@@ -1,8 +1,16 @@
-export interface OpenVikingScanResult {
-    readonly ignored: readonly string[];
+import type { OpenVikingScope } from './config.js';
+
+export interface OpenVikingScanInput {
+    readonly scope: OpenVikingScope;
+    readonly target: string;
 }
 
-export const DEFAULT_IGNORED_EXTENSIONS = [
+export interface OpenVikingScanResult {
+    readonly ignored: readonly string[];
+    readonly scope: OpenVikingScope;
+}
+
+export const DEFAULT_OPENVIKING_IGNORED_EXTENSIONS = [
     '.png',
     '.jpg',
     '.jpeg',

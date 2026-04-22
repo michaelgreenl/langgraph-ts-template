@@ -154,15 +154,15 @@ Verify:
 
 Phase 4 still does not retrieve OpenViking context inside the graph loop, but it should stop exporting host/port stubs that conflict with the new project contract. This step makes the package surface concrete for Phase 5 without wiring live calls yet.
 
-- [ ] `langgraph-ts-template/src/openviking/config.ts`: replace the host/port stub with concrete project-config readers that model `maw.json.openviking` as the retrieval toggle and `.maw/ovcli.conf` as the client URL authority
-- [ ] `langgraph-ts-template/src/openviking/client.ts`, `src/openviking/scanner.ts`, and `src/index.ts`: replace the stub interfaces/constants with URL-based client contracts and shared project-scope types aligned to `.maw/ovcli.conf` and project-scoped `.maw/openviking/`, without performing live retrieval yet
-- [ ] `langgraph-ts-template/tests/unit/openviking.spec.ts` and `tests/integration/graph.test.ts`: verify the exported OpenViking surface, missing/invalid config rules, and continued graph creation under the simplified `maw.json` shape
+- [x] `langgraph-ts-template/src/openviking/config.ts`: replace the host/port stub with concrete project-config readers that model `maw.json.openviking` as the retrieval toggle and `.maw/ovcli.conf` as the client URL authority
+- [x] `langgraph-ts-template/src/openviking/client.ts`, `src/openviking/scanner.ts`, and `src/index.ts`: replace the stub interfaces/constants with URL-based client contracts and shared project-scope types aligned to `.maw/ovcli.conf` and project-scoped `.maw/openviking/`, without performing live retrieval yet
+- [x] `langgraph-ts-template/tests/unit/openviking.spec.ts` and `tests/integration/graph.test.ts`: verify the exported OpenViking surface, missing/invalid config rules, and continued graph creation under the simplified `maw.json` shape
 
 Verify:
 
-- [ ] `bun run typecheck` in `langgraph-ts-template/`
-- [ ] `bun run test -- tests/unit/openviking.spec.ts` in `langgraph-ts-template/`
-- [ ] `bun run test:int -- tests/integration/graph.test.ts` in `langgraph-ts-template/`
+- [x] `bun run typecheck` in `langgraph-ts-template/`
+- [x] `bun run test -- tests/unit/openviking.spec.ts` in `langgraph-ts-template/`
+- [x] `bun run test:int -- tests/integration/graph.test.ts` in `langgraph-ts-template/`
 
 ### 4. Align public MVP docs with the new OpenViking surface
 
@@ -203,9 +203,9 @@ Verify:
 - [x] Step 1: `bun run test:int -- tests/integration/graph.test.ts` in `langgraph-ts-template/`
 - [x] Step 2: `bun run test -- tests/init.test.ts` in `maw-cli/`
 - [x] Step 2: `bun run build` in `maw-cli/`
-- [ ] Step 3: `bun run typecheck` in `langgraph-ts-template/`
-- [ ] Step 3: `bun run test -- tests/unit/openviking.spec.ts` in `langgraph-ts-template/`
-- [ ] Step 3: `bun run test:int -- tests/integration/graph.test.ts` in `langgraph-ts-template/`
+- [x] Step 3: `bun run typecheck` in `langgraph-ts-template/`
+- [x] Step 3: `bun run test -- tests/unit/openviking.spec.ts` in `langgraph-ts-template/`
+- [x] Step 3: `bun run test:int -- tests/integration/graph.test.ts` in `langgraph-ts-template/`
 - [ ] Step 4: `rg "maw:ov:server|maw:ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md`
 - [ ] Step 4: `! rg "ov:init|maw-cli ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md`
 - [ ] Step 5: `bun smoke-init phase4-openviking` in `../maw-smoke/`

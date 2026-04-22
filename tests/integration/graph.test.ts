@@ -25,9 +25,9 @@ const writeJson = async (file: string, value: unknown): Promise<void> => {
     await writeFile(file, JSON.stringify(value, null, 4));
 };
 
-const writeProject = async (root: string): Promise<void> => {
+const writeProject = async (root: string, openviking = false): Promise<void> => {
     await writeJson(join(root, 'maw.json'), {
-        openviking: false,
+        openviking,
         templates: {
             customPath: '.maw/templates',
         },
@@ -194,6 +194,37 @@ describe('Graph', () => {
         expect(warn).toHaveBeenCalledTimes(1);
         expect(warn.mock.calls[0]?.[0]).toContain('Unable to resolve snippet: missing-snippet');
         expect(warn.mock.calls[0]?.[0]).toContain('Falling back to embedded workflow defaults');
+    });
+
+    it('does not require ovcli.conf while retrieval is still deferred', async () => {
+        const root = await createRoot();
+
+        await writeProject(root, true);
+
+        const app = createGraph({ root, workflow: 'missing' });
+        const result = await app.invoke({ messages: ['Hello'] });
+        const prompt = text(result.messages[0].content);
+
+        expect(result.messages[0]._getType()).toBe('system');
+        expect(prompt).toContain(GENERAL);
+        expect(prompt).toContain(SECURITY);
+        expect(prompt).toContain(RESEARCH);
+    });
+
+    it('ignores invalid ovcli.conf while retrieval is still deferred', async () => {
+        const root = await createRoot();
+
+        await writeProject(root, true);
+        await writeJson(join(root, '.maw/ovcli.conf'), { url: ':' });
+
+        const app = createGraph({ root, workflow: 'missing' });
+        const result = await app.invoke({ messages: ['Hello'] });
+        const prompt = text(result.messages[0].content);
+
+        expect(result.messages[0]._getType()).toBe('system');
+        expect(prompt).toContain(GENERAL);
+        expect(prompt).toContain(SECURITY);
+        expect(prompt).toContain(RESEARCH);
     });
 
     it('rejects when an existing maw.json file is invalid', async () => {
