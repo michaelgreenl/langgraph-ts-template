@@ -1,12 +1,11 @@
 # langgraph-ts-template MVP Usage
 
-This guide shows how a workflow author uses `langgraph-ts-template` to build a MAW-compatible workflow package for the finalized MVP.
+This guide shows how a workflow author uses `langgraph-ts-template` to build a MAW-compatible workflow package for the Phase 4 MVP.
 
 > Status
 >
-> This page documents the finalized Phase 2 through Phase 5 contract from `docs/agents/initiatives/active/init/init-plan.md` and `docs/agents/initiatives/active/init/active/08-langgraph-template-refactor/tasks.md`.
-> The current repository still contains pre-refactor pieces such as the stock LangGraph README, the old config shape, and the old scaffold contract.
-> This guide is the target usage model for the MVP end state.
+> This page reflects the current workflow-package contract through Phase 4.
+> Workflow packages own workflow-specific runtime assets, `maw-cli dev <workflow>` remains the workflow runner, and OpenViking runtime execution lives in target-project `package.json` scripts.
 
 ## Goal
 
@@ -48,7 +47,10 @@ The workflow package does not own project-level MAW infrastructure.
 | --- | --- |
 | `maw.json` | `maw-cli` |
 | `.maw/ov.conf` | `maw-cli` |
+| `.maw/ovcli.conf` | `maw-cli` |
 | `.maw/graphs/<workflow>/langgraph.json` | `maw-cli` |
+| `package.json#scripts.maw:ov:server` | `maw-cli` seeds it, target project owns the final value |
+| `package.json#scripts.maw:ov:index` | `maw-cli` seeds it, target project owns the final value |
 | `maw-cli` installation and command execution | target project |
 
 ## 1. Name The Package And Workflow
@@ -230,6 +232,20 @@ Project config from `maw.json`:
 
 - if `maw.json` is missing, fall back to project defaults
 - if `maw.json` exists but is invalid, throw instead of silently defaulting
+- expect the Phase 4 project shape shown below; do not read `workspace` or OpenViking host/port fields from `maw.json`
+
+Phase 4 project config shape:
+
+```json
+{
+    "openviking": true,
+    "templates": {
+        "customPath": ".maw/templates"
+    }
+}
+```
+
+OpenViking URL ownership lives in `.maw/ovcli.conf`, not in `maw.json`.
 
 Workflow config from `.maw/graphs/<workflow>/config.json`:
 
@@ -262,12 +278,14 @@ Graph naming rule:
 graph.name = cfg.name ?? cfg.workflow ?? DEFAULT_GRAPH_NAME;
 ```
 
-For the finalized MVP base coding workflow, the graph is expected to:
+For the Phase 4 base coding workflow, the graph is expected to:
 
-- retrieve shared project context through OpenViking
 - use deterministic planner and coder prompts
 - operate against the target project's codebase
 - expose a controlled tool loop for file, shell, and git work
+- stay compatible with the simplified OpenViking config surface in `maw.json` and `.maw/ovcli.conf`
+
+Through Phase 4, live graph-time OpenViking retrieval stays deferred. `maw-cli dev <workflow>` is still the workflow runner, while target projects start and index OpenViking through `bun run maw:ov:server` and `bun run maw:ov:index -- <target-path>`.
 
 Runtime constraint:
 
@@ -310,6 +328,7 @@ bunx maw-cli init
 Expected generated target-project layout:
 
 ```text
+package.json
 maw.json
 .maw/
   templates/
@@ -319,6 +338,7 @@ maw.json
       config.json
       langgraph.json
   ov.conf
+  ovcli.conf
 ```
 
 What happened during `init`:
@@ -327,6 +347,8 @@ What happened during `init`:
 - `maw-cli` created `.maw/graphs/coding/`
 - the workflow package supplied `graph.ts` and `config.json`
 - `maw-cli` generated `langgraph.json`
+- `maw-cli` created `.maw/ov.conf` and `.maw/ovcli.conf` if they were missing
+- `maw-cli` seeded missing `maw:ov:server` and `maw:ov:index` scripts into the target project's `package.json`
 
 ## 11. Run The End-To-End MVP Flow
 
@@ -369,18 +391,25 @@ bunx maw-cli prompt:preview coding planner
 bunx maw-cli prompt:preview coding coder
 ```
 
-7. Index project context.
+7. Start the target project's OpenViking server.
 
 ```bash
-bunx maw-cli ov:init
-bunx maw-cli ov:index
+bun run maw:ov:server
 ```
 
-8. Run the workflow.
+8. Index an explicit target path.
+
+```bash
+bun run maw:ov:index -- .
+```
+
+9. Run the workflow.
 
 ```bash
 bunx maw-cli dev coding
 ```
+
+Through Phase 4, `bunx maw-cli dev coding` remains the workflow runner. The `maw:ov:*` scripts stay in the target project's `package.json`; the workflow package should not introduce a separate OpenViking wrapper command.
 
 Expected result:
 
@@ -388,6 +417,7 @@ Expected result:
 - prompt composition is deterministic and inspectable
 - the workflow reads project config from `maw.json`
 - the workflow reads workflow config from `.maw/graphs/coding/config.json`
+- the target project starts and indexes OpenViking through `maw:ov:server` and `maw:ov:index`
 - the workflow can operate on the target project's codebase through the finalized MVP tool loop
 
 ## Related Guide

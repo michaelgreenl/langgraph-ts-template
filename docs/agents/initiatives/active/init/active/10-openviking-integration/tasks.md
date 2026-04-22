@@ -168,14 +168,14 @@ Verify:
 
 The user-facing docs currently advertise `ov:init`, `maw-cli ov:index`, and the old `maw.json` shape. Update them only after the code contract is locked so implementation and docs land together.
 
-- [ ] `docs/usage/mvp/maw-cli.md`: replace `ov:init` / `maw-cli ov:index` guidance with `bun run maw:ov:server` and `bun run maw:ov:index -- <target-path>` examples, and update the `maw.json` shape
-- [ ] `docs/usage/mvp/langgraph-ts-template.md`: remove stale `workspace` / OpenViking host-port references and align the workflow-package usage guidance with the target-project script model
-- [ ] Both usage docs: state clearly that `maw-cli dev <workflow>` remains the workflow runner through Phase 4 while OpenViking runtime execution lives in target-project `package.json` scripts
+- [x] `docs/usage/mvp/maw-cli.md`: replace `ov:init` / `maw-cli ov:index` guidance with `bun run maw:ov:server` and `bun run maw:ov:index -- <target-path>` examples, and update the `maw.json` shape
+- [x] `docs/usage/mvp/langgraph-ts-template.md`: remove stale `workspace` / OpenViking host-port references and align the workflow-package usage guidance with the target-project script model
+- [x] Both usage docs: state clearly that `maw-cli dev <workflow>` remains the workflow runner through Phase 4 while OpenViking runtime execution lives in target-project `package.json` scripts
 
 Verify:
 
-- [ ] `rg "maw:ov:server|maw:ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md`
-- [ ] `! rg "ov:init|maw-cli ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md`
+- [x] `rg "maw:ov:server|maw:ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md`
+- [x] `! rg "ov:init|maw-cli ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md`
 
 ### 5. Prove the final script-driven flow in a disposable smoke project
 
@@ -206,8 +206,8 @@ Verify:
 - [x] Step 3: `bun run typecheck` in `langgraph-ts-template/`
 - [x] Step 3: `bun run test -- tests/unit/openviking.spec.ts` in `langgraph-ts-template/`
 - [x] Step 3: `bun run test:int -- tests/integration/graph.test.ts` in `langgraph-ts-template/`
-- [ ] Step 4: `rg "maw:ov:server|maw:ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md`
-- [ ] Step 4: `! rg "ov:init|maw-cli ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md`
+- [x] Step 4: `rg "maw:ov:server|maw:ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md`
+- [x] Step 4: `! rg "ov:init|maw-cli ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md`
 - [ ] Step 5: `bun smoke-init phase4-openviking` in `../maw-smoke/`
 - [ ] Step 5: in `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli init`
 - [ ] Step 5: in terminal A inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bun run maw:ov:server`
