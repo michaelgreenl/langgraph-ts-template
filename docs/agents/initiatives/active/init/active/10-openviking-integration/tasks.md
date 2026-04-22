@@ -77,7 +77,7 @@ Relevant generated OpenViking defaults become:
         "workspace": "./.maw/openviking"
     },
     "server": {
-        "host": "0.0.0.0",
+        "host": "127.0.0.1",
         "port": 1933
     }
 }
@@ -90,7 +90,7 @@ Relevant generated OpenViking defaults become:
 }
 ```
 
-Phase 4 seeds matching defaults once. If a user later changes the server bind settings or client URL, rerunning `maw-cli init` preserves those edits instead of reconciling them.
+Phase 4 seeds these loopback defaults once. If a user later changes the server bind settings or client URL, rerunning `maw-cli init` preserves those edits instead of reconciling them.
 
 ### OpenViking runtime script contract
 

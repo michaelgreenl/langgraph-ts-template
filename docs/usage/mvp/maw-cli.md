@@ -288,7 +288,7 @@ Generated OpenViking config excerpts:
         "workspace": "./.maw/openviking"
     },
     "server": {
-        "host": "0.0.0.0",
+        "host": "127.0.0.1",
         "port": 1933
     }
 }
@@ -300,6 +300,8 @@ Generated OpenViking config excerpts:
     "url": "http://localhost:1933"
 }
 ```
+
+The generated server binds to loopback (`127.0.0.1`) by default, and the generated client URL uses `localhost` to reach that same local listener.
 
 ## 8. Run One Workflow In Isolation
 
