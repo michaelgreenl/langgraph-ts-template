@@ -15,9 +15,10 @@ import { createTemplateEngine, type TemplateVars } from '../templates/engine.js'
 import { MAW_SYSTEM_ID, StateAnnotation } from './state.js';
 
 const DEFAULT_GRAPH_NAME = 'New Agent';
+const ROOT_WORKSPACE = '.';
 
 interface ProjectConfig {
-    workspace: string;
+    openviking: boolean;
     templates: {
         customPath: string;
     };
@@ -25,7 +26,7 @@ interface ProjectConfig {
 
 const projectConfigSchema = z
     .object({
-        workspace: z.string().min(1),
+        openviking: z.boolean(),
         templates: z
             .object({
                 customPath: z.string().min(1),
@@ -35,7 +36,7 @@ const projectConfigSchema = z
     .passthrough();
 
 const DEFAULT_PROJECT_CONFIG: ProjectConfig = {
-    workspace: '.',
+    openviking: true,
     templates: {
         customPath: '.maw/templates',
     },
@@ -128,7 +129,7 @@ const prompt = async (cfg: GraphConfig): Promise<string> => {
     const runtime = await loadRuntime(cfg);
     const opts = {
         prompts: runtime.workflowConfig.prompts,
-        workspace: runtime.projectConfig.workspace,
+        workspace: ROOT_WORKSPACE,
         customPath: runtime.projectConfig.templates.customPath,
         root: runtime.root,
     };
@@ -148,7 +149,7 @@ const prompt = async (cfg: GraphConfig): Promise<string> => {
 
         return createTemplateEngine({
             prompts: DEFAULT_WORKFLOW_CONFIG.prompts,
-            workspace: runtime.projectConfig.workspace,
+            workspace: ROOT_WORKSPACE,
             customPath: runtime.projectConfig.templates.customPath,
             root: runtime.root,
         }).compose(runtime.agent, cfg.vars);

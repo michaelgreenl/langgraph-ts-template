@@ -7,9 +7,10 @@ import { DEFAULT_WORKFLOW_CONFIG, loadWorkflowConfig, resolveWorkflowConfig, } f
 import { createTemplateEngine } from '../templates/engine.js';
 import { MAW_SYSTEM_ID, StateAnnotation } from './state.js';
 const DEFAULT_GRAPH_NAME = 'New Agent';
+const ROOT_WORKSPACE = '.';
 const projectConfigSchema = z
     .object({
-    workspace: z.string().min(1),
+    openviking: z.boolean(),
     templates: z
         .object({
         customPath: z.string().min(1),
@@ -18,7 +19,7 @@ const projectConfigSchema = z
 })
     .passthrough();
 const DEFAULT_PROJECT_CONFIG = {
-    workspace: '.',
+    openviking: true,
     templates: {
         customPath: '.maw/templates',
     },
@@ -86,7 +87,7 @@ const prompt = async (cfg) => {
     const runtime = await loadRuntime(cfg);
     const opts = {
         prompts: runtime.workflowConfig.prompts,
-        workspace: runtime.projectConfig.workspace,
+        workspace: ROOT_WORKSPACE,
         customPath: runtime.projectConfig.templates.customPath,
         root: runtime.root,
     };
@@ -101,7 +102,7 @@ const prompt = async (cfg) => {
         console.warn(`[langgraph-ts-template] ${msg} Falling back to embedded workflow defaults for agent ${runtime.agent}.`);
         return createTemplateEngine({
             prompts: DEFAULT_WORKFLOW_CONFIG.prompts,
-            workspace: runtime.projectConfig.workspace,
+            workspace: ROOT_WORKSPACE,
             customPath: runtime.projectConfig.templates.customPath,
             root: runtime.root,
         }).compose(runtime.agent, cfg.vars);

@@ -128,14 +128,14 @@ Phase 4 still stops short of live retrieval, but the exported OpenViking helpers
 
 Clear the old `workspace` / host-port config contract and remove the retired `ov:*` CLI surface first. Keep this step limited to parsing, CLI registration, and runtime callers that still assume the old `maw.json` shape. Do not seed new OpenViking files or package scripts yet.
 
-- [ ] `maw-cli/src/utils/config.ts`: replace the old `workspace` + `openviking.enabled/host/port` schema with the Phase 4 `openviking: boolean` project config shape and keep missing-file behavior aligned with current callers
-- [ ] `maw-cli/src/index.ts`, `maw-cli/src/commands/ov-init.ts`, and `maw-cli/src/commands/ov-index.ts`: remove `ov:init` and `ov:index` from the command registry/help surface and delete the retired placeholder commands
-- [ ] `maw-cli/tests/{cli,config,dev,prompt-preview}.test.ts`, `langgraph-ts-template/src/agent/graph.ts`, and `langgraph-ts-template/tests/integration/graph.test.ts`: stop reading `workspace` or OpenViking host/port from `maw.json` and preserve `workspacePath='.'` compatibility for custom templates
+- [x] `maw-cli/src/utils/config.ts`: replace the old `workspace` + `openviking.enabled/host/port` schema with the Phase 4 `openviking: boolean` project config shape and keep missing-file behavior aligned with current callers
+- [x] `maw-cli/src/index.ts`, `maw-cli/src/commands/ov-init.ts`, and `maw-cli/src/commands/ov-index.ts`: remove `ov:init` and `ov:index` from the command registry/help surface and delete the retired placeholder commands
+- [x] `maw-cli/tests/{cli,config,dev,prompt-preview}.test.ts`, `langgraph-ts-template/src/agent/graph.ts`, and `langgraph-ts-template/tests/integration/graph.test.ts`: stop reading `workspace` or OpenViking host/port from `maw.json` and preserve `workspacePath='.'` compatibility for custom templates
 
 Verify:
 
-- [ ] `bun run test -- tests/config.test.ts tests/dev.test.ts tests/prompt-preview.test.ts tests/cli.test.ts` in `maw-cli/`
-- [ ] `bun run test:int -- tests/integration/graph.test.ts` in `langgraph-ts-template/`
+- [x] `bun run test -- tests/config.test.ts tests/dev.test.ts tests/prompt-preview.test.ts tests/cli.test.ts` in `maw-cli/`
+- [x] `bun run test:int -- tests/integration/graph.test.ts` in `langgraph-ts-template/`
 
 ### 2. Teach `maw-cli init` to seed project-local OpenViking files and scripts
 
@@ -199,8 +199,8 @@ Verify:
 
 ### Per-step verification
 
-- [ ] Step 1: `bun run test -- tests/config.test.ts tests/dev.test.ts tests/prompt-preview.test.ts tests/cli.test.ts` in `maw-cli/`
-- [ ] Step 1: `bun run test:int -- tests/integration/graph.test.ts` in `langgraph-ts-template/`
+- [x] Step 1: `bun run test -- tests/config.test.ts tests/dev.test.ts tests/prompt-preview.test.ts tests/cli.test.ts` in `maw-cli/`
+- [x] Step 1: `bun run test:int -- tests/integration/graph.test.ts` in `langgraph-ts-template/`
 - [ ] Step 2: `bun run test -- tests/init.test.ts` in `maw-cli/`
 - [ ] Step 2: `bun run build` in `maw-cli/`
 - [ ] Step 3: `bun run typecheck` in `langgraph-ts-template/`

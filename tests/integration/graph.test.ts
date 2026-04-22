@@ -27,12 +27,7 @@ const writeJson = async (file: string, value: unknown): Promise<void> => {
 
 const writeProject = async (root: string): Promise<void> => {
     await writeJson(join(root, 'maw.json'), {
-        workspace: '.',
-        openviking: {
-            enabled: false,
-            host: 'localhost',
-            port: 1933,
-        },
+        openviking: false,
         templates: {
             customPath: '.maw/templates',
         },
@@ -119,6 +114,28 @@ describe('Graph', () => {
         expect(prompt).toContain(TYPESCRIPT);
         expect(prompt).not.toContain(RESEARCH);
     }, 30_000);
+
+    it('derives workspacePath from the MAW scope root for custom templates', async () => {
+        const root = await createRoot();
+
+        await writeProject(root);
+        await writeFile(join(root, '.maw/templates/workspace-note.njk'), 'Workspace path: {{ workspacePath }}\n');
+        await writeWorkflow(root, 'workspace-note', {
+            prompts: {
+                global: ['workspace-note'],
+                agents: {
+                    coder: ['typescript'],
+                },
+            },
+        });
+
+        const app = createGraph({ agent: 'coder', root, workflow: 'workspace-note' });
+        const result = await app.invoke({ messages: ['Hello'] });
+        const prompt = text(result.messages[0].content);
+
+        expect(prompt).toContain('Workspace path: .');
+        expect(prompt).toContain(TYPESCRIPT);
+    });
 
     it('falls back to embedded defaults when the workflow config file is missing', async () => {
         const root = await createRoot();
