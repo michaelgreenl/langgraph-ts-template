@@ -141,14 +141,14 @@ Verify:
 
 This step owns project bootstrap only. It should make OpenViking configuration and runtime scripts visible inside the target project without adding new wrapper behavior on top of upstream commands.
 
-- [ ] `maw-cli/src/commands/init.ts`: require a target-project `package.json`, generate `maw.json` with `openviking: true`, create `.maw/ov.conf` and `.maw/ovcli.conf` if missing, and keep `.gitignore` limited to `.maw/openviking/`
-- [ ] `maw-cli/src/commands/init.ts`: add missing `package.json` scripts `maw:ov:server` and `maw:ov:index`, create `scripts` if absent, emit `Warning:` on conflicting existing values, and preserve all unrelated `package.json` content
-- [ ] `maw-cli/tests/init.test.ts` and `maw-cli/tests/support.ts`: cover missing-package failure, zero-workflow bootstrap, new file shapes, script seeding, conflict warnings, rerun preservation, and the fact that `.maw/ovcli.conf` is no longer derived from `maw.json`
+- [x] `maw-cli/src/commands/init.ts`: require a target-project `package.json`, generate `maw.json` with `openviking: true`, create `.maw/ov.conf` and `.maw/ovcli.conf` if missing, and keep `.gitignore` limited to `.maw/openviking/`
+- [x] `maw-cli/src/commands/init.ts`: add missing `package.json` scripts `maw:ov:server` and `maw:ov:index`, create `scripts` if absent, emit `Warning:` on conflicting existing values, and preserve all unrelated `package.json` content
+- [x] `maw-cli/tests/init.test.ts` and `maw-cli/tests/support.ts`: cover missing-package failure, zero-workflow bootstrap, new file shapes, script seeding, conflict warnings, rerun preservation, and the fact that `.maw/ovcli.conf` is no longer derived from `maw.json`
 
 Verify:
 
-- [ ] `bun run test -- tests/init.test.ts` in `maw-cli/`
-- [ ] `bun run build` in `maw-cli/`
+- [x] `bun run test -- tests/init.test.ts` in `maw-cli/`
+- [x] `bun run build` in `maw-cli/`
 
 ### 3. Replace template-side OpenViking stubs with Phase 5-ready toggle/url plumbing
 
@@ -201,8 +201,8 @@ Verify:
 
 - [x] Step 1: `bun run test -- tests/config.test.ts tests/dev.test.ts tests/prompt-preview.test.ts tests/cli.test.ts` in `maw-cli/`
 - [x] Step 1: `bun run test:int -- tests/integration/graph.test.ts` in `langgraph-ts-template/`
-- [ ] Step 2: `bun run test -- tests/init.test.ts` in `maw-cli/`
-- [ ] Step 2: `bun run build` in `maw-cli/`
+- [x] Step 2: `bun run test -- tests/init.test.ts` in `maw-cli/`
+- [x] Step 2: `bun run build` in `maw-cli/`
 - [ ] Step 3: `bun run typecheck` in `langgraph-ts-template/`
 - [ ] Step 3: `bun run test -- tests/unit/openviking.spec.ts` in `langgraph-ts-template/`
 - [ ] Step 3: `bun run test:int -- tests/integration/graph.test.ts` in `langgraph-ts-template/`
