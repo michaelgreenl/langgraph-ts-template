@@ -49,6 +49,7 @@ The remaining alignment work is now:
 - OpenViking remains per-project, not per-workflow.
 - `.maw/openviking/` is the project-local OpenViking storage location for that MAW scope.
 - `.maw/ov.conf` is the project-local OpenViking server config authority.
+- `.maw/ov.conf` seeds OpenAI-backed dense-embedding and VLM defaults, and the scaffold keeps `${OPENAI_API_KEY}` literal for OpenViking to resolve.
 - `.maw/ovcli.conf` is the project-local OpenViking client/runtime URL authority and stores no secrets.
 - `maw-cli init` seeds missing `package.json` scripts `maw:ov:server` and `maw:ov:index`; if either script already exists with different content, it warns and preserves the existing value.
 - `maw-cli init` seeds matching default OpenViking files once, but reruns do not reconcile later drift between `maw.json`, `.maw/ov.conf`, `.maw/ovcli.conf`, or target-project script entries.
@@ -203,8 +204,10 @@ Workflow runtimes may fall back to built-in project defaults only when `maw.json
 
 - it configures the shared OpenViking database for the project
 - it includes the server bind settings used by `maw:ov:server`
+- it seeds the restored OpenAI-backed dense-embedding and VLM defaults used by the Phase 4 scaffold
 - every installed workflow uses the same indexed project context
 - it may use environment variable placeholders like `${OPENAI_API_KEY}` or any other `${VAR}` name supported by upstream config expansion
+- the scaffold keeps `${OPENAI_API_KEY}` literal and lets OpenViking resolve it during config loading
 - it should move out of the workflow template and into `maw-cli`
 
 Relevant generated fields:
@@ -217,6 +220,23 @@ Relevant generated fields:
     "server": {
         "host": "127.0.0.1",
         "port": 1933
+    },
+    "embedding": {
+        "dense": {
+            "provider": "openai",
+            "api_base": "https://api.openai.com/v1",
+            "api_key": "${OPENAI_API_KEY}",
+            "model": "text-embedding-3-large",
+            "dimension": 3072
+        },
+        "max_concurrent": 10
+    },
+    "vlm": {
+        "provider": "openai",
+        "api_base": "https://api.openai.com/v1",
+        "api_key": "${OPENAI_API_KEY}",
+        "model": "gpt-4o",
+        "max_concurrent": 100
     }
 }
 ```
@@ -618,6 +638,7 @@ Smoke verification runs from `../maw-smoke/` following `README.md` and `docs/age
 
 - `maw-cli init` requires a target-project `package.json`; if it is missing, the command fails loudly instead of guessing where MAW scripts should live
 - `maw-cli init` with no installed workflows still creates `maw.json`, `.maw/templates/`, `.maw/graphs/`, `.maw/ov.conf`, `.maw/ovcli.conf`, and seeded `maw:ov:*` scripts, then warns
+- `.maw/ov.conf` is seeded with loopback host/port plus the restored OpenAI-backed dense-embedding and VLM defaults, and it keeps `${OPENAI_API_KEY}` literal for OpenViking to resolve
 - `.maw/ovcli.conf` is seeded with `http://localhost:1933` and preserved on rerun instead of being regenerated from `maw.json`
 - a target project with two installed workflows gets two directories under `.maw/graphs/`
 - `.gitignore` gets `.maw/openviking/` and does not add `maw.json`, `.maw/ov.conf`, or `.maw/ovcli.conf`

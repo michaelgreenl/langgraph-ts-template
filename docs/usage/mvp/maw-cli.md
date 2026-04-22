@@ -105,10 +105,10 @@ Ownership split:
 | --- | --- |
 | `package.json#scripts.maw:ov:server` | `maw-cli` seeds it if missing, target project owns later edits |
 | `package.json#scripts.maw:ov:index` | `maw-cli` seeds it if missing, target project owns later edits |
-| `maw.json` | `maw-cli` |
+| `maw.json` | `maw-cli` seeds it if missing, target project owns later edits |
 | `.maw/templates/` | `maw-cli` creates it, target project owns overrides inside it |
-| `.maw/ov.conf` | `maw-cli` |
-| `.maw/ovcli.conf` | `maw-cli` |
+| `.maw/ov.conf` | `maw-cli` seeds it if missing, target project owns later edits |
+| `.maw/ovcli.conf` | `maw-cli` seeds it if missing, target project owns later edits |
 | `.maw/graphs/<workflow>/graph.ts` | workflow package |
 | `.maw/graphs/<workflow>/config.json` | workflow package |
 | `.maw/graphs/<workflow>/langgraph.json` | `maw-cli` |
@@ -290,6 +290,23 @@ Generated OpenViking config excerpts:
     "server": {
         "host": "127.0.0.1",
         "port": 1933
+    },
+    "embedding": {
+        "dense": {
+            "provider": "openai",
+            "api_base": "https://api.openai.com/v1",
+            "api_key": "${OPENAI_API_KEY}",
+            "model": "text-embedding-3-large",
+            "dimension": 3072
+        },
+        "max_concurrent": 10
+    },
+    "vlm": {
+        "provider": "openai",
+        "api_base": "https://api.openai.com/v1",
+        "api_key": "${OPENAI_API_KEY}",
+        "model": "gpt-4o",
+        "max_concurrent": 100
     }
 }
 ```
@@ -302,6 +319,8 @@ Generated OpenViking config excerpts:
 ```
 
 The generated server binds to loopback (`127.0.0.1`) by default, and the generated client URL uses `localhost` to reach that same local listener.
+
+The scaffolded `.maw/ov.conf` intentionally keeps `${OPENAI_API_KEY}` literal. OpenViking resolves that placeholder at runtime, so the generated config carries placeholders rather than copied secrets.
 
 ## 8. Run One Workflow In Isolation
 
