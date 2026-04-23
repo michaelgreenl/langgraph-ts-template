@@ -157,14 +157,14 @@ Phase 4 still stops short of live retrieval, but the exported OpenViking helpers
 
 ### 1. Restore `maw-cli` OpenViking runtime wrappers
 
-- [ ] add `maw-cli/src/commands/ov-server.ts` and `src/commands/ov-index.ts`
-- [ ] add a `maw-cli` utility to parse `.maw/ov.conf`, resolve `${VAR}` placeholders, and create/clean up the resolved temp config used by `ov:server`
-- [ ] wire `maw-cli/src/index.ts` so `ov:server` and `ov:index` are back in the command registry/help surface while `ov:init` stays retired
-- [ ] add CLI/tests coverage for explicit target path handling, placeholder-resolution failures, and wrapper passthrough behavior
+- [x] add `maw-cli/src/commands/ov-server.ts` and `src/commands/ov-index.ts`
+- [x] add a `maw-cli` utility to parse `.maw/ov.conf`, resolve `${VAR}` placeholders, and create/clean up the resolved temp config used by `ov:server`
+- [x] wire `maw-cli/src/index.ts` so `ov:server` and `ov:index` are back in the command registry/help surface while `ov:init` stays retired
+- [x] add CLI/tests coverage for explicit target path handling, placeholder-resolution failures, and wrapper passthrough behavior
 
 Verify:
 
-- [ ] `bun run test -- tests/cli.test.ts tests/ov-server.test.ts tests/ov-index.test.ts` in `maw-cli/`
+- [x] `bun run test -- tests/cli.test.ts tests/ov-server.test.ts tests/ov-index.test.ts` in `maw-cli/`
 
 ### 2. Stop mutating target-project `package.json` for OpenViking runtime wiring
 
@@ -208,7 +208,7 @@ Verify:
 
 ### Per-step verification
 
-- [ ] Step 1: `bun run test -- tests/cli.test.ts tests/ov-server.test.ts tests/ov-index.test.ts` in `maw-cli/`
+- [x] Step 1: `bun run test -- tests/cli.test.ts tests/ov-server.test.ts tests/ov-index.test.ts` in `maw-cli/`
 - [ ] Step 2: `bun run test -- tests/init.test.ts` in `maw-cli/`
 - [ ] Step 2: `bun run build` in `maw-cli/`
 - [ ] Step 3: `rg "maw-cli ov:server|maw-cli ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md docs/agents/initiatives/active/init/init-plan.md`
