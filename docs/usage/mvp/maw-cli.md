@@ -37,7 +37,7 @@ Example workflow name used throughout this guide: `coding`.
 | `maw-cli init` | Bootstrap MAW project files and workflow-local scaffolds |
 | `maw-cli dev <workflow>` | Run one workflow through LangGraph dev using its local config |
 | `maw-cli ov:server` | Start the project-scoped OpenViking server after resolving `.maw/ov.conf` placeholders |
-| `maw-cli ov:index <target-path> [openviking args...]` | Index one explicit path with the project-local `.maw/ovcli.conf` |
+| `maw-cli ov:index [target-path] [openviking args...]` | Index the current working directory by default, or one explicit path, with the project-local `.maw/ovcli.conf` |
 
 There is no `maw-cli start` command in the MVP.
 
@@ -248,10 +248,10 @@ bunx maw-cli ov:server
 
 `maw-cli ov:server` reads `.maw/ov.conf`, resolves `${VAR}` placeholders from the current process environment first and the MAW-scope local `.env` as fallback, loads that `.env` file explicitly instead of relying on Bun auto-loading, writes the resolved values only into an ephemeral temp config outside the project tree, and then invokes upstream `openviking-server`.
 
-Index the whole project. The target path is always explicit:
+Index the whole project. If you omit `target-path`, `maw-cli ov:index` defaults to the current working directory:
 
 ```bash
-bunx maw-cli ov:index .
+bunx maw-cli ov:index
 ```
 
 Reindex only one subtree or file:
@@ -269,7 +269,8 @@ bunx maw-cli ov:index . --wait
 
 Important behavior:
 
-- `maw-cli ov:index` requires an explicit target path and does not hide one behind MAW defaults
+- `maw-cli ov:index` defaults to the current working directory when you omit the target path
+- when passing extra upstream flags, provide the target path before those flags, for example `bunx maw-cli ov:index . --wait`
 - `maw-cli ov:index` uses the project-local `.maw/ovcli.conf`
 - `maw-cli ov:index` does not depend on `maw.json.openviking`; setting `"openviking": false` disables later retrieval only and does not block indexing
 - `maw-cli init` creates `.maw/ov.conf` and `.maw/ovcli.conf` if missing, but it does not add target-project OpenViking runtime scripts
@@ -365,7 +366,7 @@ Example:
 bunx maw-cli dev coding --port 3020
 ```
 
-Through Phase 4, this remains the workflow runner. Starting and indexing OpenViking stays separate through `bunx maw-cli ov:server` and `bunx maw-cli ov:index <target-path>`.
+Through Phase 4, this remains the workflow runner. Starting and indexing OpenViking stays separate through `bunx maw-cli ov:server` and `bunx maw-cli ov:index [target-path]`.
 
 ## 9. End-To-End MVP Flow
 
@@ -403,10 +404,10 @@ bunx maw-cli prompt:preview coding coder
 bunx maw-cli ov:server
 ```
 
-8. Index an explicit path into OpenViking.
+8. Index project content into OpenViking. Omitting the path uses the current working directory.
 
 ```bash
-bunx maw-cli ov:index .
+bunx maw-cli ov:index
 ```
 
 9. Run the workflow.
@@ -437,7 +438,7 @@ Use these checks to confirm the target project matches the MVP contract.
 | `.maw/ovcli.conf` exists | project-local OpenViking client URL was created |
 | target-project `package.json` exists before `maw-cli init` | MAW scope satisfies workflow discovery requirements |
 | `bunx maw-cli ov:server` is the server start path | OpenViking runtime ownership stays in `maw-cli` |
-| `bunx maw-cli ov:index .` requires an explicit target path | indexing uses the direct `maw-cli` surface |
+| `bunx maw-cli ov:index` defaults to the current working directory | indexing uses the direct `maw-cli` surface |
 | `.maw/graphs/coding/graph.ts` exists | workflow scaffold landed |
 | `.maw/graphs/coding/config.json` exists | workflow-local prompt config landed |
 | `.maw/graphs/coding/langgraph.json` exists | workflow-local LangGraph config was generated |
@@ -452,7 +453,7 @@ Use these checks to confirm the target project matches the MVP contract.
 | --- | --- |
 | `maw-cli init` finds no workflows | confirm the package is installed and exports `./scaffold` |
 | `maw-cli ov:server` fails before launch | confirm the required `.maw/ov.conf` placeholders are available in the current process environment or the MAW-scope local `.env`; process env wins when both define the same value |
-| `bunx maw-cli ov:index` exits immediately | confirm you passed an explicit target path, for example `bunx maw-cli ov:index .` |
+| `bunx maw-cli ov:index` exits immediately | if you passed upstream flags, confirm you also supplied the target path first, for example `bunx maw-cli ov:index . --wait` |
 | `maw-cli dev <workflow>` says the workflow directory is missing | rerun `maw-cli init` after installing the workflow package |
 | prompt preview does not show a custom override | confirm the override file name matches the snippet name exactly |
 | workflow config is ignored | confirm `.maw/graphs/<workflow>/config.json` is valid JSON and uses the prompt-only shape |

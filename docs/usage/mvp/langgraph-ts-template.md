@@ -286,7 +286,7 @@ For the Phase 4 base coding workflow, the graph is expected to:
 - expose a controlled tool loop for file, shell, and git work
 - stay compatible with the simplified OpenViking config surface in `maw.json` and `.maw/ovcli.conf`
 
-Through Phase 4, live graph-time OpenViking retrieval stays deferred. `maw-cli dev <workflow>` is still the workflow runner, while target projects start and index OpenViking through `bunx maw-cli ov:server` and `bunx maw-cli ov:index <target-path>`.
+Through Phase 4, live graph-time OpenViking retrieval stays deferred. `maw-cli dev <workflow>` is still the workflow runner, while target projects start and index OpenViking through `bunx maw-cli ov:server` and `bunx maw-cli ov:index [target-path]`.
 
 Runtime constraint:
 
@@ -398,10 +398,10 @@ bunx maw-cli prompt:preview coding coder
 bunx maw-cli ov:server
 ```
 
-8. Index an explicit target path.
+8. Index target project content. Omitting the path defaults to the current working directory.
 
 ```bash
-bunx maw-cli ov:index .
+bunx maw-cli ov:index
 ```
 
 9. Run the workflow.
@@ -410,7 +410,7 @@ bunx maw-cli ov:index .
 bunx maw-cli dev coding
 ```
 
-Through Phase 4, `bunx maw-cli dev coding` remains the workflow runner. Target projects start and index OpenViking through `bunx maw-cli ov:server` and `bunx maw-cli ov:index <target-path>`; the workflow package should not introduce a separate OpenViking wrapper command.
+Through Phase 4, `bunx maw-cli dev coding` remains the workflow runner. Target projects start and index OpenViking through `bunx maw-cli ov:server` and `bunx maw-cli ov:index [target-path]`; the workflow package should not introduce a separate OpenViking wrapper command.
 
 Expected result:
 

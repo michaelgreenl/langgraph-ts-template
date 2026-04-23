@@ -55,10 +55,10 @@ The remaining alignment work is now:
 - `maw-cli init` does not mutate the target project's `package.json` for OpenViking runtime wiring.
 - `maw-cli` exposes these OpenViking runtime commands:
   - `maw-cli ov:server`
-  - `maw-cli ov:index <target-path> [openviking args...]`
-- `maw-cli ov:index` requires an explicit target path at invocation time, for example `bunx maw-cli ov:index .` or `bunx maw-cli ov:index src --wait`.
+- `maw-cli ov:index [target-path] [openviking args...]`
+- `maw-cli ov:index` defaults to the current working directory when `target-path` is omitted; if the caller passes additional OpenViking flags, the target path must come before those flags, for example `bunx maw-cli ov:index . --wait` or `bunx maw-cli ov:index src --wait`.
 - `maw-cli ov:server` resolves `${VAR}` placeholders in `.maw/ov.conf` from the current process environment first and the MAW-scope local `.env` as fallback, loads that `.env` file explicitly instead of relying on Bun auto-loading, uses the resolved values only for the temp config passed to upstream `openviking-server`, and fails clearly when required placeholders are unresolved.
-- `maw-cli ov:index` points upstream `openviking add-resource` at `.maw/ovcli.conf`, requires an explicit target path, and passes any additional caller-supplied flags straight through.
+- `maw-cli ov:index` points upstream `openviking add-resource` at `.maw/ovcli.conf`, defaults to the current working directory when `target-path` is omitted, and passes any additional caller-supplied flags straight through.
 - `openviking: false` in `maw.json` disables graph-time retrieval only; it does not block `maw-cli ov:index`.
 - The target project's workflow runtime files live under `.maw/graphs/<workflow>/`.
 - Each workflow directory contains its own `graph.ts`, `config.json`, and `langgraph.json`.
@@ -271,14 +271,14 @@ Command surface:
 
 ```text
 maw-cli ov:server
-maw-cli ov:index <target-path> [openviking args...]
+maw-cli ov:index [target-path] [openviking args...]
 ```
 
 Rules:
 
 - `maw-cli ov:server` is the explicit Phase 4 server start path
-- `maw-cli ov:index` requires an explicit target path at invocation time
-- additional OpenViking flags are passed through by the caller, for example `bunx maw-cli ov:index . --wait`
+- `maw-cli ov:index` defaults to the current working directory when the caller omits `target-path`
+- additional OpenViking flags are passed through by the caller; when flags are present, provide the target first, for example `bunx maw-cli ov:index . --wait`
 - `.maw/ov.conf` placeholder resolution happens inside `maw-cli ov:server`, using process env first and MAW-scope local `.env` fallback, not inside the scaffolded file itself
 - `.maw/ovcli.conf` remains the client/runtime URL authority used by `maw-cli ov:index`
 - `maw-cli init` requires a target-project `package.json`, but it does not seed `maw:ov:*` scripts because the runtime surface is direct `maw-cli` execution
@@ -381,7 +381,7 @@ The MVP command surface now lives entirely on `maw-cli`; target projects no long
 maw-cli init
 maw-cli dev <workflow>
 maw-cli ov:server
-maw-cli ov:index <target-path> [openviking args...]
+maw-cli ov:index [target-path] [openviking args...]
 maw-cli prompt:list <workflow>
 maw-cli prompt:preview <workflow> <agent>
 ```
@@ -434,7 +434,7 @@ Phase 4 keeps live OpenViking execution inside `maw-cli` so MAW can resolve `.ma
 
 - set `OPENVIKING_CLI_CONFIG_FILE=.maw/ovcli.conf`
 - invoke upstream `openviking add-resource`
-- require the caller to provide an explicit target path
+- default to the current working directory when the caller omits the target path
 - pass through any additional caller-supplied flags such as `--wait`
 - continue relying on upstream non-strict unsupported-file handling unless the caller opts into stricter flags
 
@@ -442,7 +442,7 @@ Examples:
 
 ```text
 bunx maw-cli ov:server
-bunx maw-cli ov:index .
+bunx maw-cli ov:index
 bunx maw-cli ov:index src --wait
 ```
 
@@ -580,7 +580,7 @@ The remaining implementation gap called out by this plan is:
 - shrink `maw.json.openviking` to a boolean retrieval toggle and remove `workspace`, host, and port from the live project config contract
 - keep `ov:init` retired, but move `ov:server` and `ov:index` runtime responsibility back into `maw-cli`
 - stop seeding target-project OpenViking runtime scripts; target projects should invoke `maw-cli ov:*` directly
-- require explicit target paths for `maw-cli ov:index` and pass any additional flags straight through to upstream `openviking add-resource`
+- default `maw-cli ov:index` to the current working directory when no target path is supplied and pass any additional flags straight through to upstream `openviking add-resource`
 - resolve `.maw/ov.conf` `${VAR}` placeholders inside `maw-cli` before launching upstream OpenViking processes
 - verify that all workflows in one MAW scope continue to share the same project-level OpenViking storage and config
 - keep OpenViking model/provider config out of workflow-specific config
