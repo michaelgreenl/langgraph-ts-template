@@ -2,63 +2,72 @@
 
 ## Goal
 
-Implement project-scoped OpenViking bootstrap and target-project runtime scripts for MAW. After this phase, `maw-cli init` requires a target-project `package.json`, creates `.maw/ov.conf` and `.maw/ovcli.conf`, seeds `maw:ov:server` and `maw:ov:index` into the target project's scripts, removes `ov:*` from the `maw-cli` command surface, and `langgraph-ts-template` exposes non-stub OpenViking toggle/url plumbing for Phase 5 without wiring live retrieval into the graph loop yet.
+Implement project-scoped OpenViking bootstrap plus `maw-cli`-owned runtime wrappers for MAW. After this phase, `maw-cli init` requires a target-project `package.json`, creates `.maw/ov.conf` and `.maw/ovcli.conf`, leaves the target project's `package.json` untouched for OpenViking runtime wiring, `maw-cli` exposes `ov:server` and `ov:index`, `maw-cli ov:server` resolves `.maw/ov.conf` placeholders before launching upstream OpenViking, and `langgraph-ts-template` continues to expose non-stub OpenViking toggle/url plumbing without wiring live graph-time retrieval into the graph loop yet.
+
+## Status Reset
+
+- Already complete and still valid:
+  - simplified `maw.json` contract (`openviking: boolean` plus `templates.customPath`)
+  - project-local `.maw/ov.conf` / `.maw/ovcli.conf` bootstrap
+  - template-side OpenViking toggle/url plumbing for later runtime retrieval
+  - public docs alignment for the simplified project-config surface
+- Superseded assumption:
+  - target-project `maw:ov:*` scripts are not the right ownership boundary once `.maw/ov.conf` placeholder resolution moves back into `maw-cli`
+- Remaining Phase 4 work:
+  - move OpenViking runtime responsibility fully back into `maw-cli`
+  - stop mutating target-project `package.json` for OpenViking runtime wiring
+  - reprove the smoke flow end to end with direct `maw-cli ov:*` commands
 
 ## Scope
 
-- `maw-cli/src/commands/init.ts` - require `package.json`, generate the new `maw.json` shape, scaffold OpenViking files, and seed target-project `package.json` scripts
-- `maw-cli/src/commands/ov-init.ts` and `maw-cli/src/commands/ov-index.ts` - delete the retired command files
-- `maw-cli/src/index.ts` - remove `ov:*` from the command registry and help output
-- `maw-cli/src/utils/config.ts` - simplify `maw.json` to the scope-root contract with `openviking: boolean`
-- `maw-cli/tests/{cli,config,dev,init,prompt-preview}.test.ts` and `maw-cli/tests/support.ts` - align assertions and fixtures with the new project-config and script-seeding contract
-- `langgraph-ts-template/src/agent/graph.ts` - stop reading `workspace` / OpenViking host-port settings from `maw.json` while preserving `workspacePath='.'` compatibility for custom templates
-- `langgraph-ts-template/src/openviking/config.ts`, `src/openviking/client.ts`, `src/openviking/scanner.ts`, and `src/index.ts` - replace Phase 4 stubs with concrete toggle/url-based plumbing for Phase 5
-- `langgraph-ts-template/tests/integration/graph.test.ts` and `tests/unit/openviking.spec.ts` - cover the new runtime contract
-- `docs/usage/mvp/maw-cli.md` and `docs/usage/mvp/langgraph-ts-template.md` - align public MVP docs with target-project OpenViking scripts and the simplified `maw.json` shape
-- `../maw-smoke/docs/agents/smoke-logs/phase4-openviking.md` - record manual Phase 4 verification against local repo checkouts
+- `maw-cli/src/commands/ov-server.ts` and `src/commands/ov-index.ts` - implement OpenViking runtime wrappers
+- `maw-cli/src/index.ts` - expose `ov:server` and `ov:index` while keeping `ov:init` retired
+- `maw-cli/src/utils/openviking.ts` (or equivalent) - parse `.maw/ov.conf`, resolve `${VAR}` placeholders, manage the resolved temp config used by `ov:server`, and centralize `.maw/ovcli.conf` path handling
+- `maw-cli/src/commands/init.ts` - keep the package requirement, stop seeding `maw:ov:*` scripts, and preserve project-local OpenViking file bootstrap behavior
+- `maw-cli/tests/{cli,init,ov-server,ov-index}.test.ts` and support fixtures - cover wrapper behavior, explicit target path handling, placeholder resolution, no-script init behavior, and rerun preservation
+- `docs/usage/mvp/maw-cli.md`, `docs/usage/mvp/langgraph-ts-template.md`, and `docs/agents/initiatives/active/init/init-plan.md` - align the written contract to `maw-cli`-owned runtime execution
+- `../maw-smoke/docs/agents/smoke-logs/phase4-openviking.md` - record final end-to-end smoke results against local repo checkouts
 
 ## Out of Scope
 
-- Live graph-time OpenViking retrieval or tool-loop consumption inside `createGraph()` (Phase 5)
-- Replacing `maw-cli dev <workflow>` or finalizing the broader workflow-execution surface (Phase 5)
-- Extra server lifecycle orchestration, process inspection, or `maw-cli` wrappers around `openviking-server` / `openviking`
-- Automatic drift reconciliation across `maw.json`, `.maw/ov.conf`, `.maw/ovcli.conf`, and seeded `package.json` scripts
-- Docker install/provisioning flows for OpenViking itself; Phase 4 assumes `openviking-server` and `openviking` are already available
+- Live graph-time OpenViking retrieval or tool-loop consumption inside `createGraph()` (deferred to Phase 7)
+- Replacing `maw-cli dev <workflow>` or finalizing the broader workflow-execution surface (deferred until after the opencode SDK phase)
 - Change-aware reindex heuristics, watch-mode indexing, or prepare-script automation
+- Docker install/provisioning flows for OpenViking itself; Phase 4 still assumes `openviking-server` and `openviking` are already available
+- Automatic drift reconciliation across `maw.json`, `.maw/ov.conf`, and `.maw/ovcli.conf`
 - A single root MAW config managing multiple child workspaces
 
 ## Decisions Cleared
 
-- A target-project `package.json` is required at the MAW scope root. Missing file is a hard failure for `maw-cli init`.
-- `maw-cli` no longer exposes `ov:init` or `ov:index`; OpenViking runtime execution lives in target-project `package.json` scripts.
-- `maw-cli init` seeds missing `maw:ov:server` and `maw:ov:index` scripts. If either script already exists with different content, it emits `Warning:` and preserves the existing value.
-- The exact seeded script values are:
-  - `maw:ov:server` -> `openviking-server --config .maw/ov.conf`
-  - `maw:ov:index` -> `OPENVIKING_CLI_CONFIG_FILE=.maw/ovcli.conf openviking add-resource`
-- `maw:ov:index` requires an explicit target path supplied by the caller, for example `bun run maw:ov:index -- .` or `bun run maw:ov:index -- src`.
-- `maw.json` becomes `{ "openviking": boolean, "templates": { "customPath": ".maw/templates" } }`.
-- `maw.json.openviking` toggles graph-time retrieval only. It does not gate or prompt target-project indexing scripts.
-- `.maw/ov.conf` is the server-config authority. `.maw/ovcli.conf` is the client/runtime URL authority.
-- `maw-cli init` creates `.maw/ov.conf` and `.maw/ovcli.conf` if missing, but reruns do not reconcile later drift between those files or the seeded scripts.
-- The seeded `.maw/ov.conf` restores OpenAI-backed dense-embedding and VLM defaults. The scaffold keeps `${OPENAI_API_KEY}` literal and OpenViking resolves it at runtime.
-- Upstream OpenViking now owns env-placeholder resolution and non-strict unsupported-file behavior. Phase 4 must not reintroduce `maw-cli` wrapper logic for those concerns.
-- `prompt:preview` and `src/agent/graph.ts` must stop reading `workspace` from `maw.json`. If custom snippet rendering still passes `workspacePath`, derive `'.'` from the MAW scope root.
+- A target-project `package.json` is required at the MAW scope root because `maw-cli init` discovers installed workflow packages there.
+- `maw-cli init` no longer seeds or maintains target-project `maw:ov:*` scripts.
+- `maw-cli` exposes `ov:server` and `ov:index`; `ov:init` remains retired.
+- The runtime commands are:
+  - `maw-cli ov:server`
+  - `maw-cli ov:index <target-path> [openviking args...]`
+- `maw-cli ov:index` requires an explicit target path supplied by the caller, for example `bunx maw-cli ov:index .` or `bunx maw-cli ov:index src --wait`.
+- `maw-cli ov:server` resolves `${VAR}` placeholders in `.maw/ov.conf` against the current process environment, launches upstream `openviking-server` with a resolved temp config, and fails clearly when required placeholders are unresolved.
+- `maw-cli ov:index` sets `OPENVIKING_CLI_CONFIG_FILE=.maw/ovcli.conf`, forwards the target path plus any caller-supplied flags to `openviking add-resource`, and does not read `maw.json.openviking`.
+- `maw.json` remains `{ "openviking": boolean, "templates": { "customPath": ".maw/templates" } }`.
+- `maw.json.openviking` toggles graph-time retrieval only. It does not gate or prompt indexing.
+- `.maw/ov.conf` remains the server-config authority. `.maw/ovcli.conf` remains the client/runtime URL authority.
+- `maw-cli init` creates `.maw/ov.conf` and `.maw/ovcli.conf` if missing, but reruns do not reconcile later drift between those files.
+- The seeded `.maw/ov.conf` keeps loopback server defaults plus OpenAI-backed dense-embedding and VLM defaults, and it keeps `${OPENAI_API_KEY}` literal for `maw-cli ov:server` to resolve at runtime.
+- `prompt:preview` and `src/agent/graph.ts` must not read `workspace` from `maw.json`. If custom snippet rendering still passes `workspacePath`, derive `'.'` from the MAW scope root.
 
 ## Execution Notes
 
-### `package.json` mutation rules
+### `package.json` rules
 
-`maw-cli init` edits only the target project's existing `package.json`.
+`maw-cli init` still requires the target project's existing `package.json`, but Phase 4 no longer mutates it for OpenViking runtime wiring.
 
-- It must parse the existing file and preserve unrelated fields.
-- If `scripts` is missing, create it.
-- Add only the missing `maw:ov:server` and `maw:ov:index` entries.
-- If an existing `maw:ov:*` entry already matches the seeded value, leave it untouched.
-- If an existing `maw:ov:*` entry differs, emit `Warning:` and keep the user value.
+- It may read the file to confirm the MAW scope is a real package-managed project and to discover installed workflows.
+- It must preserve the file untouched.
+- It must not add, update, or remove OpenViking runtime scripts.
 
 ### `maw.json`, `.maw/ov.conf`, and `.maw/ovcli.conf`
 
-`maw.json` becomes:
+`maw.json` remains:
 
 ```json
 {
@@ -69,7 +78,7 @@ Implement project-scoped OpenViking bootstrap and target-project runtime scripts
 }
 ```
 
-Relevant generated OpenViking defaults become:
+Relevant generated OpenViking defaults remain:
 
 ```json
 // .maw/ov.conf
@@ -108,31 +117,28 @@ Relevant generated OpenViking defaults become:
 }
 ```
 
-Phase 4 seeds these loopback and OpenAI-backed defaults once. The `${OPENAI_API_KEY}` placeholders stay literal in the scaffolded `.maw/ov.conf` and are resolved by OpenViking. If a user later changes the server bind settings, provider/model settings, placeholders, or client URL, rerunning `maw-cli init` preserves those edits instead of reconciling them.
+Phase 4 seeds these loopback and OpenAI-backed defaults once. The `${OPENAI_API_KEY}` placeholders stay literal in the scaffolded `.maw/ov.conf`; `maw-cli ov:server` resolves them before launch. If a user later changes the server bind settings, provider/model settings, placeholders, or client URL, rerunning `maw-cli init` preserves those edits instead of reconciling them.
 
-### OpenViking runtime script contract
+### OpenViking runtime command contract
 
-The Phase 4 runtime surface is intentionally thin:
+The corrected Phase 4 runtime surface is:
 
-```json
-{
-    "scripts": {
-        "maw:ov:server": "openviking-server --config .maw/ov.conf",
-        "maw:ov:index": "OPENVIKING_CLI_CONFIG_FILE=.maw/ovcli.conf openviking add-resource"
-    }
-}
+```text
+bunx maw-cli ov:server
+bunx maw-cli ov:index <target-path> [openviking args...]
 ```
 
 Implications:
 
-- Start the server explicitly with `bun run maw:ov:server`.
-- Index explicitly with `bun run maw:ov:index -- <target-path>`.
-- For deterministic verification, pass `--wait` at invocation time, for example `bun run maw:ov:index -- . --wait`.
-- Do not pass `--strict` in the seeded script. If users want stricter behavior later, they can add flags themselves.
+- Start the server explicitly with `bunx maw-cli ov:server`.
+- Index explicitly with `bunx maw-cli ov:index <target-path>`.
+- For deterministic verification, pass `--wait` at invocation time, for example `bunx maw-cli ov:index . --wait`.
+- Do not hide the target path behind MAW-specific defaults.
+- `maw-cli ov:index` continues to rely on upstream non-strict unsupported-file handling unless the caller opts into stricter flags.
 
 ### Runtime OpenViking config contract for `langgraph-ts-template`
 
-Phase 4 still stops short of live retrieval, but the exported OpenViking helpers should match the new ownership model:
+Phase 4 still stops short of live retrieval, but the exported OpenViking helpers should keep the same ownership model:
 
 - `maw.json` contributes only the retrieval toggle.
 - `.maw/ovcli.conf` contributes the client URL used by future retrieval code.
@@ -142,95 +148,76 @@ Phase 4 still stops short of live retrieval, but the exported OpenViking helpers
 
 ## Work Plan
 
-### 1. Remove stale project-config and CLI-surface assumptions
+### Completed foundation
 
-Clear the old `workspace` / host-port config contract and remove the retired `ov:*` CLI surface first. Keep this step limited to parsing, CLI registration, and runtime callers that still assume the old `maw.json` shape. Do not seed new OpenViking files or package scripts yet.
+- [x] simplify `maw.json` to the Phase 4 boolean toggle contract and remove `workspace` / host / port from live runtime readers
+- [x] seed project-local `maw.json`, `.maw/ov.conf`, and `.maw/ovcli.conf` from `maw-cli init`
+- [x] replace template-side OpenViking stubs with toggle/url plumbing for later runtime retrieval
+- [x] align the public MVP docs to the simplified project-config surface
 
-- [x] `maw-cli/src/utils/config.ts`: replace the old `workspace` + `openviking.enabled/host/port` schema with the Phase 4 `openviking: boolean` project config shape and keep missing-file behavior aligned with current callers
-- [x] `maw-cli/src/index.ts`, `maw-cli/src/commands/ov-init.ts`, and `maw-cli/src/commands/ov-index.ts`: remove `ov:init` and `ov:index` from the command registry/help surface and delete the retired placeholder commands
-- [x] `maw-cli/tests/{cli,config,dev,prompt-preview}.test.ts`, `langgraph-ts-template/src/agent/graph.ts`, and `langgraph-ts-template/tests/integration/graph.test.ts`: stop reading `workspace` or OpenViking host/port from `maw.json` and preserve `workspacePath='.'` compatibility for custom templates
+### 1. Restore `maw-cli` OpenViking runtime wrappers
 
-Verify:
-
-- [x] `bun run test -- tests/config.test.ts tests/dev.test.ts tests/prompt-preview.test.ts tests/cli.test.ts` in `maw-cli/`
-- [x] `bun run test:int -- tests/integration/graph.test.ts` in `langgraph-ts-template/`
-
-### 2. Teach `maw-cli init` to seed project-local OpenViking files and scripts
-
-This step owns project bootstrap only. It should make OpenViking configuration and runtime scripts visible inside the target project without adding new wrapper behavior on top of upstream commands.
-
-- [x] `maw-cli/src/commands/init.ts`: require a target-project `package.json`, generate `maw.json` with `openviking: true`, create `.maw/ov.conf` and `.maw/ovcli.conf` if missing, and keep `.gitignore` limited to `.maw/openviking/`
-- [x] `maw-cli/src/commands/init.ts`: add missing `package.json` scripts `maw:ov:server` and `maw:ov:index`, create `scripts` if absent, emit `Warning:` on conflicting existing values, and preserve all unrelated `package.json` content
-- [x] `maw-cli/tests/init.test.ts` and `maw-cli/tests/support.ts`: cover missing-package failure, zero-workflow bootstrap, new file shapes, script seeding, conflict warnings, rerun preservation, and the fact that `.maw/ovcli.conf` is no longer derived from `maw.json`
+- [ ] add `maw-cli/src/commands/ov-server.ts` and `src/commands/ov-index.ts`
+- [ ] add a `maw-cli` utility to parse `.maw/ov.conf`, resolve `${VAR}` placeholders, and create/clean up the resolved temp config used by `ov:server`
+- [ ] wire `maw-cli/src/index.ts` so `ov:server` and `ov:index` are back in the command registry/help surface while `ov:init` stays retired
+- [ ] add CLI/tests coverage for explicit target path handling, placeholder-resolution failures, and wrapper passthrough behavior
 
 Verify:
 
-- [x] `bun run test -- tests/init.test.ts` in `maw-cli/`
-- [x] `bun run build` in `maw-cli/`
+- [ ] `bun run test -- tests/cli.test.ts tests/ov-server.test.ts tests/ov-index.test.ts` in `maw-cli/`
 
-### 3. Replace template-side OpenViking stubs with Phase 5-ready toggle/url plumbing
+### 2. Stop mutating target-project `package.json` for OpenViking runtime wiring
 
-Phase 4 still does not retrieve OpenViking context inside the graph loop, but it should stop exporting host/port stubs that conflict with the new project contract. This step makes the package surface concrete for Phase 5 without wiring live calls yet.
-
-- [x] `langgraph-ts-template/src/openviking/config.ts`: replace the host/port stub with concrete project-config readers that model `maw.json.openviking` as the retrieval toggle and `.maw/ovcli.conf` as the client URL authority
-- [x] `langgraph-ts-template/src/openviking/client.ts`, `src/openviking/scanner.ts`, and `src/index.ts`: replace the stub interfaces/constants with URL-based client contracts and shared project-scope types aligned to `.maw/ovcli.conf` and project-scoped `.maw/openviking/`, without performing live retrieval yet
-- [x] `langgraph-ts-template/tests/unit/openviking.spec.ts` and `tests/integration/graph.test.ts`: verify the exported OpenViking surface, missing/invalid config rules, and continued graph creation under the simplified `maw.json` shape
+- [ ] `maw-cli/src/commands/init.ts`: keep the package requirement for workflow discovery, but stop seeding any `maw:ov:*` runtime scripts
+- [ ] preserve `.maw/ov.conf` / `.maw/ovcli.conf` bootstrap and rerun behavior unchanged
+- [ ] `maw-cli/tests/init.test.ts` and support fixtures: align expectations so `package.json` stays untouched for OpenViking runtime wiring
 
 Verify:
 
-- [x] `bun run typecheck` in `langgraph-ts-template/`
-- [x] `bun run test -- tests/unit/openviking.spec.ts` in `langgraph-ts-template/`
-- [x] `bun run test:int -- tests/integration/graph.test.ts` in `langgraph-ts-template/`
+- [ ] `bun run test -- tests/init.test.ts` in `maw-cli/`
+- [ ] `bun run build` in `maw-cli/`
 
-### 4. Align public MVP docs with the new OpenViking surface
+### 3. Align docs to direct `maw-cli` runtime execution
 
-The user-facing docs currently advertise `ov:init`, `maw-cli ov:index`, and the old `maw.json` shape. Update them only after the code contract is locked so implementation and docs land together.
-
-- [x] `docs/usage/mvp/maw-cli.md`: replace `ov:init` / `maw-cli ov:index` guidance with `bun run maw:ov:server` and `bun run maw:ov:index -- <target-path>` examples, update the `maw.json` shape, and show the restored OpenAI-backed `.maw/ov.conf` defaults with literal `${OPENAI_API_KEY}` placeholders
-- [x] `docs/usage/mvp/langgraph-ts-template.md`: remove stale `workspace` / OpenViking host-port references and align the workflow-package usage guidance with the target-project script model
-- [x] Both usage docs: state clearly that `maw-cli dev <workflow>` remains the workflow runner through Phase 4 while OpenViking runtime execution lives in target-project `package.json` scripts
+- [ ] `docs/usage/mvp/maw-cli.md`: document `maw-cli ov:server` / `maw-cli ov:index` and that `maw-cli ov:server` resolves `.maw/ov.conf` placeholders before launch
+- [ ] `docs/usage/mvp/langgraph-ts-template.md`: align the workflow-package usage guide with the direct-`maw-cli` runtime model
+- [ ] `docs/agents/initiatives/active/init/init-plan.md`: keep the master init plan consistent with the corrected Phase 4 runtime ownership
 
 Verify:
 
-- [x] `rg "maw:ov:server|maw:ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md`
-- [x] `! rg "ov:init|maw-cli ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md`
+- [ ] `rg "maw-cli ov:server|maw-cli ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md docs/agents/initiatives/active/init/init-plan.md`
+- [ ] `! rg "maw:ov:server|maw:ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md docs/agents/initiatives/active/init/init-plan.md`
 
-### 5. Prove the final script-driven flow in a disposable smoke project
-
-The phase is not done until the real installed-local-checkout flow works with seeded package scripts, not just fixtures. This step exists to prove that the thin-script surface is enough for a real target project.
+### 4. Prove the direct `maw-cli` flow in a disposable smoke project
 
 - [ ] `../maw-smoke`: run `bun smoke-init phase4-openviking` to create the disposable target project from local repo checkouts
-- [ ] In `../maw-smoke/tests/smoke-phase4-openviking/`: run `bunx maw-cli init`, confirm `package.json`, `maw.json`, `.maw/ov.conf`, and `.maw/ovcli.conf` contain the Phase 4 contract, including the restored OpenAI-backed `.maw/ov.conf` defaults, then verify the seeded `maw:ov:*` script entries
-- [ ] In terminal A inside that same smoke project: run `bun run maw:ov:server`; in terminal B: run `bun run maw:ov:index -- . --wait` and `bun run maw:ov:index -- package.json --wait`
-- [ ] In that smoke project: set `"openviking": false` in `maw.json`, rerun `bun run maw:ov:index -- package.json --wait`, and record that indexing still works unchanged because the toggle affects retrieval only
-- [ ] `../maw-smoke/docs/agents/smoke-logs/phase4-openviking.md`: record the final results, any issues/fixes, script conflicts or rerun behavior, and whether the thin-script surface exposed any gaps worth carrying into Phase 5 review
+- [ ] In `../maw-smoke/tests/smoke-phase4-openviking/`: run `bunx maw-cli init`, confirm `package.json`, `maw.json`, `.maw/ov.conf`, and `.maw/ovcli.conf` contain the Phase 4 contract
+- [ ] In terminal A inside that same smoke project: run `bunx maw-cli ov:server`; in terminal B: run `bunx maw-cli ov:index . --wait` and `bunx maw-cli ov:index package.json --wait`
+- [ ] In that smoke project: set `"openviking": false` in `maw.json`, rerun `bunx maw-cli ov:index package.json --wait`, and record that indexing still works unchanged because the toggle affects retrieval only
+- [ ] `../maw-smoke/docs/agents/smoke-logs/phase4-openviking.md`: record the final results, any issues/fixes, runtime-env assumptions, and whether the direct-`maw-cli` surface exposed any gaps worth carrying into the later retrieval phase
 
 Verify:
 
 - [ ] `bun smoke-init phase4-openviking` in `../maw-smoke/`
 - [ ] In `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli init`
-- [ ] In terminal A inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bun run maw:ov:server`
-- [ ] In terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bun run maw:ov:index -- . --wait`
-- [ ] In terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bun run maw:ov:index -- package.json --wait`
+- [ ] In terminal A inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:server`
+- [ ] In terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:index . --wait`
+- [ ] In terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:index package.json --wait`
 
 ## Verification
 
 ### Per-step verification
 
-- [x] Step 1: `bun run test -- tests/config.test.ts tests/dev.test.ts tests/prompt-preview.test.ts tests/cli.test.ts` in `maw-cli/`
-- [x] Step 1: `bun run test:int -- tests/integration/graph.test.ts` in `langgraph-ts-template/`
-- [x] Step 2: `bun run test -- tests/init.test.ts` in `maw-cli/`
-- [x] Step 2: `bun run build` in `maw-cli/`
-- [x] Step 3: `bun run typecheck` in `langgraph-ts-template/`
-- [x] Step 3: `bun run test -- tests/unit/openviking.spec.ts` in `langgraph-ts-template/`
-- [x] Step 3: `bun run test:int -- tests/integration/graph.test.ts` in `langgraph-ts-template/`
-- [x] Step 4: `rg "maw:ov:server|maw:ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md`
-- [x] Step 4: `! rg "ov:init|maw-cli ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md`
-- [ ] Step 5: `bun smoke-init phase4-openviking` in `../maw-smoke/`
-- [ ] Step 5: in `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli init`
-- [ ] Step 5: in terminal A inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bun run maw:ov:server`
-- [ ] Step 5: in terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bun run maw:ov:index -- . --wait`
-- [ ] Step 5: in terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bun run maw:ov:index -- package.json --wait`
+- [ ] Step 1: `bun run test -- tests/cli.test.ts tests/ov-server.test.ts tests/ov-index.test.ts` in `maw-cli/`
+- [ ] Step 2: `bun run test -- tests/init.test.ts` in `maw-cli/`
+- [ ] Step 2: `bun run build` in `maw-cli/`
+- [ ] Step 3: `rg "maw-cli ov:server|maw-cli ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md docs/agents/initiatives/active/init/init-plan.md`
+- [ ] Step 3: `! rg "maw:ov:server|maw:ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md docs/agents/initiatives/active/init/init-plan.md`
+- [ ] Step 4: `bun smoke-init phase4-openviking` in `../maw-smoke/`
+- [ ] Step 4: in `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli init`
+- [ ] Step 4: in terminal A inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:server`
+- [ ] Step 4: in terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:index . --wait`
+- [ ] Step 4: in terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:index package.json --wait`
 
 ### Phase completion
 
@@ -244,22 +231,22 @@ Verify:
 - [ ] `langgraph-ts-template`: `bun run test:int`
 - [ ] `../maw-smoke`: `bun smoke-init phase4-openviking`
 - [ ] `../maw-smoke/tests/smoke-phase4-openviking/`: run `bunx maw-cli init`
-- [ ] In terminal A inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bun run maw:ov:server`
-- [ ] In terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bun run maw:ov:index -- . --wait` and `bun run maw:ov:index -- package.json --wait`
+- [ ] In terminal A inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:server`
+- [ ] In terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:index . --wait` and `bunx maw-cli ov:index package.json --wait`
 - [ ] `../maw-smoke/docs/agents/smoke-logs/phase4-openviking.md`: log the final results/issues/fixes
 
 ## Exit Criteria
 
 - [ ] `maw.json` no longer contains `workspace` or OpenViking host/port fields, and `openviking` is a boolean retrieval toggle
-- [ ] `maw-cli` no longer advertises or parses `ov:init` or `ov:index`
-- [ ] `maw-cli init` requires a target-project `package.json`, creates `.maw/ovcli.conf` alongside `.maw/ov.conf`, and seeds missing `maw:ov:server` / `maw:ov:index` script entries
-- [ ] conflicting existing `maw:ov:*` script values trigger `Warning:` and are preserved instead of overwritten
-- [ ] `maw:ov:server` runs `openviking-server --config .maw/ov.conf`
-- [ ] `maw:ov:index` runs `OPENVIKING_CLI_CONFIG_FILE=.maw/ovcli.conf openviking add-resource` and requires the caller to supply an explicit target path
-- [ ] `.maw/ov.conf` seeds the restored OpenAI-backed dense-embedding and VLM defaults with literal `${OPENAI_API_KEY}` placeholders resolved by OpenViking
-- [ ] rerunning `maw-cli init` preserves edited `.maw/ov.conf`, `.maw/ovcli.conf`, and existing conflicting MAW script entries instead of reconciling drift
-- [ ] setting `"openviking": false` in `maw.json` disables retrieval only; indexing scripts still run unchanged
+- [ ] `maw-cli` exposes `ov:server` and `ov:index`, but not `ov:init`
+- [ ] `maw-cli init` requires a target-project `package.json`, creates `.maw/ovcli.conf` alongside `.maw/ov.conf`, and does not mutate `package.json` for OpenViking runtime wiring
+- [ ] `maw-cli ov:server` is the explicit Phase 4 server launch path
+- [ ] `maw-cli ov:index` requires the caller to supply an explicit target path
+- [ ] `maw-cli ov:server` resolves `.maw/ov.conf` placeholders against the current process environment before launching upstream OpenViking
+- [ ] `.maw/ov.conf` seeds the loopback server defaults plus the restored OpenAI-backed dense-embedding and VLM defaults with literal `${OPENAI_API_KEY}` placeholders
+- [ ] rerunning `maw-cli init` preserves edited `.maw/ov.conf` and `.maw/ovcli.conf` instead of reconciling drift
+- [ ] setting `"openviking": false` in `maw.json` disables retrieval only; `maw-cli ov:index` still runs unchanged
 - [ ] the MAW scope still has one shared `.maw/openviking/`, `.maw/ov.conf`, and `.maw/ovcli.conf` rather than per-workflow OpenViking state
-- [ ] `langgraph-ts-template` exports concrete OpenViking toggle/url-based plumbing against the simplified project config shape, while live graph-time retrieval remains explicitly deferred to Phase 5
-- [ ] the MVP usage docs reflect the target-project `maw:ov:*` script model and the simplified `maw.json` shape
-- [ ] the Phase 4 smoke log proves the real installed-local-checkout flow works end to end with `bunx maw-cli init`, `bun run maw:ov:server`, and `bun run maw:ov:index -- <target> --wait`
+- [ ] `langgraph-ts-template` exports concrete OpenViking toggle/url-based plumbing against the simplified project config shape, while live graph-time retrieval remains explicitly deferred to Phase 7
+- [ ] the MVP usage docs reflect the direct-`maw-cli` runtime model and the simplified `maw.json` shape
+- [ ] the Phase 4 smoke log proves the real installed-local-checkout flow works end to end with `bunx maw-cli init`, `bunx maw-cli ov:server`, and `bunx maw-cli ov:index <target> --wait`
