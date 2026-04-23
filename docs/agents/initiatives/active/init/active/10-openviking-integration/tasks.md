@@ -179,14 +179,14 @@ Verify:
 
 ### 3. Align docs to direct `maw-cli` runtime execution
 
-- [ ] `docs/usage/mvp/maw-cli.md`: document `maw-cli ov:server` / `maw-cli ov:index` and that `maw-cli ov:server` resolves `.maw/ov.conf` placeholders before launch
-- [ ] `docs/usage/mvp/langgraph-ts-template.md`: align the workflow-package usage guide with the direct-`maw-cli` runtime model
-- [ ] `docs/agents/initiatives/active/init/init-plan.md`: keep the master init plan consistent with the corrected Phase 4 runtime ownership
+- [x] `docs/usage/mvp/maw-cli.md`: document `maw-cli ov:server` / `maw-cli ov:index` and that `maw-cli ov:server` resolves `.maw/ov.conf` placeholders before launch
+- [x] `docs/usage/mvp/langgraph-ts-template.md`: align the workflow-package usage guide with the direct-`maw-cli` runtime model
+- [x] `docs/agents/initiatives/active/init/init-plan.md`: keep the master init plan consistent with the corrected Phase 4 runtime ownership
 
 Verify:
 
-- [ ] `rg "maw-cli ov:server|maw-cli ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md docs/agents/initiatives/active/init/init-plan.md`
-- [ ] `! rg "maw:ov:server|maw:ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md docs/agents/initiatives/active/init/init-plan.md`
+- [x] `rg "maw-cli ov:server|maw-cli ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md docs/agents/initiatives/active/init/init-plan.md`
+- [x] `! rg "maw:ov:server|maw:ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md docs/agents/initiatives/active/init/init-plan.md`
 
 ### 4. Prove the direct `maw-cli` flow in a disposable smoke project
 
@@ -211,8 +211,8 @@ Verify:
 - [x] Step 1: `bun run test -- tests/cli.test.ts tests/ov-server.test.ts tests/ov-index.test.ts` in `maw-cli/`
 - [x] Step 2: `bun run test -- tests/init.test.ts` in `maw-cli/`
 - [x] Step 2: `bun run build` in `maw-cli/`
-- [ ] Step 3: `rg "maw-cli ov:server|maw-cli ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md docs/agents/initiatives/active/init/init-plan.md`
-- [ ] Step 3: `! rg "maw:ov:server|maw:ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md docs/agents/initiatives/active/init/init-plan.md`
+- [x] Step 3: `rg "maw-cli ov:server|maw-cli ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md docs/agents/initiatives/active/init/init-plan.md`
+- [x] Step 3: `! rg "maw:ov:server|maw:ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md docs/agents/initiatives/active/init/init-plan.md`
 - [ ] Step 4: `bun smoke-init phase4-openviking` in `../maw-smoke/`
 - [ ] Step 4: in `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli init`
 - [ ] Step 4: in terminal A inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:server`

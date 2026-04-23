@@ -5,7 +5,7 @@ This guide shows how a target project uses `maw-cli` in the Phase 4 MAW MVP.
 > Status
 >
 > This page reflects the current Phase 4 MVP usage model.
-> `maw-cli init` bootstraps MAW files, `maw-cli dev <workflow>` remains the workflow runner, and OpenViking runtime execution lives in target-project `package.json` scripts.
+> `maw-cli init` bootstraps MAW files, `maw-cli dev <workflow>` remains the workflow runner, and OpenViking runtime execution stays on direct `maw-cli ov:*` commands.
 
 ## Goal
 
@@ -30,18 +30,18 @@ This guide assumes:
 
 Example workflow name used throughout this guide: `coding`.
 
-## MVP Command And Script Surface
+## MVP Command Surface
 
 | Surface | Purpose |
 | --- | --- |
-| `maw-cli init` | Bootstrap MAW project files, workflow-local scaffolds, and target-project OpenViking scripts |
+| `maw-cli init` | Bootstrap MAW project files and workflow-local scaffolds |
 | `maw-cli dev <workflow>` | Run one workflow through LangGraph dev using its local config |
-| `bun run maw:ov:server` | Start the project-scoped OpenViking server with `.maw/ov.conf` |
-| `bun run maw:ov:index -- <target-path>` | Index one explicit path with the target project's `.maw/ovcli.conf` |
+| `maw-cli ov:server` | Start the project-scoped OpenViking server after resolving `.maw/ov.conf` placeholders |
+| `maw-cli ov:index <target-path> [openviking args...]` | Index one explicit path with the project-local `.maw/ovcli.conf` |
 
 There is no `maw-cli start` command in the MVP.
 
-`maw-cli dev <workflow>` remains the workflow runner through Phase 4. OpenViking runtime execution is intentionally separate and lives in the target project's `package.json` scripts seeded by `maw-cli init`.
+`maw-cli dev <workflow>` remains the workflow runner through Phase 4. OpenViking runtime execution is intentionally separate and runs through direct `maw-cli ov:*` commands; `maw-cli init` does not wire target-project `package.json` scripts for it.
 
 ## 1. Install `maw-cli` And A Workflow Package
 
@@ -103,8 +103,7 @@ Ownership split:
 
 | Path | Owner |
 | --- | --- |
-| `package.json#scripts.maw:ov:server` | `maw-cli` seeds it if missing, target project owns later edits |
-| `package.json#scripts.maw:ov:index` | `maw-cli` seeds it if missing, target project owns later edits |
+| `package.json` | target project; `maw-cli init` requires it for workflow discovery and leaves OpenViking runtime wiring untouched |
 | `maw.json` | `maw-cli` seeds it if missing, target project owns later edits |
 | `.maw/templates/` | `maw-cli` creates it, target project owns overrides inside it |
 | `.maw/ov.conf` | `maw-cli` seeds it if missing, target project owns later edits |
@@ -117,8 +116,8 @@ Important behavior:
 
 - rerunning `maw-cli init` preserves existing files
 - if no workflow packages are installed yet, `maw-cli init` still creates `maw.json`, `.maw/templates/`, `.maw/graphs/`, `.maw/ov.conf`, and `.maw/ovcli.conf`, then warns instead of failing
-- `maw-cli init` seeds missing `maw:ov:server` and `maw:ov:index` scripts into the target project's existing `package.json`
-- if the target project's `package.json` already contains conflicting `maw:ov:*` values, `maw-cli init` warns and preserves the user value
+- `maw-cli init` requires the target project's existing `package.json` for workflow discovery
+- `maw-cli init` does not add OpenViking runtime scripts or otherwise mutate `package.json` for OpenViking runtime wiring
 - `maw-cli init` appends only `.maw/openviking/` to `.gitignore`
 
 ## 3. Review Project Configuration In `maw.json`
@@ -140,7 +139,7 @@ Field meanings:
 
 | Field | Meaning |
 | --- | --- |
-| `openviking` | Boolean retrieval toggle carried by the workflow runtime; in Phase 4 it does not start or stop OpenViking scripts |
+| `openviking` | Boolean retrieval toggle carried by the workflow runtime; in Phase 4 it affects later retrieval only and does not gate `maw-cli ov:index` |
 | `templates.customPath` | Directory for project-local prompt snippet overrides |
 
 Rules:
@@ -239,43 +238,41 @@ Use this flow when you want to verify that:
 
 ## 7. Start And Index OpenViking
 
-This is part of the Phase 4 target-project runtime surface.
-
-`maw-cli init` seeds the target project's `package.json` with these scripts:
-
-```json
-{
-    "scripts": {
-        "maw:ov:server": "openviking-server --config .maw/ov.conf",
-        "maw:ov:index": "OPENVIKING_CLI_CONFIG_FILE=.maw/ovcli.conf openviking add-resource"
-    }
-}
-```
+This is part of the Phase 4 direct `maw-cli` runtime surface.
 
 Start the project-scoped OpenViking server:
 
 ```bash
-bun run maw:ov:server
+bunx maw-cli ov:server
 ```
+
+`maw-cli ov:server` reads `.maw/ov.conf`, resolves `${VAR}` placeholders against the current process environment before launch, writes a resolved temp config, and then invokes upstream `openviking-server`.
 
 Index the whole project. The target path is always explicit:
 
 ```bash
-bun run maw:ov:index -- .
+bunx maw-cli ov:index .
 ```
 
 Reindex only one subtree or file:
 
 ```bash
-bun run maw:ov:index -- src
-bun run maw:ov:index -- package.json
+bunx maw-cli ov:index src
+bunx maw-cli ov:index package.json
 ```
 
 Pass extra upstream OpenViking flags after the target path when you need them:
 
 ```bash
-bun run maw:ov:index -- . --wait
+bunx maw-cli ov:index . --wait
 ```
+
+Important behavior:
+
+- `maw-cli ov:index` requires an explicit target path and does not hide one behind MAW defaults
+- `maw-cli ov:index` uses the project-local `.maw/ovcli.conf`
+- `maw-cli ov:index` does not depend on `maw.json.openviking`; setting `"openviking": false` disables later retrieval only and does not block indexing
+- `maw-cli init` creates `.maw/ov.conf` and `.maw/ovcli.conf` if missing, but it does not add target-project OpenViking runtime scripts
 
 OpenViking is project-wide, not workflow-specific. Every installed workflow shares the same indexed project context through `.maw/ov.conf` and `.maw/ovcli.conf`.
 
@@ -320,7 +317,7 @@ Generated OpenViking config excerpts:
 
 The generated server binds to loopback (`127.0.0.1`) by default, and the generated client URL uses `localhost` to reach that same local listener.
 
-The scaffolded `.maw/ov.conf` intentionally keeps `${OPENAI_API_KEY}` literal. OpenViking resolves that placeholder at runtime, so the generated config carries placeholders rather than copied secrets.
+The scaffolded `.maw/ov.conf` intentionally keeps `${OPENAI_API_KEY}` literal. `maw-cli ov:server` resolves that placeholder at launch time before it hands the temp config to upstream OpenViking, so the generated config carries placeholders rather than copied secrets.
 
 ## 8. Run One Workflow In Isolation
 
@@ -368,7 +365,7 @@ Example:
 bunx maw-cli dev coding --port 3020
 ```
 
-Through Phase 4, this remains the workflow runner. Starting and indexing OpenViking stays separate through `bun run maw:ov:server` and `bun run maw:ov:index -- <target-path>` in the target project's `package.json`.
+Through Phase 4, this remains the workflow runner. Starting and indexing OpenViking stays separate through `bunx maw-cli ov:server` and `bunx maw-cli ov:index <target-path>`.
 
 ## 9. End-To-End MVP Flow
 
@@ -403,13 +400,13 @@ bunx maw-cli prompt:preview coding coder
 7. Start the project-scoped OpenViking server.
 
 ```bash
-bun run maw:ov:server
+bunx maw-cli ov:server
 ```
 
 8. Index an explicit path into OpenViking.
 
 ```bash
-bun run maw:ov:index -- .
+bunx maw-cli ov:index .
 ```
 
 9. Run the workflow.
@@ -425,7 +422,7 @@ In the current Phase 4 MVP surface, the base workflow can:
 - inspect the target project's files
 - use deterministic planner and coder prompts
 - run a controlled file, shell, and git tool loop
-- rely on target-project OpenViking scripts for server startup and indexing
+- use direct `maw-cli ov:server` and `maw-cli ov:index` commands for shared project context management
 - surface the resulting code changes back to the user
 
 ## 10. Acceptance Checks
@@ -438,8 +435,9 @@ Use these checks to confirm the target project matches the MVP contract.
 | `.maw/templates/` exists | project-local prompt overrides are available |
 | `.maw/ov.conf` exists | project-wide OpenViking config was created |
 | `.maw/ovcli.conf` exists | project-local OpenViking client URL was created |
-| `package.json` includes `maw:ov:server` | project-scoped OpenViking server script was seeded |
-| `package.json` includes `maw:ov:index` | project-scoped OpenViking indexing script was seeded |
+| target-project `package.json` exists before `maw-cli init` | MAW scope satisfies workflow discovery requirements |
+| `bunx maw-cli ov:server` is the server start path | OpenViking runtime ownership stays in `maw-cli` |
+| `bunx maw-cli ov:index .` requires an explicit target path | indexing uses the direct `maw-cli` surface |
 | `.maw/graphs/coding/graph.ts` exists | workflow scaffold landed |
 | `.maw/graphs/coding/config.json` exists | workflow-local prompt config landed |
 | `.maw/graphs/coding/langgraph.json` exists | workflow-local LangGraph config was generated |
@@ -453,7 +451,8 @@ Use these checks to confirm the target project matches the MVP contract.
 | Problem | What to check |
 | --- | --- |
 | `maw-cli init` finds no workflows | confirm the package is installed and exports `./scaffold` |
-| `bun run maw:ov:index` exits immediately | confirm you passed an explicit target path after `--`, for example `bun run maw:ov:index -- .` |
+| `maw-cli ov:server` fails before launch | confirm the required `.maw/ov.conf` placeholders are available in the current process environment |
+| `bunx maw-cli ov:index` exits immediately | confirm you passed an explicit target path, for example `bunx maw-cli ov:index .` |
 | `maw-cli dev <workflow>` says the workflow directory is missing | rerun `maw-cli init` after installing the workflow package |
 | prompt preview does not show a custom override | confirm the override file name matches the snippet name exactly |
 | workflow config is ignored | confirm `.maw/graphs/<workflow>/config.json` is valid JSON and uses the prompt-only shape |

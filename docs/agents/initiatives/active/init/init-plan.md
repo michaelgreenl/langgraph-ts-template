@@ -281,6 +281,8 @@ Rules:
 - additional OpenViking flags are passed through by the caller, for example `bunx maw-cli ov:index . --wait`
 - `.maw/ov.conf` placeholder resolution happens inside `maw-cli ov:server`, not inside the scaffolded file itself
 - `.maw/ovcli.conf` remains the client/runtime URL authority used by `maw-cli ov:index`
+- `maw-cli init` requires a target-project `package.json`, but it does not seed `maw:ov:*` scripts because the runtime surface is direct `maw-cli` execution
+- `maw-cli ov:index` does not consult `maw.json.openviking`; setting `"openviking": false` only affects later graph-time retrieval
 
 ### `.maw/graphs/<workflow>/graph.ts`
 
