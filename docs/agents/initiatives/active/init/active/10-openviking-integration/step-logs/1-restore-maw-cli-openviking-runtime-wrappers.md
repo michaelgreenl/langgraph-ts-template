@@ -6,17 +6,18 @@
 
 ## Pre-flight
 
-- No blockers found in `tasks.md`, the current `maw-cli` runtime wrappers, or the existing test surface.
-- Manager review confirmed the only Step 1 mismatch: `maw-cli/src/utils/openviking.ts` wrote the resolved runtime config into `<root>/.maw/ov.resolved.<uuid>.conf`, which violated the plan requirement that `maw-cli ov:server` keep the resolved launch config outside checked-in project files.
-- Existing Step 1 behavior otherwise already matched scope: `.maw/ov.conf` remained the source config, `${VAR}` placeholders resolved against the provided env, unresolved placeholders failed clearly, and `openviking-server --config <resolved-temp-config>` was already wired.
+- No implementation blocker found in `tasks.md`, the current `maw-cli` runtime wrappers, or the existing Step 1 tests.
+- Concern carried into the retry: the approved runtime contract now requires scoped `.env` fallback reads for `.maw/ov.conf` placeholder resolution, which is broader than the older env-only wording in `tasks.md` and the default repo no-`.env` rule. I proceeded only within the explicitly approved narrow scope: lazy MAW-root `.env` reads, no Bun auto-loading, no `process.env` mutation, no secret logging, and no persistence beyond the existing temp config outside the project tree.
+- Existing Step 1 behavior already stayed aligned on the rest of the contract: `.maw/ov.conf` remained the source config, the resolved launch config stayed under a system temp dir outside the project root, `openviking-server --config <resolved-temp-config>` remained the wrapper handoff, and unresolved placeholders still needed to fail clearly.
 
 ## Changes
 
-- Moved the resolved OpenViking server config from `<root>/.maw/...` to a system temp directory created with `mkdtemp(join(tmpdir(), ...))`.
-- Preserved the existing Step 1 contract: `.maw/ov.conf` is still parsed from the MAW scope root, `${VAR}` placeholders are still resolved against the provided env, unresolved placeholders still fail clearly, and `openviking-server --config <resolved-temp-config>` still receives the fully resolved file.
-- Tightened cleanup so the temp directory is removed after wrapper execution and also removed if writing the resolved config fails.
-- Extended `tests/ov-server.test.ts` so Step 1 now proves the resolved placeholder values are written into the config passed to `openviking-server`, that the path lives under the system temp directory but outside the project root, and that the temp config is deleted after use.
-- Re-ran Step 1 verification plus `maw-cli` build, lint, and full tests; Step 1 checkboxes remain checked in `tasks.md`.
+- Kept the existing Step 1 temp-config behavior intact: the resolved OpenViking server config still lives under a system temp directory created with `mkdtemp(join(tmpdir(), ...))`, outside the MAW project tree, and is still cleaned up after wrapper execution or write failure.
+- Added explicit MAW-root `.env` fallback resolution to `maw-cli/src/utils/openviking.ts` for `maw-cli ov:server`, using process env first and only consulting `.env` when the first pass leaves placeholders unresolved.
+- Parsed the fallback `.env` content explicitly with Node's `parseEnv`, so the runtime does not rely on Bun auto-loading and does not mutate global `process.env`.
+- Preserved clear unresolved-placeholder failures when a value is missing from both sources, while avoiding secret logging and limiting `.env` usage to placeholder resolution only.
+- Extended `tests/ov-server.test.ts` so Step 1 now proves local `.env` fallback resolution, process-env precedence over `.env`, lazy skip behavior when process env already satisfies every placeholder, and the existing temp-config launch/cleanup behavior.
+- Left Step 1 checked in `tasks.md`; no checklist edit was needed for this retry.
 
 ## Files
 
@@ -28,7 +29,7 @@
 
 ## Verification
 
-- `bun run test -- tests/ov-server.test.ts` in `maw-cli/` — FAIL before the code change (`ov:server` still wrote the resolved config under the project root)
+- `bun run test -- tests/ov-server.test.ts` in `maw-cli/` — FAIL before the code change (new `.env` fallback / precedence tests exposed the missing runtime-contract behavior)
 - `bun run test -- tests/ov-server.test.ts` in `maw-cli/` — PASS after the fix
 - `bun run build` in `maw-cli/` — PASS
 - `bun run lint` in `maw-cli/` — PASS
@@ -37,7 +38,7 @@
 
 ## Summary
 
-- Step 1 remains complete and now matches the plan exactly: `maw-cli ov:server` resolves `.maw/ov.conf` placeholders into a system-temp config outside checked-in project files, passes that resolved file to `openviking-server`, and removes it after use.
+- Step 1 remains complete after the retry: `maw-cli ov:server` resolves `.maw/ov.conf` placeholders with process-env precedence plus MAW-root `.env` fallback, writes the resolved launch config into a system-temp location outside checked-in project files, passes that file to `openviking-server`, and removes it after use.
 
 ## Remaining
 
