@@ -168,14 +168,14 @@ Verify:
 
 ### 2. Stop mutating target-project `package.json` for OpenViking runtime wiring
 
-- [ ] `maw-cli/src/commands/init.ts`: keep the package requirement for workflow discovery, but stop seeding any `maw:ov:*` runtime scripts
-- [ ] preserve `.maw/ov.conf` / `.maw/ovcli.conf` bootstrap and rerun behavior unchanged
-- [ ] `maw-cli/tests/init.test.ts` and support fixtures: align expectations so `package.json` stays untouched for OpenViking runtime wiring
+- [x] `maw-cli/src/commands/init.ts`: keep the package requirement for workflow discovery, but stop seeding any `maw:ov:*` runtime scripts
+- [x] preserve `.maw/ov.conf` / `.maw/ovcli.conf` bootstrap and rerun behavior unchanged
+- [x] `maw-cli/tests/init.test.ts` and support fixtures: align expectations so `package.json` stays untouched for OpenViking runtime wiring
 
 Verify:
 
-- [ ] `bun run test -- tests/init.test.ts` in `maw-cli/`
-- [ ] `bun run build` in `maw-cli/`
+- [x] `bun run test -- tests/init.test.ts` in `maw-cli/`
+- [x] `bun run build` in `maw-cli/`
 
 ### 3. Align docs to direct `maw-cli` runtime execution
 
@@ -209,8 +209,8 @@ Verify:
 ### Per-step verification
 
 - [x] Step 1: `bun run test -- tests/cli.test.ts tests/ov-server.test.ts tests/ov-index.test.ts` in `maw-cli/`
-- [ ] Step 2: `bun run test -- tests/init.test.ts` in `maw-cli/`
-- [ ] Step 2: `bun run build` in `maw-cli/`
+- [x] Step 2: `bun run test -- tests/init.test.ts` in `maw-cli/`
+- [x] Step 2: `bun run build` in `maw-cli/`
 - [ ] Step 3: `rg "maw-cli ov:server|maw-cli ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md docs/agents/initiatives/active/init/init-plan.md`
 - [ ] Step 3: `! rg "maw:ov:server|maw:ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md docs/agents/initiatives/active/init/init-plan.md`
 - [ ] Step 4: `bun smoke-init phase4-openviking` in `../maw-smoke/`
