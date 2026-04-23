@@ -246,7 +246,7 @@ Start the project-scoped OpenViking server:
 bunx maw-cli ov:server
 ```
 
-`maw-cli ov:server` reads `.maw/ov.conf`, resolves `${VAR}` placeholders against the current process environment before launch, writes a resolved temp config, and then invokes upstream `openviking-server`.
+`maw-cli ov:server` reads `.maw/ov.conf`, resolves `${VAR}` placeholders from the current process environment first and the MAW-scope local `.env` as fallback, loads that `.env` file explicitly instead of relying on Bun auto-loading, writes the resolved values only into an ephemeral temp config outside the project tree, and then invokes upstream `openviking-server`.
 
 Index the whole project. The target path is always explicit:
 
@@ -317,7 +317,7 @@ Generated OpenViking config excerpts:
 
 The generated server binds to loopback (`127.0.0.1`) by default, and the generated client URL uses `localhost` to reach that same local listener.
 
-The scaffolded `.maw/ov.conf` intentionally keeps `${OPENAI_API_KEY}` literal. `maw-cli ov:server` resolves that placeholder at launch time before it hands the temp config to upstream OpenViking, so the generated config carries placeholders rather than copied secrets.
+The scaffolded `.maw/ov.conf` intentionally keeps `${OPENAI_API_KEY}` literal. `maw-cli ov:server` resolves that placeholder at launch time using the current process environment first and the MAW-scope local `.env` as fallback, so the generated config carries placeholders rather than copied secrets.
 
 ## 8. Run One Workflow In Isolation
 
@@ -451,7 +451,7 @@ Use these checks to confirm the target project matches the MVP contract.
 | Problem | What to check |
 | --- | --- |
 | `maw-cli init` finds no workflows | confirm the package is installed and exports `./scaffold` |
-| `maw-cli ov:server` fails before launch | confirm the required `.maw/ov.conf` placeholders are available in the current process environment |
+| `maw-cli ov:server` fails before launch | confirm the required `.maw/ov.conf` placeholders are available in the current process environment or the MAW-scope local `.env`; process env wins when both define the same value |
 | `bunx maw-cli ov:index` exits immediately | confirm you passed an explicit target path, for example `bunx maw-cli ov:index .` |
 | `maw-cli dev <workflow>` says the workflow directory is missing | rerun `maw-cli init` after installing the workflow package |
 | prompt preview does not show a custom override | confirm the override file name matches the snippet name exactly |

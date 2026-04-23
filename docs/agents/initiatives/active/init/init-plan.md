@@ -58,7 +58,7 @@ The remaining alignment work is now:
   - `maw-cli ov:server`
   - `maw-cli ov:index <target-path> [openviking args...]`
 - `maw-cli ov:index` requires an explicit target path at invocation time, for example `bunx maw-cli ov:index .` or `bunx maw-cli ov:index src --wait`.
-- `maw-cli ov:server` resolves `${VAR}` placeholders in `.maw/ov.conf` against the current process environment, launches upstream `openviking-server` with a resolved temp config, and fails clearly when required placeholders are unresolved.
+- `maw-cli ov:server` resolves `${VAR}` placeholders in `.maw/ov.conf` from the current process environment first and the MAW-scope local `.env` as fallback, loads that `.env` file explicitly instead of relying on Bun auto-loading, uses the resolved values only for the temp config passed to upstream `openviking-server`, and fails clearly when required placeholders are unresolved.
 - `maw-cli ov:index` points upstream `openviking add-resource` at `.maw/ovcli.conf`, requires an explicit target path, and passes any additional caller-supplied flags straight through.
 - `openviking: false` in `maw.json` disables graph-time retrieval only; it does not block `maw-cli ov:index`.
 - The target project's workflow runtime files live under `.maw/graphs/<workflow>/`.
@@ -211,7 +211,8 @@ Workflow runtimes may fall back to built-in project defaults only when `maw.json
 - it seeds the restored OpenAI-backed dense-embedding and VLM defaults used by the Phase 4 scaffold
 - every installed workflow uses the same indexed project context
 - it may use environment variable placeholders like `${OPENAI_API_KEY}` or any other `${VAR}` name supported by MAW's runtime resolver
-- the scaffold keeps `${OPENAI_API_KEY}` literal and lets `maw-cli ov:server` resolve it at runtime before launching OpenViking
+- the scaffold keeps `${OPENAI_API_KEY}` literal and lets `maw-cli ov:server` resolve it at runtime from the current process environment first and the MAW-scope local `.env` as fallback
+- `maw-cli` loads that `.env` file explicitly for placeholder resolution instead of relying on Bun auto-loading, and writes the resolved values only to the ephemeral temp config outside the project tree
 - unresolved placeholders should fail clearly at runtime instead of being passed through literally to the upstream provider
 - it should move out of the workflow template and into `maw-cli`
 
@@ -279,7 +280,7 @@ Rules:
 - `maw-cli ov:server` is the explicit Phase 4 server start path
 - `maw-cli ov:index` requires an explicit target path at invocation time
 - additional OpenViking flags are passed through by the caller, for example `bunx maw-cli ov:index . --wait`
-- `.maw/ov.conf` placeholder resolution happens inside `maw-cli ov:server`, not inside the scaffolded file itself
+- `.maw/ov.conf` placeholder resolution happens inside `maw-cli ov:server`, using process env first and MAW-scope local `.env` fallback, not inside the scaffolded file itself
 - `.maw/ovcli.conf` remains the client/runtime URL authority used by `maw-cli ov:index`
 - `maw-cli init` requires a target-project `package.json`, but it does not seed `maw:ov:*` scripts because the runtime surface is direct `maw-cli` execution
 - `maw-cli ov:index` does not consult `maw.json.openviking`; setting `"openviking": false` only affects later graph-time retrieval
@@ -424,7 +425,8 @@ Phase 4 keeps live OpenViking execution inside `maw-cli` so MAW can resolve `.ma
 `maw-cli ov:server` should:
 
 - parse `.maw/ov.conf`
-- resolve `${VAR}` placeholders against the current process environment
+- resolve `${VAR}` placeholders from the current process environment first and the MAW-scope local `.env` as fallback
+- load that `.env` file explicitly for placeholder resolution instead of relying on Bun auto-loading
 - write a resolved temp config outside the checked-in project files
 - invoke `openviking-server --config <resolved-temp-config>`
 - fail clearly when required placeholders are unresolved
@@ -662,7 +664,7 @@ Smoke verification runs from `../maw-smoke/` following `README.md` and `docs/age
 - `maw.json` no longer carries `workspace`, `openviking.host`, or `openviking.port`; `openviking` is a boolean retrieval toggle and MAW scope is defined by the directory containing the file
 - `maw-cli` help advertises `ov:server` and `ov:index`, but not `ov:init`
 - `maw-cli init` does not mutate the target project's `package.json` for OpenViking runtime wiring
-- `bunx maw-cli ov:server` resolves `.maw/ov.conf` placeholders against the current process environment before launching upstream OpenViking
+- `bunx maw-cli ov:server` resolves `.maw/ov.conf` placeholders from the current process environment first and the MAW-scope local `.env` as fallback, loaded explicitly rather than through Bun auto-loading, before launching upstream OpenViking
 - `bunx maw-cli ov:index . --wait` and `bunx maw-cli ov:index package.json --wait` use the project-local `.maw/ovcli.conf` instead of the operator's global OpenViking CLI config
 - setting `"openviking": false` in `maw.json` disables retrieval only; `maw-cli ov:index` still runs unchanged
 - all workflows in one MAW scope share the same `.maw/openviking/` storage, `.maw/ov.conf`, and `.maw/ovcli.conf`; live graph retrieval is verified in Phase 7

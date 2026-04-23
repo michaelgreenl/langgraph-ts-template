@@ -46,7 +46,7 @@ Implement project-scoped OpenViking bootstrap plus `maw-cli`-owned runtime wrapp
   - `maw-cli ov:server`
   - `maw-cli ov:index <target-path> [openviking args...]`
 - `maw-cli ov:index` requires an explicit target path supplied by the caller, for example `bunx maw-cli ov:index .` or `bunx maw-cli ov:index src --wait`.
-- `maw-cli ov:server` resolves `${VAR}` placeholders in `.maw/ov.conf` against the current process environment, launches upstream `openviking-server` with a resolved temp config, and fails clearly when required placeholders are unresolved.
+- `maw-cli ov:server` resolves `${VAR}` placeholders in `.maw/ov.conf` from the current process environment first and the MAW-scope local `.env` as fallback, loads that `.env` file explicitly instead of relying on Bun auto-loading, launches upstream `openviking-server` with a resolved temp config, and fails clearly when required placeholders are unresolved.
 - `maw-cli ov:index` sets `OPENVIKING_CLI_CONFIG_FILE=.maw/ovcli.conf`, forwards the target path plus any caller-supplied flags to `openviking add-resource`, and does not read `maw.json.openviking`.
 - `maw.json` remains `{ "openviking": boolean, "templates": { "customPath": ".maw/templates" } }`.
 - `maw.json.openviking` toggles graph-time retrieval only. It does not gate or prompt indexing.
@@ -117,7 +117,7 @@ Relevant generated OpenViking defaults remain:
 }
 ```
 
-Phase 4 seeds these loopback and OpenAI-backed defaults once. The `${OPENAI_API_KEY}` placeholders stay literal in the scaffolded `.maw/ov.conf`; `maw-cli ov:server` resolves them before launch. If a user later changes the server bind settings, provider/model settings, placeholders, or client URL, rerunning `maw-cli init` preserves those edits instead of reconciling them.
+Phase 4 seeds these loopback and OpenAI-backed defaults once. The `${OPENAI_API_KEY}` placeholders stay literal in the scaffolded `.maw/ov.conf`; `maw-cli ov:server` resolves them before launch by checking the current process environment first and the MAW-scope local `.env` as fallback, loading that `.env` file explicitly instead of relying on Bun auto-loading, and using the resolved values only to write the ephemeral temp config outside the project tree. If a user later changes the server bind settings, provider/model settings, placeholders, or client URL, rerunning `maw-cli init` preserves those edits instead of reconciling them.
 
 ### OpenViking runtime command contract
 
@@ -179,7 +179,7 @@ Verify:
 
 ### 3. Align docs to direct `maw-cli` runtime execution
 
-- [x] `docs/usage/mvp/maw-cli.md`: document `maw-cli ov:server` / `maw-cli ov:index` and that `maw-cli ov:server` resolves `.maw/ov.conf` placeholders before launch
+- [x] `docs/usage/mvp/maw-cli.md`: document `maw-cli ov:server` / `maw-cli ov:index` and that `maw-cli ov:server` resolves `.maw/ov.conf` placeholders with current-process-env precedence plus MAW-scope local `.env` fallback before launch
 - [x] `docs/usage/mvp/langgraph-ts-template.md`: align the workflow-package usage guide with the direct-`maw-cli` runtime model
 - [x] `docs/agents/initiatives/active/init/init-plan.md`: keep the master init plan consistent with the corrected Phase 4 runtime ownership
 
@@ -242,7 +242,7 @@ Verify:
 - [ ] `maw-cli init` requires a target-project `package.json`, creates `.maw/ovcli.conf` alongside `.maw/ov.conf`, and does not mutate `package.json` for OpenViking runtime wiring
 - [ ] `maw-cli ov:server` is the explicit Phase 4 server launch path
 - [ ] `maw-cli ov:index` requires the caller to supply an explicit target path
-- [ ] `maw-cli ov:server` resolves `.maw/ov.conf` placeholders against the current process environment before launching upstream OpenViking
+- [ ] `maw-cli ov:server` resolves `.maw/ov.conf` placeholders from the current process environment first and the MAW-scope local `.env` as fallback, loaded explicitly rather than through Bun auto-loading, before launching upstream OpenViking
 - [ ] `.maw/ov.conf` seeds the loopback server defaults plus the restored OpenAI-backed dense-embedding and VLM defaults with literal `${OPENAI_API_KEY}` placeholders
 - [ ] rerunning `maw-cli init` preserves edited `.maw/ov.conf` and `.maw/ovcli.conf` instead of reconciling drift
 - [ ] setting `"openviking": false` in `maw.json` disables retrieval only; `maw-cli ov:index` still runs unchanged

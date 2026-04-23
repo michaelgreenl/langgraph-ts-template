@@ -7,20 +7,19 @@
 ## Pre-flight
 
 - No blockers found.
-- Concern noted before editing: `docs/agents/initiatives/active/init/init-plan.md` was already mostly aligned, so this step focused on removing stale target-project `maw:ov:*` script guidance and reinforcing the corrected Phase 4 ownership rules without broad doc rewrites.
+- Concern noted before editing: `docs/usage/mvp/langgraph-ts-template.md` was already aligned to the direct-`maw-cli` ownership model and does not describe the `ov:server` env-loading contract, so changing it would have broadened this retry beyond the approved runtime-contract wording.
 
 ## Changes
 
-- Updated `docs/usage/mvp/maw-cli.md` to replace target-project `maw:ov:*` script guidance with direct `maw-cli ov:server` / `maw-cli ov:index` usage.
-- Documented that `maw-cli ov:server` resolves `.maw/ov.conf` `${VAR}` placeholders against the current process environment before launching upstream OpenViking.
-- Updated `docs/usage/mvp/langgraph-ts-template.md` so the workflow-package guide matches direct `maw-cli` runtime ownership and the unchanged target-project `package.json` contract.
-- Tightened `docs/agents/initiatives/active/init/init-plan.md` runtime rules to restate direct `maw-cli` ownership, `package.json` non-mutation for OpenViking runtime wiring, and retrieval-only `openviking` toggle behavior.
-- Checked off Step 3 items and Step 3 verification items in `docs/agents/initiatives/active/init/active/10-openviking-integration/tasks.md` after verification passed.
+- Updated `docs/usage/mvp/maw-cli.md` so the user-facing `ov:server` docs now state the approved resolution order: current process environment first, then the MAW-scope local `.env` as fallback.
+- Documented in `docs/usage/mvp/maw-cli.md` that `maw-cli` loads that `.env` file explicitly rather than relying on Bun auto-loading, and that the resolved values are written only to the ephemeral temp config outside the project tree before launching upstream OpenViking.
+- Updated `docs/agents/initiatives/active/init/init-plan.md` so the master Phase 4 contract matches the approved `ov:server` runtime behavior, including precedence, explicit `.env` loading, temp-config-only use, and continued direct `maw-cli` ownership.
+- Updated `docs/agents/initiatives/active/init/active/10-openviking-integration/tasks.md` where the Phase 4 contract still said process-environment-only, while keeping the Step 3 checklist checked because the retry left Step 3 fully compliant.
+- Updated this existing Step 3 log for the retry.
 
 ## Files
 
 - `docs/usage/mvp/maw-cli.md`
-- `docs/usage/mvp/langgraph-ts-template.md`
 - `docs/agents/initiatives/active/init/init-plan.md`
 - `docs/agents/initiatives/active/init/active/10-openviking-integration/tasks.md`
 - `docs/agents/initiatives/active/init/active/10-openviking-integration/step-logs/3-align-docs-to-direct-maw-cli-runtime-execution.md`
@@ -35,8 +34,8 @@
 
 ## Summary
 
-- Step 3 is complete.
-- The Phase 4 docs now consistently describe direct `maw-cli ov:server` / `maw-cli ov:index` runtime ownership, `.maw/ov.conf` placeholder resolution in `maw-cli`, and the retrieval-only meaning of `openviking: false`.
+- Step 3 remains complete.
+- The Phase 4 docs now consistently describe direct `maw-cli ov:server` / `maw-cli ov:index` runtime ownership, process-env-first plus MAW-scope local `.env` fallback placeholder resolution in `maw-cli`, explicit non-Bun `.env` loading, temp-config-only value use, and the retrieval-only meaning of `openviking: false`.
 
 ## Remaining
 
