@@ -27,14 +27,13 @@ Still valid from earlier work:
 - Workflow packages being installable npm/git packages
 - Nunjucks-based prompt composition inside workflows
 
-The earlier reset items above are now largely resolved by Phases 1-3.
+The earlier reset items above are now resolved through Phase 4.
 
 The remaining alignment work is now:
 
-- finishing the `maw.json.workspace` plus `maw.json.openviking.host/port` removal from the live contract
-- replacing the broken direct-upstream OpenViking execution model with `maw-cli`-owned runtime wrappers and `.maw/ov.conf` placeholder resolution
-- keeping project-local `.maw/ovcli.conf` and corrected `.maw/ov.conf` ownership in `maw-cli`
-- splitting the former Phase 5 into a base workflow phase, an opencode SDK integration phase, and a later runtime OpenViking retrieval phase
+- replacing the current hardcoded graph stub with the Phase 5 base workflow
+- integrating opencode-backed codebase actions in Phase 6
+- landing live graph-time OpenViking retrieval in Phase 7
 
 ## Finalized Decisions
 
@@ -523,14 +522,11 @@ They are tracked separately in:
 
 ## Current State Assessment
 
-These parts of the current implementation conflict with the revised architecture and need revision:
+The earlier Phase 4 OpenViking contract conflicts are now resolved by the completed wrapper, init, docs, and smoke work.
 
-- the current Phase 4 direct-runtime model still assumes target-project OpenViking entrypoints can live outside `maw-cli`, but smoke work showed `.maw/ov.conf` placeholder resolution must stay in MAW
-- `maw-cli` does not yet expose `ov:server` / `ov:index` runtime wrappers that resolve `.maw/ov.conf` placeholders and centralize upstream OpenViking invocation
-- `maw-cli init` still seeds target-project OpenViking scripts even though the corrected architecture removes that indirection
-- Phase 4 smoke coverage does not yet prove the corrected direct-`maw-cli` runtime flow end to end against local repo checkouts
+The remaining implementation gap called out by this plan is:
+
 - the current graph is still a stub that returns a hardcoded greeting
-- the old Phase 5 scope still conflates base workflow foundation, opencode-enabled codebase actions, and runtime OpenViking retrieval into one phase
 
 ## Execution Plan
 
@@ -578,7 +574,7 @@ These parts of the current implementation conflict with the revised architecture
 
 ### Phase 4: OpenViking integration
 
-- [ ] complete
+- [x] complete
 
 - keep OpenViking configuration project-wide in `.maw/ov.conf` and `.maw/ovcli.conf`
 - shrink `maw.json.openviking` to a boolean retrieval toggle and remove `workspace`, host, and port from the live project config contract

@@ -190,19 +190,19 @@ Verify:
 
 ### 4. Prove the direct `maw-cli` flow in a disposable smoke project
 
-- [ ] `../maw-smoke`: run `bun smoke-init phase4-openviking` to create the disposable target project from local repo checkouts
-- [ ] In `../maw-smoke/tests/smoke-phase4-openviking/`: run `bunx maw-cli init`, confirm `package.json`, `maw.json`, `.maw/ov.conf`, and `.maw/ovcli.conf` contain the Phase 4 contract
-- [ ] In terminal A inside that same smoke project: run `bunx maw-cli ov:server`; in terminal B: run `bunx maw-cli ov:index . --wait` and `bunx maw-cli ov:index package.json --wait`
-- [ ] In that smoke project: set `"openviking": false` in `maw.json`, rerun `bunx maw-cli ov:index package.json --wait`, and record that indexing still works unchanged because the toggle affects retrieval only
-- [ ] `../maw-smoke/docs/agents/smoke-logs/phase4-openviking.md`: record the final results, any issues/fixes, runtime-env assumptions, and whether the direct-`maw-cli` surface exposed any gaps worth carrying into the later retrieval phase
+- [x] `../maw-smoke`: run `bun smoke-init phase4-openviking` to create the disposable target project from local repo checkouts
+- [x] In `../maw-smoke/tests/smoke-phase4-openviking/`: run `bunx maw-cli init`, confirm `package.json`, `maw.json`, `.maw/ov.conf`, and `.maw/ovcli.conf` contain the Phase 4 contract
+- [x] In terminal A inside that same smoke project: run `bunx maw-cli ov:server`; in terminal B: run `bunx maw-cli ov:index . --wait` and `bunx maw-cli ov:index package.json --wait`
+- [x] In that smoke project: set `"openviking": false` in `maw.json`, rerun `bunx maw-cli ov:index package.json --wait`, and record that indexing still works unchanged because the toggle affects retrieval only
+- [x] `../maw-smoke/docs/agents/smoke-logs/phase4-openviking.md`: record the final results, any issues/fixes, runtime-env assumptions, and whether the direct-`maw-cli` surface exposed any gaps worth carrying into the later retrieval phase
 
 Verify:
 
-- [ ] `bun smoke-init phase4-openviking` in `../maw-smoke/`
-- [ ] In `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli init`
-- [ ] In terminal A inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:server`
-- [ ] In terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:index . --wait`
-- [ ] In terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:index package.json --wait`
+- [x] `bun smoke-init phase4-openviking` in `../maw-smoke/`
+- [x] In `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli init`
+- [x] In terminal A inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:server`
+- [x] In terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:index . --wait`
+- [x] In terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:index package.json --wait`
 
 ## Verification
 
@@ -213,40 +213,40 @@ Verify:
 - [x] Step 2: `bun run build` in `maw-cli/`
 - [x] Step 3: `rg "maw-cli ov:server|maw-cli ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md docs/agents/initiatives/active/init/init-plan.md`
 - [x] Step 3: `! rg "maw:ov:server|maw:ov:index" docs/usage/mvp/maw-cli.md docs/usage/mvp/langgraph-ts-template.md docs/agents/initiatives/active/init/init-plan.md`
-- [ ] Step 4: `bun smoke-init phase4-openviking` in `../maw-smoke/`
-- [ ] Step 4: in `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli init`
-- [ ] Step 4: in terminal A inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:server`
-- [ ] Step 4: in terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:index . --wait`
-- [ ] Step 4: in terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:index package.json --wait`
+- [x] Step 4: `bun smoke-init phase4-openviking` in `../maw-smoke/`
+- [x] Step 4: in `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli init`
+- [x] Step 4: in terminal A inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:server`
+- [x] Step 4: in terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:index . --wait`
+- [x] Step 4: in terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:index package.json --wait`
 
 ### Phase completion
 
-- [ ] `maw-cli`: `bun run typecheck`
-- [ ] `maw-cli`: `bun run build`
-- [ ] `maw-cli`: `bun run lint`
-- [ ] `maw-cli`: `bun run test`
-- [ ] `langgraph-ts-template`: `bun run build`
-- [ ] `langgraph-ts-template`: `bun run typecheck`
-- [ ] `langgraph-ts-template`: `bun run test`
-- [ ] `langgraph-ts-template`: `bun run test:int`
-- [ ] `../maw-smoke`: `bun smoke-init phase4-openviking`
-- [ ] `../maw-smoke/tests/smoke-phase4-openviking/`: run `bunx maw-cli init`
-- [ ] In terminal A inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:server`
-- [ ] In terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:index . --wait` and `bunx maw-cli ov:index package.json --wait`
-- [ ] `../maw-smoke/docs/agents/smoke-logs/phase4-openviking.md`: log the final results/issues/fixes
+- [x] `maw-cli`: `bun run typecheck`
+- [x] `maw-cli`: `bun run build`
+- [x] `maw-cli`: `bun run lint`
+- [x] `maw-cli`: `bun run test`
+- [x] `langgraph-ts-template`: `bun run build`
+- [x] `langgraph-ts-template`: `bun run typecheck`
+- [x] `langgraph-ts-template`: `bun run test`
+- [x] `langgraph-ts-template`: `bun run test:int`
+- [x] `../maw-smoke`: `bun smoke-init phase4-openviking`
+- [x] `../maw-smoke/tests/smoke-phase4-openviking/`: run `bunx maw-cli init`
+- [x] In terminal A inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:server`
+- [x] In terminal B inside `../maw-smoke/tests/smoke-phase4-openviking/`, run `bunx maw-cli ov:index . --wait` and `bunx maw-cli ov:index package.json --wait`
+- [x] `../maw-smoke/docs/agents/smoke-logs/phase4-openviking.md`: log the final results/issues/fixes
 
 ## Exit Criteria
 
-- [ ] `maw.json` no longer contains `workspace` or OpenViking host/port fields, and `openviking` is a boolean retrieval toggle
-- [ ] `maw-cli` exposes `ov:server` and `ov:index`, but not `ov:init`
-- [ ] `maw-cli init` requires a target-project `package.json`, creates `.maw/ovcli.conf` alongside `.maw/ov.conf`, and does not mutate `package.json` for OpenViking runtime wiring
-- [ ] `maw-cli ov:server` is the explicit Phase 4 server launch path
-- [ ] `maw-cli ov:index` requires the caller to supply an explicit target path
-- [ ] `maw-cli ov:server` resolves `.maw/ov.conf` placeholders from the current process environment first and the MAW-scope local `.env` as fallback, loaded explicitly rather than through Bun auto-loading, before launching upstream OpenViking
-- [ ] `.maw/ov.conf` seeds the loopback server defaults plus the restored OpenAI-backed dense-embedding and VLM defaults with literal `${OPENAI_API_KEY}` placeholders
-- [ ] rerunning `maw-cli init` preserves edited `.maw/ov.conf` and `.maw/ovcli.conf` instead of reconciling drift
-- [ ] setting `"openviking": false` in `maw.json` disables retrieval only; `maw-cli ov:index` still runs unchanged
-- [ ] the MAW scope still has one shared `.maw/openviking/`, `.maw/ov.conf`, and `.maw/ovcli.conf` rather than per-workflow OpenViking state
-- [ ] `langgraph-ts-template` exports concrete OpenViking toggle/url-based plumbing against the simplified project config shape, while live graph-time retrieval remains explicitly deferred to Phase 7
-- [ ] the MVP usage docs reflect the direct-`maw-cli` runtime model and the simplified `maw.json` shape
-- [ ] the Phase 4 smoke log proves the real installed-local-checkout flow works end to end with `bunx maw-cli init`, `bunx maw-cli ov:server`, and `bunx maw-cli ov:index <target> --wait`
+- [x] `maw.json` no longer contains `workspace` or OpenViking host/port fields, and `openviking` is a boolean retrieval toggle
+- [x] `maw-cli` exposes `ov:server` and `ov:index`, but not `ov:init`
+- [x] `maw-cli init` requires a target-project `package.json`, creates `.maw/ovcli.conf` alongside `.maw/ov.conf`, and does not mutate `package.json` for OpenViking runtime wiring
+- [x] `maw-cli ov:server` is the explicit Phase 4 server launch path
+- [x] `maw-cli ov:index` requires the caller to supply an explicit target path
+- [x] `maw-cli ov:server` resolves `.maw/ov.conf` placeholders from the current process environment first and the MAW-scope local `.env` as fallback, loaded explicitly rather than through Bun auto-loading, before launching upstream OpenViking
+- [x] `.maw/ov.conf` seeds the loopback server defaults plus the restored OpenAI-backed dense-embedding and VLM defaults with literal `${OPENAI_API_KEY}` placeholders
+- [x] rerunning `maw-cli init` preserves edited `.maw/ov.conf` and `.maw/ovcli.conf` instead of reconciling drift
+- [x] setting `"openviking": false` in `maw.json` disables retrieval only; `maw-cli ov:index` still runs unchanged
+- [x] the MAW scope still has one shared `.maw/openviking/`, `.maw/ov.conf`, and `.maw/ovcli.conf` rather than per-workflow OpenViking state
+- [x] `langgraph-ts-template` exports concrete OpenViking toggle/url-based plumbing against the simplified project config shape, while live graph-time retrieval remains explicitly deferred to Phase 7
+- [x] the MVP usage docs reflect the direct-`maw-cli` runtime model and the simplified `maw.json` shape
+- [x] the Phase 4 smoke log proves the real installed-local-checkout flow works end to end with `bunx maw-cli init`, `bunx maw-cli ov:server`, and `bunx maw-cli ov:index <target> --wait`
