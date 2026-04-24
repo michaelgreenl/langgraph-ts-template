@@ -45,12 +45,18 @@ Before drafting anything, identify which planning job you are doing:
 Read the relevant context before proposing structure:
 
 - the target plan file if it already exists
-- adjacent phase docs when writing a new phase plan
 - the parent initiative plan when writing a phase plan
 - any referenced task docs, step logs, usage docs, or implementation notes that materially define the contract
 - the planning templates:
   - `docs/agents/templates/initiative-plan.template.md`
   - `docs/agents/templates/phase-tasks.template.md`
+
+Source-of-truth priority:
+
+- Active plan files, current code, and maintained usage/docs are the current contract.
+- Completed phase docs under `complete/` are history/logs, not contract authority.
+- You may read completed phase docs for historical context, sequencing, or style, but never treat them as the source of truth over the active codebase or active plan files.
+- If a completed phase doc conflicts with the active codebase or `init-plan.md`, treat the completed doc as stale unless the user explicitly asks for historical carry-forward.
 
 ### Ambiguity Handling
 

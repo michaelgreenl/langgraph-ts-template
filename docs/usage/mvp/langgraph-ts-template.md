@@ -1,5 +1,10 @@
 # langgraph-ts-template MVP Usage
 
+> Planning note
+>
+> This is a target-state MVP usage guide, not a statement of the currently implemented surface in the active codebase.
+> It describes what usage should look like once the MAW MVP is complete.
+
 This guide shows how a workflow author uses `langgraph-ts-template` to build a MAW-compatible workflow package for the Phase 4 MVP.
 
 > Status
