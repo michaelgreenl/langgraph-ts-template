@@ -514,6 +514,8 @@ Anything beyond that baseline is post-MVP.
 
 Runtime-backed skills are intentionally out of scope for this MVP plan.
 
+Workflow-local or per-agent model/provider overrides are also deferred to post-MVP work because the right config shape depends on how opencode integration lands in the workflow runtime.
+
 They are tracked separately in:
 
 - `docs/agents/initiatives/queued/runtime-backed-skills/plan.md`

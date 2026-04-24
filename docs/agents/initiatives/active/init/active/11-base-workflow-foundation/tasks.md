@@ -18,7 +18,7 @@ Replace the current hardcoded greeting stub with a real LLM-backed base workflow
 
 - File, shell, git, or other codebase-action tools; the controlled tool loop lands in Phase 6 with opencode integration.
 - Graph-time OpenViking retrieval, `.maw/ovcli.conf` consumption inside agent nodes, or any shared-context lookup during execution; that lands in Phase 7.
-- Per-agent model/provider settings in `maw.json` or `.maw/graphs/<workflow>/config.json`; Phase 5 uses one shared package-owned model path.
+- Per-agent or workflow-local model/provider settings in `maw.json` or `.maw/graphs/<workflow>/config.json`; Phase 5 uses one shared package-owned model path.
 - `createReactAgent`, `ToolNode`, loop-back tool execution, or any other prebuilt agent abstraction.
 - `../maw-cli/src/**` product-code changes; Phase 5 reuses the existing `maw-cli dev <workflow>` runner for smoke verification.
 - Rewriting the target-state MVP usage guides under `docs/usage/mvp/`; those pages already carry a target-state note and are not the current active-code contract.
@@ -28,7 +28,7 @@ Replace the current hardcoded greeting stub with a real LLM-backed base workflow
 - `planner` and `coder` are real sequential runtime nodes in Phase 5, not just prompt labels on one stub node.
 - Phase 5 builds the graph manually with `StateGraph`; do not use `createReactAgent`.
 - The initial shared model path is OpenAI `gpt-4.1-mini`.
-- Phase 5 uses one shared model path for both nodes. Per-agent model splits are deferred.
+- Phase 5 uses one shared package-owned model path for both nodes. Workflow-local or per-agent model overrides are deferred to a post-MVP follow-on after opencode integration clarifies the workflow config contract.
 - `src/scaffold/assets/config.json` already ships `planner` / `coder` defaults. Phase 5 does not reopen scaffold prompt defaults as unfinished work.
 - Runtime prompt selection continues to resolve in this order: embedded workflow defaults -> `.maw/graphs/<workflow>/config.json` -> `.maw/templates/<name>.njk`, with the existing missing/invalid-config fallback rules unchanged.
 - Runtime template vars must reach both live agent nodes. At minimum, both nodes keep `workspacePath='.'` from the MAW scope root and merge `GraphConfig.vars`; coder prompt composition additionally receives the resolved planner handoff string.
@@ -61,9 +61,8 @@ The installed-package runtime should default to OpenAI `gpt-4.1-mini`, but Phase
 
 Required rules:
 
-- `createGraph()` accepts one optional model override on `GraphConfig`
-- the override is shared by planner and coder so tests can run with one deterministic fake model
-- the default installed-package path instantiates the shared OpenAI model internally when no override is supplied
+- the default installed-package path instantiates the shared OpenAI model internally
+- Phase 5 tests stay deterministic by mocking or stubbing that shared model path rather than by adding workflow-local runtime model configuration
 - the workflow package must not add a second on-disk model config layer for Phase 5
 
 ### Runtime prompt/context smoke contract
@@ -138,16 +137,16 @@ Rules:
 
 ### 1. Add the Phase 5 runtime contract and model seam
 
-This step locks the public/testable runtime surface before the stub is removed. It owns the shared model dependency, graph-visible prompt/handoff fields, and the caller-supplied model override used in deterministic tests. It must not add tools, file actions, or retrieval behavior.
+This step locks the public/testable runtime surface before the stub is removed. It owns the shared model dependency and graph-visible prompt/handoff fields while keeping tests deterministic without real model calls. It must not add tools, file actions, or retrieval behavior.
 
-- [ ] `langgraph-ts-template/package.json`: add the shared OpenAI runtime dependency needed for the Phase 5 model path
-- [ ] `langgraph-ts-template/src/agent/state.ts` and `src/index.ts`: extend the exported graph/runtime types so state can expose `plannerPrompt`, `coderPrompt`, and `handoff`, and `GraphConfig` can accept one optional shared model override
-- [ ] `langgraph-ts-template/tests/unit/{graph.spec.ts,public-api.spec.ts}`: cover the new runtime contract without requiring a real model call
+- [x] `langgraph-ts-template/package.json`: add the shared OpenAI runtime dependency needed for the Phase 5 model path
+- [x] `langgraph-ts-template/src/agent/state.ts` and `src/index.ts`: extend the exported graph/runtime types so state can expose `plannerPrompt`, `coderPrompt`, and `handoff`, and export any narrow state/public API types needed to inspect them cleanly in tests
+- [x] `langgraph-ts-template/tests/unit/{graph.spec.ts,public-api.spec.ts}`: cover the new runtime contract without requiring a real model call
 
 Verify:
 
-- [ ] `bun run typecheck`
-- [ ] `bun run test -- tests/unit/graph.spec.ts tests/unit/public-api.spec.ts`
+- [x] `bun run typecheck`
+- [x] `bun run test -- tests/unit/graph.spec.ts tests/unit/public-api.spec.ts`
 
 ### 2. Replace the greeting stub with a clean planner -> coder runtime
 
@@ -197,8 +196,8 @@ Verify:
 
 ### Per-step verification
 
-- [ ] Step 1: `bun run typecheck`
-- [ ] Step 1: `bun run test -- tests/unit/graph.spec.ts tests/unit/public-api.spec.ts`
+- [x] Step 1: `bun run typecheck`
+- [x] Step 1: `bun run test -- tests/unit/graph.spec.ts tests/unit/public-api.spec.ts`
 - [ ] Step 2: `bun run test -- tests/unit/templates.spec.ts`
 - [ ] Step 2: `bun run test:int -- tests/integration/graph.test.ts`
 - [ ] Step 3: manual review of `docs/agents/initiatives/active/init/init-plan.md` and `README.md`

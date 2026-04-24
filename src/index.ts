@@ -1,5 +1,5 @@
 export { createGraph, graph, route, type GraphConfig } from './agent/graph.js';
-export { StateAnnotation } from './agent/state.js';
+export { StateAnnotation, type GraphState, type GraphUpdate } from './agent/state.js';
 export {
     DEFAULT_WORKFLOW_CONFIG,
     loadWorkflowConfig,

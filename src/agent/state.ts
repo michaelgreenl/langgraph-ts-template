@@ -19,9 +19,21 @@ const pinSystem = (messages: BaseMessage[]): BaseMessage[] => {
     return [system, ...messages.slice(0, index), ...messages.slice(index + 1)];
 };
 
+const text = () =>
+    Annotation<string>({
+        reducer: (_left, right) => right,
+        default: () => '',
+    });
+
 export const StateAnnotation = Annotation.Root({
     messages: Annotation<BaseMessage[], BaseMessageLike[]>({
         reducer: (left, right) => pinSystem(messagesStateReducer(left, right)),
         default: () => [],
     }),
+    plannerPrompt: text(),
+    coderPrompt: text(),
+    handoff: text(),
 });
+
+export type GraphState = typeof StateAnnotation.State;
+export type GraphUpdate = typeof StateAnnotation.Update;
