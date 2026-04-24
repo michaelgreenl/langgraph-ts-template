@@ -96,8 +96,8 @@ export const createTemplateEngine = (opts: CreateTemplateEngineOptions): Templat
         compose: async (agent, vars = {}) => {
             const names = resolveSnippets(opts.prompts, agent);
             const bag = {
-                workspacePath: opts.workspace ?? '',
                 ...vars,
+                workspacePath: opts.workspace ?? '',
             };
             const roots = await (dirs ??= sources(opts));
             const parts = await Promise.all(

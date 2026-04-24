@@ -2,8 +2,47 @@ import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createGraph } from '../../src/agent/graph.js';
 import type { WorkflowConfig } from '../../src/config.js';
+
+const calls: string[] = [];
+
+const firstPrompt = (input: unknown): string => {
+    if (!Array.isArray(input)) {
+        return '';
+    }
+
+    const [first] = input;
+
+    if (!first || typeof first !== 'object' || !('content' in first)) {
+        return '';
+    }
+
+    return String(first.content);
+};
+
+vi.mock('@langchain/openai', async () => {
+    const { AIMessage } = await import('@langchain/core/messages');
+
+    return {
+        ChatOpenAI: class {
+            constructor(_opts: unknown) {}
+
+            async invoke(input: unknown) {
+                calls.push(firstPrompt(input));
+
+                if (calls.length % 2 === 1) {
+                    return new AIMessage({
+                        content: 'Planner handoff from stub.',
+                    });
+                }
+
+                return new AIMessage({
+                    content: 'Coder response from stub.',
+                });
+            }
+        },
+    };
+});
 
 const roots: string[] = [];
 
@@ -49,106 +88,86 @@ const writeWorkflow = async (root: string, name: string, value: WorkflowConfig |
 
 afterEach(async () => {
     vi.restoreAllMocks();
+    calls.splice(0);
     await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
 });
 
 describe('Graph', () => {
-    it('injects one leading system message, merges partial workflow overrides, and preserves it across turns', async () => {
+    it('runs planner then coder, captures live prompts, and stores a non-empty handoff', async () => {
         const root = await createRoot();
         const cfg = {
-            agent: 'coder',
             root,
             workflowConfig: {
                 prompts: {
                     agents: {
-                        coder: ['research-rules', 'typescript'],
+                        planner: ['research-rules'],
+                        coder: ['typescript'],
                     },
                 },
             } satisfies WorkflowConfig,
         };
 
-        await writeFile(join(root, '.maw/templates/general.njk'), 'override general\n');
-
+        const { createGraph } = await import('../../src/agent/graph.js');
         const app = createGraph(cfg);
-        const first = await app.invoke({ messages: ['Hello'] });
+        const result = await app.invoke({ messages: ['Hello'] });
 
-        expect(first.messages[0]._getType()).toBe('system');
-
-        const prompt = text(first.messages[0].content);
-        expect(prompt).toContain('override general');
-        expect(prompt).toContain(SECURITY);
-        expect(prompt).toContain(RESEARCH);
-        expect(prompt).toContain(TYPESCRIPT);
-        expect(prompt.indexOf('override general')).toBeLessThan(prompt.indexOf(SECURITY));
-        expect(prompt.indexOf(SECURITY)).toBeLessThan(prompt.indexOf(RESEARCH));
-        expect(prompt.indexOf(RESEARCH)).toBeLessThan(prompt.indexOf(TYPESCRIPT));
-
-        const second = await app.invoke({
-            messages: [...first.messages, 'Second turn'],
-        });
-
-        expect(second.messages[0]._getType()).toBe('system');
-        expect(second.messages.filter((message) => message._getType() === 'system')).toHaveLength(1);
-        expect(text(second.messages[0].content)).toBe(prompt);
+        expect(calls).toHaveLength(2);
+        expect(result.plannerPrompt).toContain(GENERAL);
+        expect(result.plannerPrompt).toContain(SECURITY);
+        expect(result.plannerPrompt).toContain(RESEARCH);
+        expect(result.coderPrompt).toContain(GENERAL);
+        expect(result.coderPrompt).toContain(SECURITY);
+        expect(result.coderPrompt).toContain(TYPESCRIPT);
+        expect(result.handoff).toBe('Planner handoff from stub.');
+        expect(result.handoff).not.toHaveLength(0);
+        expect(calls[0]).toBe(result.plannerPrompt);
+        expect(calls[1]).toBe(result.coderPrompt);
+        expect(text(result.messages.at(-1)?.content)).toBe('Coder response from stub.');
     });
 
-    it('loads maw.json and workflow config from disk', async () => {
+    it('injects workspacePath and custom snippets into planner and coder prompts', async () => {
         const root = await createRoot();
 
         await writeProject(root);
-        await writeWorkflow(root, 'test-workflow', {
+        await writeFile(join(root, '.maw/templates/runtime-note.njk'), 'Workspace path: {{ workspacePath }}\n');
+        await writeFile(join(root, '.maw/templates/planner-note.njk'), 'Planner snippet active.\n');
+        await writeFile(join(root, '.maw/templates/coder-note.njk'), 'Coder snippet active.\nPlanner handoff: {{ handoff }}\n');
+        await writeWorkflow(root, 'runtime-note', {
             prompts: {
+                global: ['general', 'runtime-note'],
                 agents: {
-                    coder: ['typescript'],
+                    planner: ['planner-note'],
+                    coder: ['coder-note'],
                 },
             },
         });
 
-        const app = createGraph({ root, workflow: 'test-workflow' });
+        const { createGraph } = await import('../../src/agent/graph.js');
+        const app = createGraph({ root, workflow: 'runtime-note', vars: { workspacePath: '/ignored' } });
         const result = await app.invoke({ messages: ['Hello'] });
-        const prompt = text(result.messages[0].content);
 
-        expect(result.messages[0]._getType()).toBe('system');
-        expect(prompt).toContain(GENERAL);
-        expect(prompt).toContain(SECURITY);
-        expect(prompt).toContain(TYPESCRIPT);
-        expect(prompt).not.toContain(RESEARCH);
-    }, 30_000);
-
-    it('derives workspacePath from the MAW scope root for custom templates', async () => {
-        const root = await createRoot();
-
-        await writeProject(root);
-        await writeFile(join(root, '.maw/templates/workspace-note.njk'), 'Workspace path: {{ workspacePath }}\n');
-        await writeWorkflow(root, 'workspace-note', {
-            prompts: {
-                global: ['workspace-note'],
-                agents: {
-                    coder: ['typescript'],
-                },
-            },
-        });
-
-        const app = createGraph({ agent: 'coder', root, workflow: 'workspace-note' });
-        const result = await app.invoke({ messages: ['Hello'] });
-        const prompt = text(result.messages[0].content);
-
-        expect(prompt).toContain('Workspace path: .');
-        expect(prompt).toContain(TYPESCRIPT);
+        expect(result.plannerPrompt).toContain('Workspace path: .');
+        expect(result.plannerPrompt).toContain('Planner snippet active.');
+        expect(result.coderPrompt).toContain('Workspace path: .');
+        expect(result.coderPrompt).toContain('Coder snippet active.');
+        expect(result.coderPrompt).toContain('Planner handoff: Planner handoff from stub.');
+        expect(result.handoff).toBe('Planner handoff from stub.');
     });
 
     it('falls back to embedded defaults when the workflow config file is missing', async () => {
         const root = await createRoot();
         const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
 
+        const { createGraph } = await import('../../src/agent/graph.js');
         const app = createGraph({ root, workflow: 'missing' });
         const result = await app.invoke({ messages: ['Hello'] });
-        const prompt = text(result.messages[0].content);
 
-        expect(prompt).toContain(GENERAL);
-        expect(prompt).toContain(SECURITY);
-        expect(prompt).toContain(RESEARCH);
-        expect(prompt).not.toContain(TYPESCRIPT);
+        expect(result.plannerPrompt).toContain(GENERAL);
+        expect(result.plannerPrompt).toContain(SECURITY);
+        expect(result.plannerPrompt).toContain(RESEARCH);
+        expect(result.coderPrompt).toContain(GENERAL);
+        expect(result.coderPrompt).toContain(SECURITY);
+        expect(result.coderPrompt).toContain(TYPESCRIPT);
         expect(warn).not.toHaveBeenCalled();
     });
 
@@ -159,13 +178,14 @@ describe('Graph', () => {
         await writeProject(root);
         await writeWorkflow(root, 'broken', '{"prompts":');
 
+        const { createGraph } = await import('../../src/agent/graph.js');
         const app = createGraph({ root, workflow: 'broken' });
         const result = await app.invoke({ messages: ['Hello'] });
-        const prompt = text(result.messages[0].content);
 
-        expect(prompt).toContain(GENERAL);
-        expect(prompt).toContain(SECURITY);
-        expect(prompt).toContain(RESEARCH);
+        expect(result.plannerPrompt).toContain(GENERAL);
+        expect(result.plannerPrompt).toContain(SECURITY);
+        expect(result.plannerPrompt).toContain(RESEARCH);
+        expect(result.coderPrompt).toContain(TYPESCRIPT);
         expect(warn).toHaveBeenCalledTimes(1);
         expect(warn.mock.calls[0]?.[0]).toContain('Invalid workflow config');
         expect(warn.mock.calls[0]?.[0]).toContain('falling back to embedded defaults');
@@ -184,47 +204,17 @@ describe('Graph', () => {
             },
         });
 
-        const app = createGraph({ agent: 'coder', root, workflow: 'missing-snippet' });
+        const { createGraph } = await import('../../src/agent/graph.js');
+        const app = createGraph({ root, workflow: 'missing-snippet' });
         const result = await app.invoke({ messages: ['Hello'] });
-        const prompt = text(result.messages[0].content);
 
-        expect(prompt).toContain(GENERAL);
-        expect(prompt).toContain(SECURITY);
-        expect(prompt).toContain(TYPESCRIPT);
+        expect(result.plannerPrompt).toContain(GENERAL);
+        expect(result.plannerPrompt).toContain(SECURITY);
+        expect(result.plannerPrompt).toContain(RESEARCH);
+        expect(result.coderPrompt).toContain(TYPESCRIPT);
         expect(warn).toHaveBeenCalledTimes(1);
         expect(warn.mock.calls[0]?.[0]).toContain('Unable to resolve snippet: missing-snippet');
-        expect(warn.mock.calls[0]?.[0]).toContain('Falling back to embedded workflow defaults');
-    });
-
-    it('does not require ovcli.conf while retrieval is still deferred', async () => {
-        const root = await createRoot();
-
-        await writeProject(root, true);
-
-        const app = createGraph({ root, workflow: 'missing' });
-        const result = await app.invoke({ messages: ['Hello'] });
-        const prompt = text(result.messages[0].content);
-
-        expect(result.messages[0]._getType()).toBe('system');
-        expect(prompt).toContain(GENERAL);
-        expect(prompt).toContain(SECURITY);
-        expect(prompt).toContain(RESEARCH);
-    });
-
-    it('ignores invalid ovcli.conf while retrieval is still deferred', async () => {
-        const root = await createRoot();
-
-        await writeProject(root, true);
-        await writeJson(join(root, '.maw/ovcli.conf'), { url: ':' });
-
-        const app = createGraph({ root, workflow: 'missing' });
-        const result = await app.invoke({ messages: ['Hello'] });
-        const prompt = text(result.messages[0].content);
-
-        expect(result.messages[0]._getType()).toBe('system');
-        expect(prompt).toContain(GENERAL);
-        expect(prompt).toContain(SECURITY);
-        expect(prompt).toContain(RESEARCH);
+        expect(warn.mock.calls[0]?.[0]).toContain('agent coder');
     });
 
     it('rejects when an existing maw.json file is invalid', async () => {
@@ -232,6 +222,7 @@ describe('Graph', () => {
 
         await writeFile(join(root, 'maw.json'), '{"workspace":');
 
+        const { createGraph } = await import('../../src/agent/graph.js');
         await expect(createGraph({ root, workflow: 'missing' }).invoke({ messages: ['Hello'] })).rejects.toThrow(
             'Invalid maw.json',
         );

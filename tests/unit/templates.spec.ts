@@ -68,6 +68,26 @@ describe('template engine', () => {
         );
     });
 
+    it('renders coder handoff and keeps workspacePath bound to runtime workspace', async () => {
+        const root = await createRoot();
+        await writeFile(join(root, '.maw/templates/runtime-note.njk'), 'Workspace path: {{ workspacePath }}\n');
+        await writeFile(join(root, '.maw/templates/coder-note.njk'), 'Planner handoff: {{ handoff }}\n');
+
+        const engine = createTemplateEngine({
+            prompts: {
+                global: ['runtime-note'],
+                agents: {
+                    coder: ['coder-note'],
+                },
+            },
+            root,
+            workspace: '.',
+        });
+
+        await expect(engine.compose('coder', { handoff: 'Planner handoff from stub.', workspacePath: '/ignored' })).resolves
+            .toBe(['Workspace path: .', 'Planner handoff: Planner handoff from stub.'].join('\n\n'));
+    });
+
     it('uses embedded templates when the custom source directory is missing', async () => {
         const root = await createRoot(false);
         const engine = createTemplateEngine({ prompts: makePrompts(), root });

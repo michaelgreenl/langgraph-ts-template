@@ -152,14 +152,14 @@ Verify:
 
 This step owns the live graph behavior. It must remove the hardcoded greeting, render planner/coder prompts from the resolved workflow config, execute one planner model call followed by one coder model call, and pass the planner handoff into coder prompt composition. It must not add `createReactAgent`, `ToolNode`, or loop-back execution.
 
-- [ ] `langgraph-ts-template/src/agent/graph.ts`: replace the greeting stub with a manual `StateGraph` flow that executes `planner` before `coder`
-- [ ] `langgraph-ts-template/src/agent/graph.ts` and `src/templates/engine.ts`: keep runtime template-var injection aligned so both nodes receive `workspacePath='.'`, shared `GraphConfig.vars`, and coder-only `handoff`
-- [ ] `langgraph-ts-template/tests/integration/graph.test.ts` and `tests/unit/templates.spec.ts`: cover planner/coder ordering, non-empty `handoff`, live prompt capture, runtime `workspacePath` injection, custom snippet overrides, and the existing missing/invalid-config fallback rules
+- [x] `langgraph-ts-template/src/agent/graph.ts`: replace the greeting stub with a manual `StateGraph` flow that executes `planner` before `coder`
+- [x] `langgraph-ts-template/src/agent/graph.ts` and `src/templates/engine.ts`: keep runtime template-var injection aligned so both nodes receive `workspacePath='.'`, shared `GraphConfig.vars`, and coder-only `handoff`
+- [x] `langgraph-ts-template/tests/integration/graph.test.ts` and `tests/unit/templates.spec.ts`: cover planner/coder ordering, non-empty `handoff`, live prompt capture, runtime `workspacePath` injection, custom snippet overrides, and the existing missing/invalid-config fallback rules
 
 Verify:
 
-- [ ] `bun run test -- tests/unit/templates.spec.ts`
-- [ ] `bun run test:int -- tests/integration/graph.test.ts`
+- [x] `bun run test -- tests/unit/templates.spec.ts`
+- [x] `bun run test:int -- tests/integration/graph.test.ts`
 
 ### 3. Align active docs and plans to the real Phase 5 contract
 
@@ -198,8 +198,8 @@ Verify:
 
 - [x] Step 1: `bun run typecheck`
 - [x] Step 1: `bun run test -- tests/unit/graph.spec.ts tests/unit/public-api.spec.ts`
-- [ ] Step 2: `bun run test -- tests/unit/templates.spec.ts`
-- [ ] Step 2: `bun run test:int -- tests/integration/graph.test.ts`
+- [x] Step 2: `bun run test -- tests/unit/templates.spec.ts`
+- [x] Step 2: `bun run test:int -- tests/integration/graph.test.ts`
 - [ ] Step 3: manual review of `docs/agents/initiatives/active/init/init-plan.md` and `README.md`
 - [ ] Step 4: `bun smoke-init phase5-base-workflow-foundation` in `../maw-smoke/`
 - [ ] Step 4: in `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run `bunx maw-cli init`

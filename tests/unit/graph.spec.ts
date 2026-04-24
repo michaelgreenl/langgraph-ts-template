@@ -1,15 +1,57 @@
-import { describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+
+const calls: string[] = [];
+
+const firstPrompt = (input: unknown): string => {
+    if (!Array.isArray(input)) {
+        return '';
+    }
+
+    const [first] = input;
+
+    if (!first || typeof first !== 'object' || !('content' in first)) {
+        return '';
+    }
+
+    return String(first.content);
+};
+
+vi.mock('@langchain/openai', async () => {
+    const { AIMessage } = await import('@langchain/core/messages');
+
+    return {
+        ChatOpenAI: class {
+            constructor(_opts: unknown) {}
+
+            async invoke(input: unknown) {
+                calls.push(firstPrompt(input));
+
+                if (calls.length % 2 === 1) {
+                    return new AIMessage({ content: 'Planner handoff from unit stub.' });
+                }
+
+                return new AIMessage({ content: 'Coder response from unit stub.' });
+            }
+        },
+    };
+});
+
 import { createGraph, route } from '../../src/agent/graph.js';
 
 describe('graph', () => {
+    beforeEach(() => {
+        calls.splice(0);
+    });
+
     it('keeps planner/coder prompt and handoff fields deterministic', async () => {
         const app = createGraph();
 
         const result = await app.invoke({ messages: ['Hello'] });
 
-        expect(result.plannerPrompt).toBe('');
-        expect(result.coderPrompt).toBe('');
-        expect(result.handoff).toBe('');
+        expect(calls).toHaveLength(2);
+        expect(result.plannerPrompt).not.toBe('');
+        expect(result.coderPrompt).not.toBe('');
+        expect(result.handoff).toBe('Planner handoff from unit stub.');
     });
 });
 
