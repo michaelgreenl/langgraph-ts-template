@@ -10,7 +10,7 @@ The current direction is now:
 - `maw-cli` owns project-level MAW bootstrap, `.maw/ov.conf` placeholder resolution, and OpenViking runtime execution.
 - Workflow packages built from this template only own workflow-specific runtime assets.
 - Phase 4 keeps project-scoped `.maw/ov.conf` / `.maw/ovcli.conf`, but moves `ov:server` and `ov:index` back into `maw-cli` instead of relying on target-project `package.json` scripts.
-- `maw-cli dev <workflow>` remains the current workflow runner through the base-workflow phase; broader workflow-execution realignment is deferred until after the opencode SDK phase.
+- `maw-cli dev <workflow>` remains the current workflow runner.
 - OpenViking is configured once per target project and shared by every installed workflow.
 - Skills and prompts are configured deterministically, not discovered by autoloading at runtime.
 - MAW scope is defined by the directory containing `maw.json`; it is not redirected through a configurable workspace path.
@@ -415,8 +415,6 @@ This command should:
 - validate that the workflow-specific `graph.ts`, `config.json`, and `langgraph.json` exist
 - invoke `langgraphjs dev --config .maw/graphs/<workflow>`
 
-This remains the current workflow runner through the base-workflow phase. Later phases may revisit the broader execution surface once the opencode SDK-backed workflow exists.
-
 ### `maw-cli ov:server` and `maw-cli ov:index`
 
 Phase 4 keeps live OpenViking execution inside `maw-cli` so MAW can resolve `.maw/ov.conf` placeholders before invoking upstream binaries.
@@ -595,7 +593,6 @@ The remaining implementation gap called out by this plan is:
 - wire OpenAI as the initial model provider for the base workflow
 - build the graph loop manually instead of using `createReactAgent`
 - update the workflow-local default agent config to `planner` and `coder`
-- keep `maw-cli dev <workflow>` as the current workflow runner while the base workflow takes shape
 
 ### Phase 6: Opencode SDK integration
 
@@ -604,7 +601,6 @@ The remaining implementation gap called out by this plan is:
 - integrate the opencode SDK into the graph so codebase actions can rely on it instead of bespoke MAW-managed tool implementations where practical
 - use the opencode SDK as the primary path for file inspection, editing, shell execution, and git-adjacent codebase actions inside the base workflow
 - add verification coverage that proves the opencode-backed workflow can inspect and act on the target project's codebase
-- re-evaluate whether `maw-cli dev <workflow>` remains the right workflow-execution surface once the opencode-backed workflow exists
 
 ### Phase 7: Runtime OpenViking retrieval MVP
 

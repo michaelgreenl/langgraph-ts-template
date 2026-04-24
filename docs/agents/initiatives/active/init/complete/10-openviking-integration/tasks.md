@@ -31,7 +31,6 @@ Implement project-scoped OpenViking bootstrap plus `maw-cli`-owned runtime wrapp
 ## Out of Scope
 
 - Live graph-time OpenViking retrieval or tool-loop consumption inside `createGraph()` (deferred to Phase 7)
-- Replacing `maw-cli dev <workflow>` or finalizing the broader workflow-execution surface (deferred until after the opencode SDK phase)
 - Change-aware reindex heuristics, watch-mode indexing, or prepare-script automation
 - Docker install/provisioning flows for OpenViking itself; Phase 4 still assumes `openviking-server` and `openviking` are already available
 - Automatic drift reconciliation across `maw.json`, `.maw/ov.conf`, and `.maw/ovcli.conf`
