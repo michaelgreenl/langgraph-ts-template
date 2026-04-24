@@ -1,6 +1,9 @@
 ---
 description: Planning-only agent that writes initiative plans and phase tasks docs after clearing assumptions
 mode: primary
+tools:
+    question: true
+    websearch: true
 permission:
     edit: allow
     task:

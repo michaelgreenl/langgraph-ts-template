@@ -66,12 +66,19 @@ If any of these questions return "yes", surface and report to HITL
 **If the step is clean (all tasks checked, verification passed, no unresolved issues):**
 
 1. Run `git status` in both `langgraph-ts-template` and `../maw-cli` to determine which repos were modified.
-2. Review `git log --oneline -10` in each modified repo to match the existing commit tone and format.
-3. Write the commit message: `type(phase-slug): short description`
-    - `phase-slug` matches the step, e.g. `phase1.6`
-    - Types: `refactor`, `fix`, `feat`, `docs`, `chore`
-    - Example: `refactor(phase1.6): require workflow arg in dev, remove start`
-4. Commit each modified repo separately using the **exact same message**.
+2. Review `git log --oneline -10` in each modified repo to match the existing tone and subject style, but still prefer a valid Conventional Commits message.
+3. Review the step log and changed files so the commit message reflects the actual work, not a default label.
+4. Write the commit message as a Conventional Commit: `type(scope): short description` or `type: short description`
+    - Choose the most accurate type for the primary change. Do not default to `feat`.
+    - Use `feat` only when the step adds a real new capability, workflow, or user-visible behavior.
+    - Use `fix` for bug fixes or behavior corrections.
+    - Use `refactor` for internal code changes that preserve behavior.
+    - Use `docs` only when the commit changes documentation files only.
+    - Use `chore` for maintenance, tooling, config, or housekeeping work that is not better described as `feat`, `fix`, `refactor`, or docs-only work.
+    - Scope is optional. Use it only when it clarifies the area of change.
+    - Do not force `phase` or the phase slug as scope. Use the phase slug only when it is genuinely the clearest scope; otherwise use a more accurate area or omit the scope.
+    - Examples: `refactor(dev): require workflow arg in dev, remove start`, `fix(cli): handle missing workflow arg`, `docs: clarify manager commit rules`
+5. Commit each modified repo separately using the **exact same message**.
 
 **If there are any issues:**
 
