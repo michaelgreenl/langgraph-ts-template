@@ -1,3 +1,20 @@
+## [0.4.0](https://github.com/michaelgreenl/langgraph-ts-template/compare/v0.3.0...v0.4.0) (2026-04-24)
+
+### Features
+
+* **phase4.1:** load maw-scope .env for ov:server ([58147ee](https://github.com/michaelgreenl/langgraph-ts-template/commit/58147ee52ef952650891ef81bf00da3d76fc5439))
+* **phase4.1:** restore maw-cli openviking runtime wrappers ([cd603ac](https://github.com/michaelgreenl/langgraph-ts-template/commit/cd603ac4c48db41b04d95b4b733c6e9abf144d02))
+* **phase4.2:** seed project-local openviking files and scripts ([f83af01](https://github.com/michaelgreenl/langgraph-ts-template/commit/f83af010ee449c1d3c314eab4e4e524918d0070b))
+* **phase4.3:** add openviking toggle and url plumbing ([d340cfd](https://github.com/michaelgreenl/langgraph-ts-template/commit/d340cfd6a6eca46bfa94414d52b8edcab320db46))
+* **phase4:** default ov:index to cwd ([6d3d9e7](https://github.com/michaelgreenl/langgraph-ts-template/commit/6d3d9e7e42c172c56f1968330c23c56c2cd296c2))
+
+### Bug Fixes
+
+* **phase3.6:** support installed prompt exports ([1a88a05](https://github.com/michaelgreenl/langgraph-ts-template/commit/1a88a05d4a6e36544c9ee5974a2076d330706559))
+* **phase4:** bind openviking dev server to loopback ([6d0a859](https://github.com/michaelgreenl/langgraph-ts-template/commit/6d0a859fe9f8ae5f67e17a18dbc7fa028a714358))
+* **phase4:** restore openai-backed openviking defaults ([ecd1d39](https://github.com/michaelgreenl/langgraph-ts-template/commit/ecd1d395d345919dddc8d6ffaea73f7297931ac2))
+* system prompt typo ([2abe049](https://github.com/michaelgreenl/langgraph-ts-template/commit/2abe04969d48a52f6d3e9f215314b467d18e6508))
+
 ## [0.3.0](https://github.com/michaelgreenl/langgraph-ts-template/compare/v0.2.2...v0.3.0) (2026-04-20)
 
 ### Features
