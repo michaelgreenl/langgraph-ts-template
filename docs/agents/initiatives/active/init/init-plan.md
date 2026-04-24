@@ -589,10 +589,10 @@ The remaining implementation gap called out by this plan is:
 
 - [ ] complete
 
-- replace the current hardcoded graph stub with a real LLM-backed base workflow
-- wire OpenAI as the initial model provider for the base workflow
-- build the graph loop manually instead of using `createReactAgent`
-- update the workflow-local default agent config to `planner` and `coder`
+- replace the current hardcoded graph stub with a real LLM-backed `planner` -> `coder` base workflow
+- wire OpenAI `gpt-4.1-mini` as the initial shared model provider for the base workflow
+- build the graph manually instead of using `createReactAgent`
+- prove that edited `.maw/graphs/<workflow>/config.json.prompts` plus runtime template context drive live planner/coder prompt injection during smoke verification
 
 ### Phase 6: Opencode SDK integration
 
