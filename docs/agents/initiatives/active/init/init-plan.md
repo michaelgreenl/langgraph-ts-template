@@ -591,10 +591,10 @@ The remaining implementation gap called out by this plan is:
 
 - [ ] complete
 
-- replace the current hardcoded graph stub with a real LLM-backed `planner` -> `coder` base workflow
-- wire OpenAI `gpt-4.1-mini` as the initial shared model provider for the base workflow
-- build the graph manually instead of using `createReactAgent`
-- prove that edited `.maw/graphs/<workflow>/config.json.prompts` plus runtime template context drive live planner/coder prompt injection during smoke verification
+- replace the current hardcoded graph stub with a real LLM-backed `planner` -> `coder` base workflow that captures `plannerPrompt`, `coderPrompt`, and a non-empty `handoff`
+- wire OpenAI `gpt-4.1-mini` as the initial shared package-owned model provider for both nodes
+- build the graph manually with `StateGraph` instead of using `createReactAgent`
+- prove that edited `.maw/graphs/<workflow>/config.json.prompts` plus runtime context (`workspacePath` for both nodes and planner `handoff` for coder) drive live prompt injection during smoke verification, and do not treat planner/coder scaffold defaults as unfinished Phase 5 work
 
 ### Phase 6: Opencode SDK integration
 

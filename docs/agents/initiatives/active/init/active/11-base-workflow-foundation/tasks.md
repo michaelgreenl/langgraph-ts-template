@@ -165,14 +165,14 @@ Verify:
 
 This step keeps non-archived docs/plans aligned with the runtime that Phase 5 actually lands. It stays narrow: update current contract wording only, not later-phase MVP promises.
 
-- [ ] `docs/agents/initiatives/active/init/init-plan.md`: replace the stale Phase 5 bullet that reopens planner/coder default config with the actual planner/coder handoff and runtime-context scope
-- [ ] `README.md`: stop describing the package as a placeholder greeting chatbot and describe the Phase 5 planner/coder OpenAI foundation while making clear that file/shell/git tools wait for Phase 6
-- [ ] Keep the wording aligned with the already-added target-state note on `docs/usage/mvp/*.md`; do not rewrite those guides as current-status docs in this phase
+- [x] `docs/agents/initiatives/active/init/init-plan.md`: replace the stale Phase 5 bullet that reopens planner/coder default config with the actual planner/coder handoff and runtime-context scope
+- [x] `README.md`: stop describing the package as a placeholder greeting chatbot and describe the Phase 5 planner/coder OpenAI foundation while making clear that file/shell/git tools wait for Phase 6
+- [x] Keep the wording aligned with the already-added target-state note on `docs/usage/mvp/*.md`; do not rewrite those guides as current-status docs in this phase
 
 Verify:
 
-- [ ] Manual check: `docs/agents/initiatives/active/init/init-plan.md` Phase 5 bullets match this tasks doc and do not treat planner/coder scaffold defaults as unfinished work
-- [ ] Manual check: `README.md` no longer says the runtime is a placeholder greeting chatbot or simple placeholder response
+- [x] Manual check: `docs/agents/initiatives/active/init/init-plan.md` Phase 5 bullets match this tasks doc and do not treat planner/coder scaffold defaults as unfinished work
+- [x] Manual check: `README.md` no longer says the runtime is a placeholder greeting chatbot or simple placeholder response
 
 ### 4. Prove installed-package runtime prompt injection in smoke
 
@@ -200,7 +200,7 @@ Verify:
 - [x] Step 1: `bun run test -- tests/unit/graph.spec.ts tests/unit/public-api.spec.ts`
 - [x] Step 2: `bun run test -- tests/unit/templates.spec.ts`
 - [x] Step 2: `bun run test:int -- tests/integration/graph.test.ts`
-- [ ] Step 3: manual review of `docs/agents/initiatives/active/init/init-plan.md` and `README.md`
+- [x] Step 3: manual review of `docs/agents/initiatives/active/init/init-plan.md` and `README.md`
 - [ ] Step 4: `bun smoke-init phase5-base-workflow-foundation` in `../maw-smoke/`
 - [ ] Step 4: in `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run `bunx maw-cli init`
 - [ ] Step 4: in terminal A inside `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run `bunx maw-cli dev langgraph-ts-template`

@@ -1,42 +1,46 @@
-# New LangGraph.js Project
+# langgraph-ts-template
 
 [![CI](https://github.com/langchain-ai/new-langgraphjs-project/actions/workflows/unit-tests.yml/badge.svg)](https://github.com/langchain-ai/new-langgraphjs-project/actions/workflows/unit-tests.yml) [![Integration Tests](https://github.com/langchain-ai/new-langgraphjs-project/actions/workflows/integration-tests.yml/badge.svg)](https://github.com/langchain-ai/new-langgraphjs-project/actions/workflows/integration-tests.yml)
 
-This template demonstrates a simple chatbot implemented using [LangGraph.js](https://github.com/langchain-ai/langgraphjs), showing how to get started with [LangGraph Server](https://langchain-ai.github.io/langgraph/concepts/langgraph_server/#langgraph-server) and using [LangGraph Studio](https://langchain-ai.github.io/langgraph/concepts/langgraph_studio/), a visual debugging IDE.
+This template now ships the Phase 5 MAW base workflow runtime using [LangGraph.js](https://github.com/langchain-ai/langgraphjs). The runtime is a real `planner` -> `coder` flow built with manual `StateGraph` nodes and one shared package-owned OpenAI `gpt-4.1-mini` model path.
 
 <p align="center">
   <img src="./static/studio.png" alt="Graph view in LangGraph studio UI" width="75%">
 </p>
 
-The core logic, defined in `src/agent/graph.ts`, showcases a straightforward chatbot that responds to user queries while maintaining context from previous messages.
+The core logic, defined in `src/agent/graph.ts`, captures the active Phase 5 contract: planner/coder prompt composition with runtime context injection, explicit planner handoff, and deterministic prompt/handoff inspection fields.
 
 ## What it does
 
-The simple chatbot:
+The Phase 5 base workflow:
 
-1. Takes a user **message** as input
-2. Maintains a history of the conversation
-3. Returns a placeholder response, updating the conversation history
+1. Takes a user **message** as input.
+2. Renders a planner prompt from embedded defaults plus `.maw/graphs/<workflow>/config.json` and `.maw/templates/*.njk` overrides.
+3. Invokes the shared OpenAI model for planner output and derives a non-empty `handoff` string.
+4. Renders a coder prompt with shared runtime vars plus the planner `handoff`.
+5. Invokes the shared OpenAI model for coder output and returns the final assistant response.
+6. Exposes `plannerPrompt`, `coderPrompt`, and `handoff` in graph state for deterministic verification.
 
-This template provides a foundation that can be easily customized and extended to create more complex conversational agents.
+Scope note: file/shell/git tool execution is intentionally deferred to Phase 6.
 
 ## Getting Started
 
 1. Install the [LangGraph CLI](https://langchain-ai.github.io/langgraph/concepts/langgraph_cli/).
 
 ```bash
-npx @langchain/langgraph-cli
+bunx @langchain/langgraph-cli
 ```
 
-2. Create a `.env` file. While this starter app does not require any secrets, if you later decide to connect to LLM providers and other integrations, you will likely need to provide API keys.
+2. Create a `.env` file if you want live planner/coder model calls during local runtime execution.
 
 ```bash
 cp .env.example .env
 ```
 
-3. If desired, add your LangSmith API key in your `.env` file.
+3. Add your provider keys in `.env` as needed for live runs.
 
 ```
+OPENAI_API_KEY=<your-key>
 LANGSMITH_API_KEY=lsv2...
 ```
 
@@ -58,35 +62,35 @@ bun install
 6. Start the LangGraph Server.
 
 ```bash
-npx @langchain/langgraph-cli dev
+bunx @langchain/langgraph-cli dev
 ```
 
 For more information on getting started with LangGraph Server, [see here](https://langchain-ai.github.io/langgraph/tutorials/langgraph-platform/local-server/).
 
 ## How to customize
 
-1. **Add an LLM call**: You can select and install a chat model wrapper from [the LangChain.js ecosystem](https://js.langchain.com/docs/integrations/chat/), or use LangGraph.js without LangChain.js.
-2. **Extend the graph**: The core logic of the chatbot is defined in [graph.ts](./src/agent/graph.ts). You can modify this file to add new nodes, edges, or change the flow of the conversation.
+1. **Tune planner/coder prompts**: Adjust `.maw/graphs/<workflow>/config.json` and `.maw/templates/*.njk` composition inputs.
+2. **Extend the graph**: The core flow is defined in [graph.ts](./src/agent/graph.ts). You can add nodes, edges, or adjust planner/coder behavior.
 
 You can also extend this template by:
 
-- Adding [custom tools or functions](https://js.langchain.com/docs/how_to/tool_calling) to enhance the chatbot's capabilities.
-- Implementing additional logic for handling specific types of user queries or tasks.
-- Add retrieval-augmented generation (RAG) capabilities by integrating [external APIs or databases](https://langchain-ai.github.io/langgraphjs/tutorials/rag/langgraph_agentic_rag/) to provide more customized responses.
+- Customizing planner/coder prompt snippets for your workflow domain.
+- Adding additional graph steps around planner and coder when your workflow needs them.
+- Integrating file/shell/git tool execution after the planned Phase 6 runtime integration work lands.
 
 ## Development
 
 While iterating on your graph, you can edit past state and rerun your app from previous states to debug specific nodes. Local changes will be automatically applied via hot reload. Try experimenting with:
 
-- Modifying the system prompt to give your chatbot a unique personality.
-- Adding new nodes to the graph for more complex conversation flows.
-- Implementing conditional logic to handle different types of user inputs.
+- Modifying planner and coder prompt composition.
+- Verifying handoff behavior between planner and coder.
+- Adding targeted conditional graph routing once your workflow needs it.
 
 Follow-up requests will be appended to the same thread. You can create an entirely new thread, clearing previous history, using the `+` button in the top right.
 
-For more advanced features and examples, refer to the [LangGraph.js documentation](https://langchain-ai.github.io/langgraphjs/). These resources can help you adapt this template for your specific use case and build more sophisticated conversational agents.
+For more advanced features and examples, refer to the [LangGraph.js documentation](https://langchain-ai.github.io/langgraphjs/). These resources can help you adapt this template for your specific workflow.
 
-LangGraph Studio also integrates with [LangSmith](https://smith.langchain.com/) for more in-depth tracing and collaboration with teammates, allowing you to analyze and optimize your chatbot's performance.
+LangGraph Studio also integrates with [LangSmith](https://smith.langchain.com/) for more in-depth tracing and collaboration with teammates, allowing you to analyze and optimize workflow runtime behavior.
 
 <!--
 Configuration auto-generated by `langgraph template lock`. DO NOT EDIT MANUALLY.
