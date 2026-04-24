@@ -589,7 +589,7 @@ The remaining implementation gap called out by this plan is:
 
 ### Phase 5: Base workflow foundation
 
-- [ ] complete
+- [x] complete
 
 - replace the current hardcoded graph stub with a real LLM-backed `planner` -> `coder` base workflow that captures `plannerPrompt`, `coderPrompt`, and a non-empty `handoff`
 - wire OpenAI `gpt-4.1-mini` as the initial shared package-owned model provider for both nodes

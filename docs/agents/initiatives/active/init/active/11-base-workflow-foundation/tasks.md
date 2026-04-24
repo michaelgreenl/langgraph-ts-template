@@ -178,19 +178,19 @@ Verify:
 
 This step owns the manual end-to-end proof in a disposable target project. It must prove that live runtime prompt injection follows edited `.maw/graphs/<workflow>/config.json` plus `.maw/templates/*.njk`, not only the static prompt-preview path.
 
-- [ ] `../maw-smoke`: run `bun smoke-init phase5-base-workflow-foundation` and then `bunx maw-cli init` inside `tests/smoke-phase5-base-workflow-foundation/`
-- [ ] In `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`: set `.maw/graphs/langgraph-ts-template/config.json` to the exact `runtime-note` / `planner-note` / `coder-note` prompt shape from `Execution Notes`
-- [ ] In that same smoke project: create `.maw/templates/runtime-note.njk`, `.maw/templates/planner-note.njk`, and `.maw/templates/coder-note.njk` with the exact bodies from `Execution Notes`
-- [ ] In terminal A inside that smoke project: run `bunx maw-cli dev langgraph-ts-template`
-- [ ] In terminal B inside that smoke project: run the exact `curl --silent --show-error --fail --request POST --url http://localhost:2024/runs/wait ...` command from `Execution Notes`
-- [ ] `../maw-smoke/docs/agents/smoke-logs/phase5-base-workflow-foundation.md`: record the returned `plannerPrompt`, `coderPrompt`, and `handoff` fields, confirm runtime `workspacePath` injection plus prompt-list selection, and log any issues/fixes plus the runtime-env assumption without reading secret values
+- [x] `../maw-smoke`: run `bun smoke-init phase5-base-workflow-foundation` and then `bunx maw-cli init` inside `tests/smoke-phase5-base-workflow-foundation/`
+- [x] In `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`: set `.maw/graphs/langgraph-ts-template/config.json` to the exact `runtime-note` / `planner-note` / `coder-note` prompt shape from `Execution Notes`
+- [x] In that same smoke project: create `.maw/templates/runtime-note.njk`, `.maw/templates/planner-note.njk`, and `.maw/templates/coder-note.njk` with the exact bodies from `Execution Notes`
+- [x] In terminal A inside that smoke project: run `bunx maw-cli dev langgraph-ts-template`
+- [x] In terminal B inside that smoke project: run the exact `curl --silent --show-error --fail --request POST --url http://localhost:2024/runs/wait ...` command from `Execution Notes`
+- [x] `../maw-smoke/docs/agents/smoke-logs/phase5-base-workflow-foundation.md`: record the returned `plannerPrompt`, `coderPrompt`, and `handoff` fields, confirm runtime `workspacePath` injection plus prompt-list selection, and log any issues/fixes plus the runtime-env assumption without reading secret values
 
 Verify:
 
-- [ ] `bun smoke-init phase5-base-workflow-foundation` in `../maw-smoke/`
-- [ ] In `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run `bunx maw-cli init`
-- [ ] In terminal A inside `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run `bunx maw-cli dev langgraph-ts-template`
-- [ ] In terminal B inside `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run the `curl --silent --show-error --fail --request POST --url http://localhost:2024/runs/wait ...` command from `Execution Notes`
+- [x] `bun smoke-init phase5-base-workflow-foundation` in `../maw-smoke/`
+- [x] In `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run `bunx maw-cli init`
+- [x] In terminal A inside `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run `bunx maw-cli dev langgraph-ts-template`
+- [x] In terminal B inside `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run the `curl --silent --show-error --fail --request POST --url http://localhost:2024/runs/wait ...` command from `Execution Notes`
 
 ## Verification
 
@@ -201,29 +201,29 @@ Verify:
 - [x] Step 2: `bun run test -- tests/unit/templates.spec.ts`
 - [x] Step 2: `bun run test:int -- tests/integration/graph.test.ts`
 - [x] Step 3: manual review of `docs/agents/initiatives/active/init/init-plan.md` and `README.md`
-- [ ] Step 4: `bun smoke-init phase5-base-workflow-foundation` in `../maw-smoke/`
-- [ ] Step 4: in `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run `bunx maw-cli init`
-- [ ] Step 4: in terminal A inside `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run `bunx maw-cli dev langgraph-ts-template`
-- [ ] Step 4: in terminal B inside `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run the `curl --silent --show-error --fail --request POST --url http://localhost:2024/runs/wait ...` command from `Execution Notes`
+- [x] Step 4: `bun smoke-init phase5-base-workflow-foundation` in `../maw-smoke/`
+- [x] Step 4: in `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run `bunx maw-cli init`
+- [x] Step 4: in terminal A inside `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run `bunx maw-cli dev langgraph-ts-template`
+- [x] Step 4: in terminal B inside `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run the `curl --silent --show-error --fail --request POST --url http://localhost:2024/runs/wait ...` command from `Execution Notes`
 
 ### Phase completion
 
-- [ ] `langgraph-ts-template`: `bun run build`
-- [ ] `langgraph-ts-template`: `bun run typecheck`
-- [ ] `langgraph-ts-template`: `bun run test`
-- [ ] `langgraph-ts-template`: `bun run test:int`
-- [ ] `../maw-smoke`: `bun smoke-init phase5-base-workflow-foundation`
-- [ ] In `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run `bunx maw-cli init`
-- [ ] In terminal A inside `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run `bunx maw-cli dev langgraph-ts-template`
-- [ ] In terminal B inside `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run the `curl --silent --show-error --fail --request POST --url http://localhost:2024/runs/wait ...` command from `Execution Notes`
-- [ ] `../maw-smoke/docs/agents/smoke-logs/phase5-base-workflow-foundation.md`: log the final results/issues/fixes and runtime-env assumption
+- [x] `langgraph-ts-template`: `bun run build`
+- [x] `langgraph-ts-template`: `bun run typecheck`
+- [x] `langgraph-ts-template`: `bun run test`
+- [x] `langgraph-ts-template`: `bun run test:int`
+- [x] `../maw-smoke`: `bun smoke-init phase5-base-workflow-foundation`
+- [x] In `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run `bunx maw-cli init`
+- [x] In terminal A inside `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run `bunx maw-cli dev langgraph-ts-template`
+- [x] In terminal B inside `../maw-smoke/tests/smoke-phase5-base-workflow-foundation/`, run the `curl --silent --show-error --fail --request POST --url http://localhost:2024/runs/wait ...` command from `Execution Notes`
+- [x] `../maw-smoke/docs/agents/smoke-logs/phase5-base-workflow-foundation.md`: log the final results/issues/fixes and runtime-env assumption
 
 ## Exit Criteria
 
-- [ ] `createGraph()` no longer returns a hardcoded greeting; Phase 5 executes a real OpenAI-backed `planner` -> `coder` runtime path
-- [ ] Planner and coder prompt selection still comes from embedded workflow defaults plus `.maw/graphs/<workflow>/config.json` and `.maw/templates/` overrides, with the existing fallback rules intact
-- [ ] Both live nodes receive the expected runtime template vars; at minimum `workspacePath='.'` reaches both nodes and coder prompt composition receives a non-empty planner handoff string
-- [ ] Final graph state exposes `plannerPrompt`, `coderPrompt`, and `handoff` for deterministic tests and smoke inspection
-- [ ] `maw-cli dev <workflow>` can execute a complete stateless run cleanly against the installed workflow package even though no file/shell/git tools land yet
-- [ ] Active docs/plans outside `complete/` no longer describe the runtime as a placeholder greeting chatbot or reopen already-landed planner/coder scaffold defaults
-- [ ] Smoke proof shows that edited `.maw/graphs/langgraph-ts-template/config.json.prompts` and custom `.maw/templates/*.njk` snippets affect live runtime prompt injection, not just static prompt preview
+- [x] `createGraph()` no longer returns a hardcoded greeting; Phase 5 executes a real OpenAI-backed `planner` -> `coder` runtime path
+- [x] Planner and coder prompt selection still comes from embedded workflow defaults plus `.maw/graphs/<workflow>/config.json` and `.maw/templates/` overrides, with the existing fallback rules intact
+- [x] Both live nodes receive the expected runtime template vars; at minimum `workspacePath='.'` reaches both nodes and coder prompt composition receives a non-empty planner handoff string
+- [x] Final graph state exposes `plannerPrompt`, `coderPrompt`, and `handoff` for deterministic tests and smoke inspection
+- [x] `maw-cli dev <workflow>` can execute a complete stateless run cleanly against the installed workflow package even though no file/shell/git tools land yet
+- [x] Active docs/plans outside `complete/` no longer describe the runtime as a placeholder greeting chatbot or reopen already-landed planner/coder scaffold defaults
+- [x] Smoke proof shows that edited `.maw/graphs/langgraph-ts-template/config.json.prompts` and custom `.maw/templates/*.njk` snippets affect live runtime prompt injection, not just static prompt preview

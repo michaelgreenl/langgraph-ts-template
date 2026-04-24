@@ -60,8 +60,8 @@ export const createTemplateEngine = (opts) => {
         compose: async (agent, vars = {}) => {
             const names = resolveSnippets(opts.prompts, agent);
             const bag = {
-                workspacePath: opts.workspace ?? '',
                 ...vars,
+                workspacePath: opts.workspace ?? '',
             };
             const roots = await (dirs ??= sources(opts));
             const parts = await Promise.all(names.map(async (name) => render(env, await resolveSnippet(name, roots), name, bag)));
