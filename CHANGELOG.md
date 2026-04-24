@@ -1,3 +1,10 @@
+## [0.5.0](https://github.com/michaelgreenl/langgraph-ts-template/compare/v0.4.0...v0.5.0) (2026-04-24)
+
+### Features
+
+* **agent:** expose phase 5 graph state contract ([486a103](https://github.com/michaelgreenl/langgraph-ts-template/commit/486a103bf70808e520ab599d2a2b6411bd9c23b4))
+* **agent:** replace greeting stub with planner-coder flow ([0f17c79](https://github.com/michaelgreenl/langgraph-ts-template/commit/0f17c79d89f060ae9d5ffd5a1adc2a38a27f8041))
+
 ## [0.4.0](https://github.com/michaelgreenl/langgraph-ts-template/compare/v0.3.0...v0.4.0) (2026-04-24)
 
 ### Features
