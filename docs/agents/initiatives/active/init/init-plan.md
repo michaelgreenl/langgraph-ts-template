@@ -513,6 +513,8 @@ The remaining implementation gaps called out by this plan are now:
 
 ## Execution Plan
 
+Historical note: the completed phase summaries below are preserved for sequencing context. If they mention `maw.json`, workflow-local `config.json`, `.maw/templates/`, or `maw-cli prompt:*`, treat those references as superseded history rather than the active Phase 6 contract defined above.
+
 ### Phase 0: Plan Realignment
 
 - [x] complete

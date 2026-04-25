@@ -5,12 +5,13 @@
 > This is a target-state MVP usage guide, not a statement of the currently implemented surface in the active codebase.
 > It describes what usage should look like once the MAW MVP is complete.
 
-This guide shows how a workflow author uses `langgraph-ts-template` to build a MAW-compatible workflow package for the Phase 4 MVP.
+This guide shows how a workflow author uses `langgraph-ts-template` to build a MAW-compatible workflow package for the Phase 6 MVP.
 
 > Status
 >
-> This page reflects the current workflow-package contract through Phase 4.
-> Workflow packages own workflow-specific runtime assets, `maw-cli dev <workflow>` remains the workflow runner, and OpenViking runtime execution stays on direct `maw-cli ov:*` commands.
+> This page reflects the current Phase 6 workflow-package contract.
+> Workflow packages ship a workflow-local `opencode.json` scaffold asset plus a validator, packaged `planner` / `manager` / hidden `coder` prompts, and a retained `createGraph()` compatibility runtime.
+> `maw-cli dev <workflow>` launches bundled opencode directly, while direct LangGraph remains a separate compatibility and smoke surface.
 
 ## Goal
 
@@ -18,10 +19,10 @@ By the end of this guide, a workflow package author will:
 
 1. Publish the right package surface for `maw-cli` discovery.
 2. Scaffold only workflow-owned target-project files.
-3. Ship embedded default prompt snippets.
-4. Load `maw.json` and `.maw/graphs/<workflow>/config.json` at runtime.
-5. Install the package into a target project.
-6. Run the workflow end to end through `maw-cli`.
+3. Ship a default raw `opencode.json` contract for the interactive runtime.
+4. Export a validator or schema for edited workflow-local `opencode.json` files.
+5. Keep the retained `createGraph()` compatibility runtime runnable.
+6. Install the package into a target project and run it through `maw-cli`.
 
 ## Before You Start
 
@@ -41,21 +42,23 @@ The workflow package owns only workflow-specific assets.
 | Concern | Owner |
 | --- | --- |
 | runtime API such as `createGraph` | workflow package |
-| embedded default snippets | workflow package |
+| packaged `.opencode/agents/{planner,manager,coder}.md` prompts and frontmatter baselines | workflow package |
 | `.maw/graphs/<workflow>/graph.ts` scaffold content | workflow package |
-| `.maw/graphs/<workflow>/config.json` scaffold content | workflow package |
-| template metadata needed by prompt preview | workflow package |
+| `.maw/graphs/<workflow>/opencode.json` scaffold content | workflow package |
+| workflow-local `opencode.json` validator or schema export | workflow package |
 
 The workflow package does not own project-level MAW infrastructure.
 
 | Concern | Owner |
 | --- | --- |
 | target-project `package.json` | target project; `maw-cli init` requires it for workflow discovery and leaves OpenViking runtime wiring untouched |
-| `maw.json` | `maw-cli` |
 | `.maw/ov.conf` | `maw-cli` |
 | `.maw/ovcli.conf` | `maw-cli` |
 | `.maw/graphs/<workflow>/langgraph.json` | `maw-cli` |
+| opencode runtime bundling and launch | `maw-cli` |
 | `maw-cli` installation and command execution | target project |
+
+The active contract does not include a project-root `maw.json`, `.maw/templates/`, or `maw-cli prompt:*` commands.
 
 ## 1. Name The Package And Workflow
 
@@ -74,14 +77,9 @@ const WORKFLOW_PACKAGE_NAME = '@acme/coding';
 const WORKFLOW_ID = WORKFLOW_PACKAGE_NAME.replace(/^@[^/]+\//, '');
 ```
 
-In this example:
-
-- package name: `@acme/coding`
-- workflow id: `coding`
-
 ## 2. Publish The Right `package.json` Surface
 
-The workflow package should publish runtime code, scaffold assets, and embedded templates.
+The workflow package should publish runtime code, scaffold assets, packaged agent prompts, and the `./scaffold` entrypoint used by `maw-cli init`.
 
 Target `package.json` shape:
 
@@ -96,10 +94,6 @@ Target `package.json` shape:
             "import": "./dist/index.js",
             "types": "./dist/index.d.ts"
         },
-        "./config": {
-            "import": "./dist/config.js",
-            "types": "./dist/config.d.ts"
-        },
         "./scaffold": {
             "import": "./dist/scaffold/index.js",
             "types": "./dist/scaffold/index.d.ts"
@@ -108,18 +102,19 @@ Target `package.json` shape:
     },
     "files": [
         "dist",
+        ".opencode/agents",
         "src/scaffold/assets",
-        "src/templates/defaults",
         "README.md"
     ]
 }
 ```
 
-MVP packaging rules:
+Packaging rules:
 
 - do not depend on `maw-cli`
 - do not expose a `bin` command that proxies to `maw-cli`
-- make sure the published package includes built `dist/` files and the source assets needed by scaffold and prompt preview
+- make sure the published package includes the built `dist/` files and the source assets needed by scaffold materialization
+- do not make target projects install opencode separately; `maw-cli` owns runtime bundling for `dev`
 
 ## 3. Implement The `./scaffold` Export
 
@@ -135,142 +130,77 @@ export const scaffold = {
 
 export const createScaffoldFiles = () => ({
     'graph.ts': "import { createGraph } from '@acme/coding';\n\nexport const graph = createGraph({ workflow: 'coding' });\n",
-    'config.json': '{\n    "prompts": {\n        "global": ["general", "security"],\n        "agents": {\n            "planner": ["research-rules"],\n            "coder": ["typescript"]\n        }\n    }\n}\n',
+    'opencode.json': '{\n  "$schema": "https://opencode.ai/config.json",\n  "default_agent": "planner",\n  "agent": {\n    "planner": { "mode": "primary", "prompt": "<planner>" },\n    "manager": { "mode": "primary", "prompt": "<manager>" },\n    "coder": { "mode": "subagent", "hidden": true, "prompt": "<coder>" }\n  }\n}\n',
 });
+
+export { workflowOpencodeSchema, parseWorkflowOpencode, loadWorkflowOpencode };
 ```
 
 Requirements:
 
-- `createScaffoldFiles()` returns exactly two files: `graph.ts` and `config.json`
+- `createScaffoldFiles()` returns exactly two files: `graph.ts` and `opencode.json`
 - `graph.ts` imports `createGraph` from the package name
 - `graph.ts` calls `createGraph({ workflow: '<workflow-id>' })`
-- `config.json` uses the prompt-only workflow config shape
+- `opencode.json` uses raw opencode schema
+- the validator rejects drift from the required visible `planner` and `manager`, hidden `coder`, `default_agent: "planner"`, and packaged permission baselines
 - `maw-cli` generates `langgraph.json`; the workflow package does not scaffold it
 
-Expected generated target-project `graph.ts`:
+## 4. Define The Default Workflow `opencode.json`
 
-```ts
-import { createGraph } from '@acme/coding';
+The embedded scaffold `opencode.json` is the single source of truth for the workflow's default interactive runtime contract.
 
-export const graph = createGraph({ workflow: 'coding' });
-```
-
-## 4. Ship Embedded Default Prompt Snippets
-
-Keep embedded default snippets in `src/templates/defaults/`.
-
-Finalized default snippet set for the base coding workflow:
-
-- `general.njk`
-- `security.njk`
-- `research-rules.njk`
-- `typescript.njk`
-
-MVP prompt rules:
-
-- embedded defaults live inside the workflow package
-- target-project overrides live in `.maw/templates/`
-- prompt composition order is deterministic: global snippets first, then agent-specific snippets
-- the target project can override a snippet globally by creating `.maw/templates/<name>.njk`
-
-The finalized MVP removes the older `project-context.njk` pattern. OpenViking owns project-context retrieval instead of a static prompt snippet.
-
-## 5. Define The Default Workflow Config
-
-The embedded scaffold `config.json` is the single source of truth for the workflow's default prompt configuration.
-
-Finalized workflow config shape:
+Conceptual base-workflow shape:
 
 ```json
 {
-    "prompts": {
-        "global": ["general", "security"],
-        "agents": {
-            "planner": ["research-rules"],
-            "coder": ["typescript"]
+    "$schema": "https://opencode.ai/config.json",
+    "default_agent": "planner",
+    "agent": {
+        "planner": {
+            "mode": "primary",
+            "prompt": "<planner system prompt>"
+        },
+        "manager": {
+            "mode": "primary",
+            "prompt": "<manager system prompt>"
+        },
+        "coder": {
+            "mode": "subagent",
+            "hidden": true,
+            "prompt": "<coder system prompt>"
         }
     }
 }
 ```
 
-Use this file to derive `DEFAULT_WORKFLOW_CONFIG` so the scaffolded file and the embedded runtime default cannot drift.
+Rules:
 
-Merge behavior at runtime:
+- `opencode.json` is the workflow-local prompt, context, permission, and model/provider surface
+- the workflow package validator enforces the required base-workflow topology and any permission baselines the workflow needs
+- target projects may edit prompts, context, permissions, and model/provider settings directly in this file so long as validation still passes
+- invalid edited `opencode.json` fails before `maw-cli dev <workflow>` launches
 
-- missing keys inherit defaults
-- explicit empty arrays also inherit defaults
-- non-empty arrays replace the inherited value for that slot
-- unspecified agents keep their default arrays
+## 5. Ship Packaged Agent Prompts And Permission Baselines
 
-## 6. Export Template Metadata For Prompt Preview
+Keep the packaged agent prompts in `.opencode/agents/`.
 
-`maw-cli prompt:preview` needs access to the embedded template directory.
+Required packaged agent set for the base workflow:
 
-Expose `templateDir` from `./scaffold` alongside `scaffold` and `createScaffoldFiles`.
+- `.opencode/agents/planner.md`
+- `.opencode/agents/manager.md`
+- `.opencode/agents/coder.md`
 
-Example pattern:
+Rules:
 
-```ts
-import { existsSync } from 'node:fs';
-import { fileURLToPath } from 'node:url';
+- frontmatter is the source of truth for each agent's description, mode, hidden flag, and permission baseline
+- prompt bodies from those files should be materialized into the scaffolded `opencode.json`
+- if the runtime needs an explicit permission-baseline update, change the packaged agent frontmatter and the scaffolded `opencode.json` contract together
 
-const resolveTemplateDir = (): string => {
-    const local = fileURLToPath(new URL('../templates/defaults', import.meta.url));
-    if (existsSync(local)) return local;
-    return fileURLToPath(new URL('../../src/templates/defaults', import.meta.url));
-};
+## 6. Keep The Retained `createGraph()` Compatibility Runtime
 
-export const templateDir = resolveTemplateDir();
-```
+The package still exports `createGraph()` from its main entrypoint. The generated target-project `graph.ts` calls that function with the workflow id.
 
-Expected result:
-
-- local development and installed-package resolution both work
-- `maw-cli prompt:preview` can find the embedded snippets in a published package
-
-## 7. Load Project And Workflow Config At Runtime
-
-The workflow runtime reads two config layers.
-
-Project config from `maw.json`:
-
-- if `maw.json` is missing, fall back to project defaults
-- if `maw.json` exists but is invalid, throw instead of silently defaulting
-- expect the Phase 4 project shape shown below; do not read `workspace` or OpenViking host/port fields from `maw.json`
-
-Phase 4 project config shape:
-
-```json
-{
-    "openviking": true,
-    "templates": {
-        "customPath": ".maw/templates"
-    }
-}
-```
-
-OpenViking URL ownership lives in `.maw/ovcli.conf`, not in `maw.json`.
-
-The boolean `openviking` field gates future retrieval only; it does not gate `maw-cli ov:index`.
-
-Workflow config from `.maw/graphs/<workflow>/config.json`:
-
-- if the file is missing, use embedded defaults
-- if the file exists but is invalid, warn and fall back to embedded defaults
-- if a configured snippet name cannot be resolved, warn and retry once with embedded defaults
-
-Runtime lookup order:
-
-1. load project config from `maw.json`
-2. resolve workflow config from `cfg.workflowConfig` or `.maw/graphs/<workflow>/config.json`
-3. choose the active agent from `cfg.agent` or the first configured agent
-4. compose the prompt from global snippets followed by agent-specific snippets
-
-## 8. Implement The Graph Runtime
-
-The package exports `createGraph()` from its main entrypoint. The generated target-project `graph.ts` calls that function with the workflow id.
-
-Finalized graph usage:
+Generated target-project `graph.ts`:
 
 ```ts
 import { createGraph } from '@acme/coding';
@@ -278,27 +208,20 @@ import { createGraph } from '@acme/coding';
 export const graph = createGraph({ workflow: 'coding' });
 ```
 
-Graph naming rule:
+The retained direct LangGraph launch path remains:
 
-```ts
-graph.name = cfg.name ?? cfg.workflow ?? DEFAULT_GRAPH_NAME;
+```bash
+bunx @langchain/langgraph-cli dev --config .maw/graphs/coding
 ```
 
-For the Phase 4 base coding workflow, the graph is expected to:
+Rules:
 
-- use deterministic planner and coder prompts
-- operate against the target project's codebase
-- expose a controlled tool loop for file, shell, and git work
-- stay compatible with the simplified OpenViking config surface in `maw.json` and `.maw/ovcli.conf`
+- this path stays available for compatibility tests and `/runs/wait` smoke only
+- it is not the primary interactive UX after Phase 6
+- it must remain runnable after the old prompt-template contract is retired
+- it does not need full `planner` / `manager` parity in Phase 6; the primary interactive workflow now lives in bundled opencode behind `maw-cli dev <workflow>`
 
-Through Phase 4, live graph-time OpenViking retrieval stays deferred. `maw-cli dev <workflow>` is still the workflow runner, while target projects start and index OpenViking through `bunx maw-cli ov:server` and `bunx maw-cli ov:index [target-path]`.
-
-Runtime constraint:
-
-- use Bun for package management and test scripts
-- keep shipped runtime code under `src/` Node-compatible so the installed package works under LangGraph and Node
-
-## 9. Verify The Package Locally
+## 7. Verify The Package Locally
 
 Run these commands in the workflow package repo:
 
@@ -306,6 +229,7 @@ Run these commands in the workflow package repo:
 bun install
 bun run build
 bun run typecheck
+bun run lint
 bun run test
 bun run test:int
 ```
@@ -315,13 +239,12 @@ Acceptance checks for the workflow package:
 | Check | Expected result |
 | --- | --- |
 | package exports `./scaffold` | `maw-cli init` can discover the package |
-| `createScaffoldFiles()` returns only `graph.ts` and `config.json` | scaffold contract matches the finalized MVP |
-| `templateDir` resolves to embedded `.njk` files | prompt preview can find defaults |
-| embedded config uses the prompt-only shape | runtime and scaffold defaults match |
-| runtime throws on invalid `maw.json` | bad project config fails loudly |
-| runtime warns and falls back on invalid workflow config | bad workflow config does not break the package |
+| `createScaffoldFiles()` returns only `graph.ts` and `opencode.json` | scaffold contract matches the finalized MVP |
+| packaged `.opencode/agents/*.md` exist | default `planner` / `manager` / hidden `coder` prompts and baselines are available |
+| validator rejects topology or permission drift | edited workflow config fails loudly before launch |
+| `createGraph()` still runs | retained compatibility runtime stays available |
 
-## 10. Install The Package Into A Target Project
+## 8. Install The Package Into A Target Project
 
 From the target project:
 
@@ -335,13 +258,11 @@ Expected generated target-project layout:
 
 ```text
 package.json
-maw.json
 .maw/
-  templates/
   graphs/
     coding/
       graph.ts
-      config.json
+      opencode.json
       langgraph.json
   ov.conf
   ovcli.conf
@@ -351,12 +272,11 @@ What happened during `init`:
 
 - `maw-cli` read the package's `./scaffold` export
 - `maw-cli` created `.maw/graphs/coding/`
-- the workflow package supplied `graph.ts` and `config.json`
+- the workflow package supplied `graph.ts` and `opencode.json`
 - `maw-cli` generated `langgraph.json`
 - `maw-cli` created `.maw/ov.conf` and `.maw/ovcli.conf` if they were missing
-- `maw-cli` required the target project's existing `package.json` for workflow discovery and left OpenViking runtime wiring untouched
 
-## 11. Run The End-To-End MVP Flow
+## 9. Run The End-To-End MVP Flow
 
 Use this sequence when you want to validate the full author-to-consumer flow.
 
@@ -365,6 +285,7 @@ Use this sequence when you want to validate the full author-to-consumer flow.
 ```bash
 bun run build
 bun run typecheck
+bun run lint
 bun run test
 bun run test:int
 ```
@@ -386,45 +307,39 @@ bunx maw-cli init
 5. Review the generated workflow files.
 
 - `.maw/graphs/coding/graph.ts`
-- `.maw/graphs/coding/config.json`
+- `.maw/graphs/coding/opencode.json`
 - `.maw/graphs/coding/langgraph.json`
 
-6. Preview prompts.
-
-```bash
-bunx maw-cli prompt:list coding
-bunx maw-cli prompt:preview coding planner
-bunx maw-cli prompt:preview coding coder
-```
-
-7. Start the target project's OpenViking server.
+6. Start the target project's OpenViking server.
 
 ```bash
 bunx maw-cli ov:server
 ```
 
-8. Index target project content. Omitting the path defaults to the current working directory.
+7. Index target project content.
 
 ```bash
 bunx maw-cli ov:index
 ```
 
-9. Run the workflow.
+8. Run the primary interactive workflow.
 
 ```bash
 bunx maw-cli dev coding
 ```
 
-Through Phase 4, `bunx maw-cli dev coding` remains the workflow runner. Target projects start and index OpenViking through `bunx maw-cli ov:server` and `bunx maw-cli ov:index [target-path]`; the workflow package should not introduce a separate OpenViking wrapper command.
+9. When you need the retained compatibility smoke path, run:
+
+```bash
+bunx @langchain/langgraph-cli dev --config .maw/graphs/coding
+```
 
 Expected result:
 
 - the workflow package is discoverable by `maw-cli`
-- prompt composition is deterministic and inspectable
-- the workflow reads project config from `maw.json`
-- the workflow reads workflow config from `.maw/graphs/coding/config.json`
-- the target project starts and indexes OpenViking through `maw-cli ov:server` and `maw-cli ov:index`
-- the workflow can operate on the target project's codebase through the finalized MVP tool loop
+- the target project gets workflow-local `opencode.json` plus workflow-owned validation
+- `maw-cli dev coding` launches the planner-first interactive runtime via bundled opencode
+- the retained direct LangGraph path still runs separately for compatibility smoke
 
 ## Related Guide
 

@@ -186,14 +186,14 @@ Verify:
 
 This step keeps the active docs honest. It owns current contract wording only. It must replace active references to workflow-local `config.json`, Nunjucks, `.maw/templates/`, and `maw-cli prompt:*` with the new workflow-local `opencode.json` and `planner` / `manager` / hidden `coder` workflow model.
 
-- [ ] `docs/agents/initiatives/active/init/init-plan.md`: align the active initiative contract with raw workflow-local `opencode.json`, bundled opencode runtime launch, `maw.json` removal, prompt-command retirement, and retained LangGraph compatibility smoke
-- [ ] `README.md` and `docs/usage/mvp/{maw-cli,langgraph-ts-template}.md`: replace old prompt-composition guidance with workflow-local `opencode.json` and the interactive planner-to-manager execution flow
-- [ ] Any active doc outside `complete/` that still describes `.maw/templates/`, workflow-local `config.json`, Nunjucks prompt composition, or `maw-cli prompt:*`: either align it or mark it as explicitly historical
+- [x] `docs/agents/initiatives/active/init/init-plan.md`: align the active initiative contract with raw workflow-local `opencode.json`, bundled opencode runtime launch, `maw.json` removal, prompt-command retirement, and retained LangGraph compatibility smoke
+- [x] `README.md` and `docs/usage/mvp/{maw-cli,langgraph-ts-template}.md`: replace old prompt-composition guidance with workflow-local `opencode.json` and the interactive planner-to-manager execution flow
+- [x] Any active doc outside `complete/` that still describes `.maw/templates/`, workflow-local `config.json`, Nunjucks prompt composition, or `maw-cli prompt:*`: either align it or mark it as explicitly historical
 
 Verify:
 
-- [ ] `rg "opencode.json|planner|manager|coder|maw-cli dev" README.md docs/usage/mvp docs/agents/initiatives/active/init/init-plan.md`
-- [ ] Manual review: any remaining mentions of `.maw/templates/`, workflow-local `config.json`, Nunjucks, or `maw-cli prompt:*` in active docs are clearly labeled as superseded history rather than active contract
+- [x] `rg "opencode.json|planner|manager|coder|maw-cli dev" README.md docs/usage/mvp docs/agents/initiatives/active/init/init-plan.md`
+- [x] Manual review: any remaining mentions of `.maw/templates/`, workflow-local `config.json`, Nunjucks, or `maw-cli prompt:*` in active docs are clearly labeled as superseded history rather than active contract
 
 ### 5. Prove planner and manager interactive flows plus retained LangGraph smoke
 
@@ -227,8 +227,8 @@ Verify:
 - [x] Step 2: `bun run test:int -- tests/integration/graph.test.ts`
 - [x] Step 3: `bun run build`
 - [x] Step 3: `bun run test`
-- [ ] Step 4: `rg "opencode.json|planner|manager|coder|maw-cli dev" README.md docs/usage/mvp docs/agents/initiatives/active/init/init-plan.md`
-- [ ] Step 4: manual review of active docs for superseded references
+- [x] Step 4: `rg "opencode.json|planner|manager|coder|maw-cli dev" README.md docs/usage/mvp docs/agents/initiatives/active/init/init-plan.md`
+- [x] Step 4: manual review of active docs for superseded references
 - [ ] Step 5: `bun smoke-init phase6-opencode-interactive-runtime` in `../maw-smoke/`
 - [ ] Step 5: in `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`, run `bunx maw-cli init`
 - [ ] Step 5: in TTY mode inside `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`, run `bunx maw-cli dev langgraph-ts-template`
