@@ -28,6 +28,7 @@ Replace the old workflow-local `config.json` plus Nunjucks prompt surface with a
 - There is no project-root `maw.json` in the active contract after Phase 6; MAW scope resolves from the nearest ancestor containing `.maw/`.
 - `.maw/graphs/<workflow>/config.json`, Nunjucks prompt composition, `.maw/templates/`, and `maw-cli prompt:list` / `maw-cli prompt:preview` are retired from the active MVP contract.
 - Workflow packages ship both the default scaffolded `opencode.json` asset and a validator or schema export for the workflow-required `opencode.json` shape. `maw-cli` uses that validator during `init` and `dev`.
+- The scaffolded `planner` / `manager` / `coder` descriptions, modes, hidden flags, and permission baselines come from `.opencode/agents/{planner,manager,coder}.md` frontmatter in the workflow package. If the SDK needs explicit deny/default entries, update those agent files and the scaffold contract together instead of introducing a separate baseline config surface.
 - The base workflow default visible primary agents are exactly `planner` and `manager`, with hidden subagent `coder` and `default_agent: "planner"`.
 - `maw-cli dev <workflow>` launches bundled opencode directly in TTY mode and starts on `planner`.
 - A non-TTY `maw-cli dev <workflow>` run launches the same bundled opencode workflow in server-only mode so SDK harness tests can drive planner and manager interactions headlessly.
@@ -73,6 +74,8 @@ The workflow package, not `maw-cli`, owns validation of the workflow-required `o
 Required behavior:
 
 - the workflow package exports a validator or schema alongside the scaffold contract
+- the validator must enforce the required `planner` / `manager` / hidden `coder` topology plus the per-agent permission baselines sourced from `.opencode/agents/{planner,manager,coder}.md` frontmatter
+- if the SDK needs explicit deny/default fields beyond the current frontmatter, make that a single contract update in those agent files and the scaffolded `opencode.json`, not a separate config layer
 - `maw-cli init` uses the workflow package's default `opencode.json` asset when materializing missing workflow files
 - `maw-cli dev` loads the same validator before runtime launch
 - invalid edited `opencode.json` fails clearly before any interactive or server-only runtime starts
@@ -92,6 +95,15 @@ Implications:
 - `maw-cli dev <workflow>` no longer shells to LangGraph for the interactive base workflow
 - retained LangGraph smoke stays direct and separate
 - the compatibility path does not need planner/manager parity in Phase 6
+
+### Step boundary for scaffold contract changes
+
+When a step changes the workflow-owned scaffold contract, that same step must keep the scaffold-facing integration handoff green enough for the repo hooks to pass.
+
+Required behavior:
+
+- do not defer `tests/integration/scaffold.test.ts` updates to a later compatibility-only step when the scaffold contract itself changed earlier
+- later steps may still own compatibility-runtime behavior, but the public scaffold handoff must stay independently committable at the end of the step that changed it
 
 ### Manager auto-commit contract
 
@@ -129,16 +141,20 @@ curl --silent --show-error --fail \
 
 ### 1. Replace the workflow-local config surface with raw `opencode.json`
 
-This step resets the workflow package contract before any CLI launch changes land. It owns the new scaffolded `opencode.json` asset, the workflow-owned validator, and retirement of package exports that only existed for the old `config.json` plus Nunjucks prompt surface. It must not yet change `maw-cli` runtime launch behavior.
+This step resets the workflow package contract before any CLI launch changes land. It owns the new scaffolded `opencode.json` asset, the workflow-owned validator, retirement of package exports that only existed for the old `config.json` plus Nunjucks prompt surface, and the scaffold-facing integration handoff needed to keep the step independently committable. It must not yet change `maw-cli` runtime launch behavior.
 
-- [ ] `langgraph-ts-template/src/scaffold/**` and related package exports: replace the scaffolded `config.json` asset with a default raw `opencode.json` that ships the base `planner` / `manager` / hidden `coder` contract and exposes the workflow validator
-- [ ] `langgraph-ts-template/src/{config.ts,templates/**,index.ts}` and any adjacent helper that only served `config.json`, Nunjucks composition, or prompt inspection: retire or replace that surface so the public package contract matches the new scaffold model
-- [ ] `langgraph-ts-template/tests/unit/{config.spec.ts,templates.spec.ts,scaffold.spec.ts,public-api.spec.ts,package-metadata.spec.ts}` and related fixtures: replace old prompt-config expectations with `opencode.json` scaffold and validator coverage
+- [x] `langgraph-ts-template/src/scaffold/**` and related package exports: replace the scaffolded `config.json` asset with a default raw `opencode.json` that ships the base `planner` / `manager` / hidden `coder` contract and exposes the workflow validator
+- [x] `langgraph-ts-template/src/{config.ts,templates/**,index.ts}` and any adjacent helper that only served `config.json`, Nunjucks composition, or prompt inspection: retire or replace that surface so the public package contract matches the new scaffold model
+- [x] `langgraph-ts-template/tests/unit/{config.spec.ts,templates.spec.ts,scaffold.spec.ts,public-api.spec.ts,package-metadata.spec.ts}` and related fixtures: replace old prompt-config expectations with `opencode.json` scaffold and validator coverage
+- [x] `langgraph-ts-template/tests/integration/scaffold.test.ts` and any adjacent fixtures: replace the old workflow-owned scaffold handoff expectations so the new `opencode.json` contract stays independently verifiable under repo hooks
 
 Verify:
 
-- [ ] `bun run typecheck`
-- [ ] `bun run test`
+- [x] `bun run build`
+- [x] `bun run lint`
+- [x] `bun run typecheck`
+- [x] `bun run test`
+- [x] `bun run test:int -- tests/integration/scaffold.test.ts`
 
 ### 2. Keep the retained LangGraph compatibility runtime runnable after the reset
 
@@ -146,12 +162,12 @@ This step owns the headless compatibility path only. It must remove the retained
 
 - [ ] `langgraph-ts-template/src/agent/**` and any adjacent runtime helper: replace runtime assumptions that still read `.maw/graphs/<workflow>/config.json` or Nunjucks-driven prompt data so the direct LangGraph compatibility path still runs from the new scaffold contract
 - [ ] `langgraph-ts-template/src/index.ts`: keep the retained `createGraph` compatibility API aligned with the new workflow contract after config/template retirement
-- [ ] `langgraph-ts-template/tests/integration/{graph.test.ts,scaffold.test.ts}` and `tests/unit/{graph.spec.ts,agent.spec.ts}`: prove the retained direct LangGraph compatibility runtime still compiles and runs without the old prompt surface
+- [ ] `langgraph-ts-template/tests/integration/graph.test.ts` and `tests/unit/{graph.spec.ts,agent.spec.ts}`: prove the retained direct LangGraph compatibility runtime still compiles and runs without the old prompt surface
 
 Verify:
 
 - [ ] `bun run build`
-- [ ] `bun run test:int -- tests/integration/graph.test.ts tests/integration/scaffold.test.ts`
+- [ ] `bun run test:int -- tests/integration/graph.test.ts`
 
 ### 3. Teach `maw-cli` to scaffold and launch the interactive opencode runtime
 
@@ -202,10 +218,13 @@ Verify:
 
 ### Per-step verification
 
-- [ ] Step 1: `bun run typecheck`
-- [ ] Step 1: `bun run test`
+- [x] Step 1: `bun run build`
+- [x] Step 1: `bun run lint`
+- [x] Step 1: `bun run typecheck`
+- [x] Step 1: `bun run test`
+- [x] Step 1: `bun run test:int -- tests/integration/scaffold.test.ts`
 - [ ] Step 2: `bun run build`
-- [ ] Step 2: `bun run test:int -- tests/integration/graph.test.ts tests/integration/scaffold.test.ts`
+- [ ] Step 2: `bun run test:int -- tests/integration/graph.test.ts`
 - [ ] Step 3: `bun run build`
 - [ ] Step 3: `bun run test`
 - [ ] Step 4: `rg "opencode.json|planner|manager|coder|maw-cli dev" README.md docs/usage/mvp docs/agents/initiatives/active/init/init-plan.md`

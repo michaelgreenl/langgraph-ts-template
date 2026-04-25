@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { z } from 'zod';
-import { readScaffoldAsset } from './scaffold/index.js';
+import { readAsset } from './scaffold/assets.js';
 const snippets = z.array(z.string().min(1));
 export const workflowConfigSchema = z
     .object({
@@ -29,7 +29,7 @@ const mergeAgents = (base, next) => {
 };
 export const parseWorkflowConfig = (value) => workflowConfigSchema.parse(value);
 const loadDefaultWorkflowConfig = () => {
-    const cfg = parseWorkflowConfig(JSON.parse(readScaffoldAsset('config')));
+    const cfg = parseWorkflowConfig(JSON.parse(readAsset('config')));
     return {
         prompts: {
             global: mergeList([], cfg.prompts?.global),

@@ -1,15 +1,6 @@
 export { createGraph, graph, route, type GraphConfig } from './agent/graph.js';
 export { StateAnnotation, type GraphState, type GraphUpdate } from './agent/state.js';
 export {
-    DEFAULT_WORKFLOW_CONFIG,
-    loadWorkflowConfig,
-    parseWorkflowConfig,
-    resolveWorkflowConfig,
-    workflowConfigSchema,
-    type ResolvedWorkflowConfig,
-    type WorkflowConfig,
-} from './config.js';
-export {
     DEFAULT_OPENVIKING_ENABLED,
     OPENVIKING_CLIENT_CONFIG_FILE,
     OPENVIKING_STORAGE_DIR,
@@ -29,5 +20,15 @@ export {
     type OpenVikingScanInput,
     type OpenVikingScanResult,
 } from './openviking/scanner.js';
-export { createTemplateEngine, type TemplateEngine, type TemplateVars } from './templates/engine.js';
-export { WORKFLOW_ID, WORKFLOW_PACKAGE_NAME, createScaffoldFiles, scaffold, templateDir } from './scaffold/index.js';
+export {
+    WORKFLOW_ID,
+    WORKFLOW_PACKAGE_NAME,
+    createScaffoldFiles,
+    loadWorkflowOpencode,
+    parseWorkflowOpencode,
+    readScaffoldAsset,
+    scaffold,
+    workflowOpencodeSchema,
+    type ScaffoldAssetName,
+    type WorkflowOpencode,
+} from './scaffold/index.js';

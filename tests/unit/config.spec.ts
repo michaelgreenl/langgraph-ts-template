@@ -2,15 +2,30 @@ import { mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { afterEach, describe, expect, it } from 'vitest';
-import {
-    DEFAULT_WORKFLOW_CONFIG,
-    loadWorkflowConfig,
-    parseWorkflowConfig,
-    resolveWorkflowConfig,
-    workflowConfigSchema,
-} from '../../src/config.js';
+import { loadWorkflowOpencode, parseWorkflowOpencode, workflowOpencodeSchema } from '../../src/scaffold/index.js';
 
 const dirs: string[] = [];
+const plannerPermission = {
+    edit: 'allow',
+    task: {
+        explore: 'allow',
+        general: 'allow',
+    },
+} as const;
+const managerPermission = {
+    edit: 'allow',
+    bash: 'allow',
+    task: {
+        '*': 'deny',
+        coder: 'allow',
+        explore: 'allow',
+        general: 'allow',
+    },
+} as const;
+const coderPermission = {
+    edit: 'allow',
+    bash: 'allow',
+} as const;
 
 const createDir = async (): Promise<string> => {
     const dir = await mkdtemp(join(tmpdir(), 'maw-workflow-config-'));
@@ -23,91 +38,139 @@ afterEach(async () => {
 });
 
 describe('workflow config', () => {
-    it('accepts empty and partial config objects', () => {
-        expect(workflowConfigSchema.parse({})).toEqual({});
+    it('accepts the required planner-manager-coder topology', () => {
         expect(
-            workflowConfigSchema.parse({
-                prompts: {
-                    global: ['general'],
-                    agents: {
-                        coder: [],
+            workflowOpencodeSchema.parse({
+                $schema: 'https://opencode.ai/config.json',
+                default_agent: 'planner',
+                agent: {
+                    planner: {
+                        mode: 'primary',
+                        permission: plannerPermission,
+                        prompt: 'plan',
+                    },
+                    manager: {
+                        mode: 'primary',
+                        permission: managerPermission,
+                        prompt: 'manage',
+                    },
+                    coder: {
+                        mode: 'subagent',
+                        hidden: true,
+                        permission: coderPermission,
+                        prompt: 'code',
                     },
                 },
             }),
-        ).toEqual({
-            prompts: {
-                global: ['general'],
-                agents: {
-                    coder: [],
+        ).toMatchObject({
+            default_agent: 'planner',
+            agent: {
+                planner: {
+                    mode: 'primary',
+                },
+                manager: {
+                    mode: 'primary',
+                },
+                coder: {
+                    hidden: true,
+                    mode: 'subagent',
                 },
             },
         });
     });
 
-    it('throws on invalid config values', () => {
-        expect(() => parseWorkflowConfig({ prompts: 'bad' })).toThrow();
-        expect(() => parseWorkflowConfig({ prompts: { global: [1] } })).toThrow();
-        expect(() => parseWorkflowConfig({ prompts: { agents: { coder: ['typescript', 1] } } })).toThrow();
+    it('rejects invalid workflow topology', () => {
+        expect(() => parseWorkflowOpencode({ default_agent: 'manager', agent: {} })).toThrow();
+        expect(() =>
+            parseWorkflowOpencode({
+                default_agent: 'planner',
+                agent: {
+                    planner: {
+                        mode: 'primary',
+                        permission: plannerPermission,
+                        prompt: 'plan',
+                    },
+                    manager: {
+                        mode: 'primary',
+                        hidden: true,
+                        permission: managerPermission,
+                        prompt: 'manage',
+                    },
+                    coder: {
+                        mode: 'subagent',
+                        hidden: true,
+                        permission: coderPermission,
+                        prompt: 'code',
+                    },
+                },
+            }),
+        ).toThrow();
+        expect(() =>
+            parseWorkflowOpencode({
+                default_agent: 'planner',
+                agent: {
+                    planner: {
+                        mode: 'primary',
+                        permission: plannerPermission,
+                        prompt: 'plan',
+                    },
+                    manager: {
+                        mode: 'primary',
+                        permission: managerPermission,
+                        prompt: 'manage',
+                    },
+                    coder: {
+                        mode: 'subagent',
+                        permission: coderPermission,
+                        prompt: 'code',
+                    },
+                },
+            }),
+        ).toThrow();
     });
 
-    it('loads partial config from disk', async () => {
+    it('loads opencode config from disk', async () => {
         const dir = await createDir();
-        const file = join(dir, 'config.json');
+        const file = join(dir, 'opencode.json');
 
         await writeFile(
             file,
             JSON.stringify({
-                prompts: {
-                    agents: {
-                        coder: ['typescript'],
+                default_agent: 'planner',
+                agent: {
+                    planner: {
+                        mode: 'primary',
+                        permission: plannerPermission,
+                        prompt: 'plan',
+                    },
+                    manager: {
+                        mode: 'primary',
+                        permission: managerPermission,
+                        prompt: 'manage',
+                    },
+                    coder: {
+                        mode: 'subagent',
+                        hidden: true,
+                        permission: coderPermission,
+                        prompt: 'code',
                     },
                 },
             }),
         );
 
-        await expect(loadWorkflowConfig(file)).resolves.toEqual({
-            prompts: {
-                agents: {
-                    coder: ['typescript'],
+        await expect(loadWorkflowOpencode(file)).resolves.toMatchObject({
+            default_agent: 'planner',
+            agent: {
+                planner: {
+                    mode: 'primary',
+                },
+                manager: {
+                    mode: 'primary',
+                },
+                coder: {
+                    hidden: true,
                 },
             },
         });
-    });
-
-    it('deep-merges overrides into defaults', () => {
-        const cfg = resolveWorkflowConfig({
-            prompts: {
-                global: ['security'],
-                agents: {
-                    coder: ['typescript', 'security'],
-                },
-            },
-        });
-
-        expect(cfg.prompts.global).toEqual(['security']);
-        expect(cfg.prompts.agents.planner).toEqual(DEFAULT_WORKFLOW_CONFIG.prompts.agents.planner);
-        expect(cfg.prompts.agents.coder).toEqual(['typescript', 'security']);
-    });
-
-    it('treats explicit empty arrays as inherited defaults', () => {
-        const cfg = resolveWorkflowConfig({
-            prompts: {
-                global: [],
-                agents: {
-                    planner: [],
-                    coder: [],
-                },
-            },
-        });
-
-        expect(cfg.prompts.global).toEqual(DEFAULT_WORKFLOW_CONFIG.prompts.global);
-        expect(cfg.prompts.agents.planner).toEqual(DEFAULT_WORKFLOW_CONFIG.prompts.agents.planner);
-        expect(cfg.prompts.agents.coder).toEqual(DEFAULT_WORKFLOW_CONFIG.prompts.agents.coder);
-    });
-
-    it('publishes non-empty embedded defaults', () => {
-        expect(DEFAULT_WORKFLOW_CONFIG.prompts.global.length).toBeGreaterThan(0);
-        expect(DEFAULT_WORKFLOW_CONFIG.prompts.agents.planner.length).toBeGreaterThan(0);
-        expect(DEFAULT_WORKFLOW_CONFIG.prompts.agents.coder.length).toBeGreaterThan(0);
     });
 });

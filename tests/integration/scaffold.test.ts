@@ -1,8 +1,8 @@
-import { access, mkdtemp, readFile, readdir, rm, writeFile } from 'node:fs/promises';
+import { mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterEach, describe, expect, it } from 'vitest';
-import { createScaffoldFiles, scaffold, templateDir } from '../../src/scaffold/index.js';
+import { createScaffoldFiles, loadWorkflowOpencode, parseWorkflowOpencode, scaffold } from '../../src/scaffold/index.js';
 
 const roots: string[] = [];
 
@@ -11,7 +11,7 @@ describe('scaffold handoff', () => {
         await Promise.all(roots.splice(0).map((root) => rm(root, { recursive: true, force: true })));
     });
 
-    it('creates workflow-owned scaffold files and stays idempotent on rerun', async () => {
+    it('creates workflow-owned scaffold files and materializes the packaged agent baselines', async () => {
         const root = await mkdtemp(join(tmpdir(), 'maw-scaffold-'));
         roots.push(root);
 
@@ -19,10 +19,10 @@ describe('scaffold handoff', () => {
 
         const files = createScaffoldFiles();
 
-        expect(Object.keys(files).sort()).toEqual(['config.json', 'graph.ts']);
+        expect(Object.keys(files).sort()).toEqual(['graph.ts', 'opencode.json']);
 
         await writeFile(join(root, 'graph.ts'), files['graph.ts']);
-        await writeFile(join(root, 'config.json'), files['config.json']);
+        await writeFile(join(root, 'opencode.json'), files['opencode.json']);
 
         expect(await readFile(join(root, 'graph.ts'), 'utf8')).toContain(
             `import { createGraph } from '${scaffold.packageName}';`,
@@ -31,32 +31,59 @@ describe('scaffold handoff', () => {
             `createGraph({ workflow: '${scaffold.workflow}' })`,
         );
 
-        const cfg: unknown = JSON.parse(files['config.json']);
+        const cfg = await loadWorkflowOpencode(join(root, 'opencode.json'));
 
-        if (typeof cfg !== 'object' || cfg === null) {
-            throw new Error('Expected scaffold config.json to contain an object.');
-        }
-
-        const prompts = (cfg as Record<string, unknown>).prompts;
-
-        if (typeof prompts !== 'object' || prompts === null) {
-            throw new Error('Expected scaffold config.json to contain a prompts object.');
-        }
-
-        const global = (prompts as Record<string, unknown>).global;
-        const agents = (prompts as Record<string, unknown>).agents;
-
-        expect(Array.isArray(global)).toBe(true);
-        expect(global).toHaveLength(2);
-        expect(typeof agents).toBe('object');
-        expect(agents).not.toBeNull();
-        expect(Object.keys((agents as Record<string, unknown>) ?? {})).not.toHaveLength(0);
+        expect(cfg.default_agent).toBe('planner');
+        expect(cfg.agent.planner.mode).toBe('primary');
+        expect(cfg.agent.manager.mode).toBe('primary');
+        expect(cfg.agent.coder.mode).toBe('subagent');
+        expect(cfg.agent.coder.hidden).toBe(true);
+        expect(cfg.agent.planner.permission).toEqual({
+            edit: 'allow',
+            task: {
+                explore: 'allow',
+                general: 'allow',
+            },
+        });
+        expect(cfg.agent.manager.permission).toEqual({
+            edit: 'allow',
+            bash: 'allow',
+            task: {
+                '*': 'deny',
+                coder: 'allow',
+                explore: 'allow',
+                general: 'allow',
+            },
+        });
+        expect(cfg.agent.coder.permission).toEqual({
+            edit: 'allow',
+            bash: 'allow',
+        });
         expect(createScaffoldFiles()).toEqual(files);
     });
 
-    it('publishes embedded templates for prompt preview consumers', async () => {
-        await access(templateDir);
+    it('rejects edited agent permissions that diverge from the packaged baselines', () => {
+        const cfg = parseWorkflowOpencode(JSON.parse(createScaffoldFiles()['opencode.json']));
+        const broken = {
+            ...cfg,
+            agent: {
+                ...cfg.agent,
+                manager: {
+                    ...cfg.agent.manager,
+                    permission: {
+                        edit: 'allow',
+                        bash: 'allow',
+                        task: {
+                            '*': 'deny',
+                            coder: 'deny',
+                            explore: 'allow',
+                            general: 'allow',
+                        },
+                    },
+                },
+            },
+        };
 
-        expect((await readdir(templateDir)).some((name) => name.endsWith('.njk'))).toBe(true);
+        expect(() => parseWorkflowOpencode(broken)).toThrow(/manager permission/i);
     });
 });

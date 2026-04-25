@@ -12,24 +12,16 @@
             "import": "./dist/index.js",
             "types": "./dist/index.d.ts"
         },
-        "./config": {
-            "types": "./dist/config.d.ts",
-            "import": "./dist/config.js",
-            "default": "./dist/config.js"
-        },
         "./scaffold": {
             "import": "./dist/scaffold/index.js",
-            "types": "./dist/scaffold/index.d.ts"
-        },
-        "./templates": {
-            "types": "./dist/templates/index.d.ts",
-            "import": "./dist/templates/index.js",
-            "default": "./dist/templates/index.js"
+            "types": "./dist/scaffold/index.d.ts",
+            "default": "./dist/scaffold/index.js"
         },
         "./package.json": "./package.json"
     },
     "files": [
         "dist",
+        ".opencode/agents",
         "src/scaffold/assets",
         "src/templates/defaults",
         "README.md"

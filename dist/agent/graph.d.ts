@@ -21,7 +21,7 @@ export declare const createGraph: (cfg?: GraphConfig) => import("@langchain/lang
     plannerPrompt?: string | import("@langchain/langgraph").OverwriteValue<string>;
     coderPrompt?: string | import("@langchain/langgraph").OverwriteValue<string>;
     handoff?: string | import("@langchain/langgraph").OverwriteValue<string>;
-}, "__start__" | "planner" | "coder", {
+}, "coder" | "planner" | "__start__", {
     messages: import("@langchain/langgraph").BaseChannel<BaseMessage<import("@langchain/core/messages").MessageStructure<import("@langchain/core/messages").MessageToolSet>, import("@langchain/core/messages").MessageType>[], import("@langchain/core/messages").BaseMessageLike[] | import("@langchain/langgraph").OverwriteValue<BaseMessage<import("@langchain/core/messages").MessageStructure<import("@langchain/core/messages").MessageToolSet>, import("@langchain/core/messages").MessageType>[]>, unknown>;
     plannerPrompt: import("@langchain/langgraph").BaseChannel<string, string | import("@langchain/langgraph").OverwriteValue<string>, unknown>;
     coderPrompt: import("@langchain/langgraph").BaseChannel<string, string | import("@langchain/langgraph").OverwriteValue<string>, unknown>;
@@ -55,7 +55,7 @@ export declare const graph: import("@langchain/langgraph").CompiledStateGraph<{
     plannerPrompt?: string | import("@langchain/langgraph").OverwriteValue<string>;
     coderPrompt?: string | import("@langchain/langgraph").OverwriteValue<string>;
     handoff?: string | import("@langchain/langgraph").OverwriteValue<string>;
-}, "__start__" | "planner" | "coder", {
+}, "coder" | "planner" | "__start__", {
     messages: import("@langchain/langgraph").BaseChannel<BaseMessage<import("@langchain/core/messages").MessageStructure<import("@langchain/core/messages").MessageToolSet>, import("@langchain/core/messages").MessageType>[], import("@langchain/core/messages").BaseMessageLike[] | import("@langchain/langgraph").OverwriteValue<BaseMessage<import("@langchain/core/messages").MessageStructure<import("@langchain/core/messages").MessageToolSet>, import("@langchain/core/messages").MessageType>[]>, unknown>;
     plannerPrompt: import("@langchain/langgraph").BaseChannel<string, string | import("@langchain/langgraph").OverwriteValue<string>, unknown>;
     coderPrompt: import("@langchain/langgraph").BaseChannel<string, string | import("@langchain/langgraph").OverwriteValue<string>, unknown>;

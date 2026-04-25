@@ -1,12 +1,11 @@
-import { existsSync, readdirSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
-import { parseWorkflowConfig } from '../../src/config.js';
 import {
     WORKFLOW_ID,
     WORKFLOW_PACKAGE_NAME,
     createScaffoldFiles,
+    parseWorkflowOpencode,
+    readScaffoldAsset,
     scaffold,
-    templateDir,
     toWorkflowId,
 } from '../../src/scaffold/index.js';
 
@@ -23,20 +22,21 @@ describe('scaffold contract', () => {
         expect(toWorkflowId('langgraph-ts-template')).toBe('langgraph-ts-template');
     });
 
-    it('creates only graph and config scaffold files', () => {
+    it('creates only graph and opencode scaffold files', () => {
         const files = createScaffoldFiles();
-        const cfg = parseWorkflowConfig(JSON.parse(files['config.json']));
+        const cfg = parseWorkflowOpencode(JSON.parse(files['opencode.json']));
 
-        expect(Object.keys(files).sort()).toEqual(['config.json', 'graph.ts']);
+        expect(Object.keys(files).sort()).toEqual(['graph.ts', 'opencode.json']);
         expect(files['graph.ts']).toContain(`import { createGraph } from '${scaffold.packageName}';`);
         expect(files['graph.ts']).toContain(`createGraph({ workflow: '${scaffold.workflow}' })`);
-        expect(cfg.prompts?.global?.length ?? 0).toBeGreaterThan(0);
-        expect(cfg.prompts?.agents?.planner?.length ?? 0).toBeGreaterThan(0);
-        expect(cfg.prompts?.agents?.coder?.length ?? 0).toBeGreaterThan(0);
+        expect(cfg.default_agent).toBe('planner');
+        expect(cfg.agent.planner.mode).toBe('primary');
+        expect(cfg.agent.manager.mode).toBe('primary');
+        expect(cfg.agent.coder.hidden).toBe(true);
     });
 
-    it('resolves the embedded template directory', () => {
-        expect(existsSync(templateDir)).toBe(true);
-        expect(readdirSync(templateDir).some((name) => name.endsWith('.njk'))).toBe(true);
+    it('reads the raw opencode scaffold asset', () => {
+        expect(readScaffoldAsset('opencode')).toContain('"default_agent": "planner"');
+        expect(readScaffoldAsset('opencode')).toContain('"manager"');
     });
 });

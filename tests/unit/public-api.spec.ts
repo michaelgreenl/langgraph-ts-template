@@ -36,7 +36,9 @@ vi.mock('@langchain/openai', async () => {
     };
 });
 
-import { createGraph, graph, StateAnnotation } from '../../src/index.js';
+import * as api from '../../src/index.js';
+
+const { StateAnnotation, createGraph, graph } = api;
 
 describe('Public API', () => {
     beforeEach(() => {
@@ -64,5 +66,16 @@ describe('Public API', () => {
 
     it('exports a default graph instance', () => {
         expect(graph).toBeDefined();
+    });
+
+    it('exports the workflow opencode validator and retires the old prompt-config helpers', () => {
+        expect(api).toHaveProperty('workflowOpencodeSchema');
+        expect(api).toHaveProperty('parseWorkflowOpencode');
+        expect(api).toHaveProperty('loadWorkflowOpencode');
+        expect(api).not.toHaveProperty('DEFAULT_WORKFLOW_CONFIG');
+        expect(api).not.toHaveProperty('loadWorkflowConfig');
+        expect(api).not.toHaveProperty('resolveWorkflowConfig');
+        expect(api).not.toHaveProperty('createTemplateEngine');
+        expect(api).not.toHaveProperty('templateDir');
     });
 });

@@ -51,7 +51,7 @@ The remaining alignment work is now:
 - Nunjucks prompt composition and `.maw/templates/` are retired from the active MVP contract. `maw-cli init` stops creating `.maw/templates/`; if an older directory already exists, reruns preserve it but MAW ignores it.
 - Workflow packages ship both the default scaffolded `opencode.json` asset and the validation schema or validator for the workflow-required `opencode.json` shape.
 - `maw-cli init` materializes `.maw/graphs/<workflow>/opencode.json` if it is missing, and preserves existing files on rerun.
-- Workflow validation must require visible primary `planner` and `manager`, hidden subagent `coder`, and `default_agent: "planner"`. Invalid edited `opencode.json` files fail execution instead of silently falling back.
+- Workflow validation must require visible primary `planner` and `manager`, hidden subagent `coder`, `default_agent: "planner"`, and the per-agent permission baselines defined in `.opencode/agents/{planner,manager,coder}.md` frontmatter. Invalid edited `opencode.json` files fail execution instead of silently falling back.
 - A workflow is treated as interactive when its workflow-local `opencode.json` contains any agent with `hidden !== true`.
 - The shipped base workflow defaults to visible primary `planner` and `manager`, plus hidden `coder`.
 - `maw-cli dev <workflow>` launches bundled opencode directly in TTY mode and starts on `planner`.
@@ -122,7 +122,7 @@ The remaining alignment work is now:
 | workflow-local `opencode.json` validation schema / validator | workflow package |
 | opencode runtime bundling and launch | `maw-cli` |
 | interactive session bootstrap (`planner` first, non-TTY server-only launch) | `maw-cli` |
-| default `planner` / `manager` / `coder` prompts and role contract | workflow package |
+| default `.opencode/agents/{planner,manager,coder}.md` prompts, frontmatter permission baselines, and role contract | workflow package |
 | OpenViking config parsing / `${VAR}` placeholder resolution | `maw-cli` |
 | OpenViking server launch and indexing execution | `maw-cli` |
 | retained LangGraph compatibility runtime implementation | workflow package |
@@ -246,7 +246,8 @@ Rules:
 - it uses raw opencode schema only; Phase 6 does not add a MAW-specific opencode extension layer
 - it should contain no literal secrets; use opencode env/file substitution when provider auth needs external values
 - target projects may edit prompts, context, permissions, and model/provider settings directly in this file so long as the workflow validator still passes
-- the shipped base workflow validator must require visible primary `planner` and `manager`, hidden subagent `coder`, and `default_agent: "planner"`
+- the shipped base workflow validator must require visible primary `planner` and `manager`, hidden subagent `coder`, `default_agent: "planner"`, and the per-agent permission baselines sourced from `.opencode/agents/{planner,manager,coder}.md` frontmatter
+- if the SDK needs explicit deny/default entries beyond the current frontmatter, update those agent files and the scaffolded `opencode.json` contract together instead of introducing a separate baseline config surface
 - invalid edited `opencode.json` fails before runtime launch
 
 Conceptual base-workflow shape:
@@ -261,10 +262,8 @@ Conceptual base-workflow shape:
             "description": "Planning-only agent that writes initiative plans and phase tasks docs after clearing assumptions",
             "prompt": "<planner system prompt>",
             "permission": {
-                "edit": "ask",
-                "bash": "deny",
+                "edit": "allow",
                 "task": {
-                    "*": "deny",
                     "explore": "allow",
                     "general": "allow"
                 }
@@ -279,7 +278,9 @@ Conceptual base-workflow shape:
                 "bash": "allow",
                 "task": {
                     "*": "deny",
-                    "coder": "allow"
+                    "coder": "allow",
+                    "explore": "allow",
+                    "general": "allow"
                 }
             }
         },
@@ -637,7 +638,7 @@ Smoke verification runs from `../maw-smoke/` following `README.md`.
 - `maw-cli init` no longer creates `.maw/templates/`
 - each installed workflow gets `.maw/graphs/<workflow>/graph.ts`, `.maw/graphs/<workflow>/opencode.json`, and `.maw/graphs/<workflow>/langgraph.json`
 - `.maw/graphs/<workflow>/config.json` is no longer scaffolded
-- `.maw/graphs/<workflow>/opencode.json` uses raw opencode schema and ships the default base-workflow topology: `planner` and `manager` visible, hidden `coder`, `default_agent: "planner"`
+- `.maw/graphs/<workflow>/opencode.json` uses raw opencode schema and ships the default base-workflow topology: `planner` and `manager` visible, hidden `coder`, `default_agent: "planner"`, and per-agent permission baselines that match `.opencode/agents/{planner,manager,coder}.md` frontmatter
 - invalid edited `.maw/graphs/<workflow>/opencode.json` fails before `maw-cli dev <workflow>` launches the runtime
 - `maw-cli` help advertises `ov:server` and `ov:index`, but not `ov:init`, `prompt:list`, or `prompt:preview`
 - `maw-cli dev <workflow>` launches bundled opencode with `OPENCODE_CONFIG` pointing at the workflow-local `opencode.json`

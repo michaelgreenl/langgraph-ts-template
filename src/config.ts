@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { z } from 'zod';
-import { readScaffoldAsset } from './scaffold/index.js';
+import { readAsset } from './scaffold/assets.js';
 
 export type WorkflowConfig = {
     prompts?: {
@@ -56,7 +56,7 @@ export const parseWorkflowConfig = (value: unknown): WorkflowConfig =>
     workflowConfigSchema.parse(value) as WorkflowConfig;
 
 const loadDefaultWorkflowConfig = (): ResolvedWorkflowConfig => {
-    const cfg = parseWorkflowConfig(JSON.parse(readScaffoldAsset('config')));
+    const cfg = parseWorkflowConfig(JSON.parse(readAsset('config')));
 
     return {
         prompts: {

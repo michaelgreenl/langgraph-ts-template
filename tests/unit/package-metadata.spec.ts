@@ -13,6 +13,12 @@ const name =
         : (() => {
               throw new Error('Invalid package.json: missing name.');
           })();
+const exp =
+    typeof pkg === 'object' && pkg !== null && 'exports' in pkg && typeof pkg.exports === 'object' && pkg.exports !== null
+        ? (pkg.exports as Record<string, unknown>)
+        : (() => {
+              throw new Error('Invalid package.json: missing exports.');
+          })();
 const req = createRequire(import.meta.url);
 
 describe('package metadata', () => {
@@ -25,31 +31,24 @@ describe('package metadata', () => {
         });
     });
 
-    it('publishes scaffold assets, templates, and subpath exports', () => {
+    it('publishes scaffold assets, packaged agent prompts, and the scaffold subpath export', () => {
         expect(pkg).toMatchObject({
-            files: expect.arrayContaining(['src/scaffold/assets', 'src/templates/defaults']),
+            files: expect.arrayContaining(['src/scaffold/assets', '.opencode/agents']),
             exports: {
-                './config': {
-                    types: './dist/config.d.ts',
-                    import: './dist/config.js',
-                    default: './dist/config.js',
-                },
                 './scaffold': {
                     import: './dist/scaffold/index.js',
                     types: './dist/scaffold/index.d.ts',
                 },
-                './templates': {
-                    types: './dist/templates/index.d.ts',
-                    import: './dist/templates/index.js',
-                    default: './dist/templates/index.js',
-                },
             },
         });
+        expect(exp['./config']).toBeUndefined();
+        expect(exp['./templates']).toBeUndefined();
     });
 
-    it('resolves prompt-command subpaths for installed consumers', () => {
-        expect(req.resolve(`${name}/config`)).toBe(resolve(root, 'dist/config.js'));
-        expect(req.resolve(`${name}/templates`)).toBe(resolve(root, 'dist/templates/index.js'));
+    it('resolves the scaffold export and hides retired prompt-config subpaths', () => {
+        expect(req.resolve(`${name}/scaffold`)).toBe(resolve(root, 'dist/scaffold/index.js'));
+        expect(() => req.resolve(`${name}/config`)).toThrow();
+        expect(() => req.resolve(`${name}/templates`)).toThrow();
     });
 
     it('does not publish the retired maw-cli proxy surface', () => {
