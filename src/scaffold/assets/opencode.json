@@ -49,5 +49,13 @@
                 "bash": "allow"
             }
         }
+    },
+    "command": {
+        "execute": {
+            "description": "Hand approved work to manager for execution",
+            "agent": "manager",
+            "subtask": true,
+            "template": "The active planner session is approved for execution. Continue as the manager, use the existing conversation as context, and execute the user request below according to the packaged manager contract.\n\nUser execute request:\n$ARGUMENTS"
+        }
     }
 }

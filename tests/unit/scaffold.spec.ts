@@ -33,6 +33,8 @@ describe('scaffold contract', () => {
         expect(cfg.agent.planner.mode).toBe('primary');
         expect(cfg.agent.manager.mode).toBe('primary');
         expect(cfg.agent.coder.hidden).toBe(true);
+        expect(cfg.command.execute.agent).toBe('manager');
+        expect(cfg.command.execute.subtask).toBe(true);
     });
 
     it('reads the raw opencode scaffold asset', () => {

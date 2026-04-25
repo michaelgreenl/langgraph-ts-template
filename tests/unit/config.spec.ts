@@ -26,6 +26,14 @@ const coderPermission = {
     edit: 'allow',
     bash: 'allow',
 } as const;
+const command = {
+    execute: {
+        agent: 'manager',
+        subtask: true,
+        template:
+            'The active planner session is approved for execution. Continue as the manager, use the existing conversation as context, and execute the user request below according to the packaged manager contract.\n\nUser execute request:\n$ARGUMENTS',
+    },
+} as const;
 
 const createDir = async (): Promise<string> => {
     const dir = await mkdtemp(join(tmpdir(), 'maw-workflow-config-'));
@@ -43,6 +51,7 @@ describe('workflow config', () => {
             workflowOpencodeSchema.parse({
                 $schema: 'https://opencode.ai/config.json',
                 default_agent: 'planner',
+                command,
                 agent: {
                     planner: {
                         mode: 'primary',
@@ -64,6 +73,12 @@ describe('workflow config', () => {
             }),
         ).toMatchObject({
             default_agent: 'planner',
+            command: {
+                execute: {
+                    agent: 'manager',
+                    subtask: true,
+                },
+            },
             agent: {
                 planner: {
                     mode: 'primary',
@@ -80,10 +95,11 @@ describe('workflow config', () => {
     });
 
     it('rejects invalid workflow topology', () => {
-        expect(() => parseWorkflowOpencode({ default_agent: 'manager', agent: {} })).toThrow();
+        expect(() => parseWorkflowOpencode({ default_agent: 'manager', command, agent: {} })).toThrow();
         expect(() =>
             parseWorkflowOpencode({
                 default_agent: 'planner',
+                command,
                 agent: {
                     planner: {
                         mode: 'primary',
@@ -108,6 +124,7 @@ describe('workflow config', () => {
         expect(() =>
             parseWorkflowOpencode({
                 default_agent: 'planner',
+                command,
                 agent: {
                     planner: {
                         mode: 'primary',
@@ -137,6 +154,7 @@ describe('workflow config', () => {
             file,
             JSON.stringify({
                 default_agent: 'planner',
+                command,
                 agent: {
                     planner: {
                         mode: 'primary',
@@ -160,6 +178,12 @@ describe('workflow config', () => {
 
         await expect(loadWorkflowOpencode(file)).resolves.toMatchObject({
             default_agent: 'planner',
+            command: {
+                execute: {
+                    agent: 'manager',
+                    subtask: true,
+                },
+            },
             agent: {
                 planner: {
                     mode: 'primary',

@@ -13,6 +13,13 @@ type Node = string | boolean | Tree;
 export declare const workflowOpencodeSchema: z.ZodObject<{
     $schema: z.ZodOptional<z.ZodString>;
     default_agent: z.ZodLiteral<"planner">;
+    command: z.ZodObject<{
+        execute: z.ZodObject<{
+            agent: z.ZodLiteral<"manager">;
+            subtask: z.ZodLiteral<true>;
+            template: z.ZodString;
+        }, z.core.$loose>;
+    }, z.core.$loose>;
     agent: z.ZodObject<{
         planner: z.ZodObject<{
             hidden: z.ZodOptional<z.ZodBoolean>;

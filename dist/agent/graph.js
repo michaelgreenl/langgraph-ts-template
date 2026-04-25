@@ -3,7 +3,7 @@ import { ChatOpenAI } from '@langchain/openai';
 import { StateGraph } from '@langchain/langgraph';
 import { access } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { loadWorkflowOpencode, parseWorkflowOpencode, readScaffoldAsset } from '../scaffold/index.js';
+import { loadWorkflowOpencode, parseWorkflowOpencode, readScaffoldAsset, } from '../scaffold/index.js';
 import { MAW_SYSTEM_ID, StateAnnotation } from './state.js';
 const DEFAULT_GRAPH_NAME = 'New Agent';
 const DEFAULT_MODEL = 'gpt-4.1-mini';

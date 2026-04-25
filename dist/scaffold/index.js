@@ -41,10 +41,22 @@ const agent = z
     prompt: z.string().min(1),
 })
     .passthrough();
+const execute = z
+    .object({
+    agent: z.literal('manager'),
+    subtask: z.literal(true),
+    template: z.string().min(1),
+})
+    .passthrough();
 export const workflowOpencodeSchema = z
     .object({
     $schema: z.string().min(1).optional(),
     default_agent: z.literal('planner'),
+    command: z
+        .object({
+        execute,
+    })
+        .passthrough(),
     agent: z
         .object({
         planner: agent,

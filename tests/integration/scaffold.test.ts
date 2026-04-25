@@ -38,6 +38,8 @@ describe('scaffold handoff', () => {
         expect(cfg.agent.manager.mode).toBe('primary');
         expect(cfg.agent.coder.mode).toBe('subagent');
         expect(cfg.agent.coder.hidden).toBe(true);
+        expect(cfg.command.execute.agent).toBe('manager');
+        expect(cfg.command.execute.subtask).toBe(true);
         expect(cfg.agent.planner.permission).toEqual({
             edit: 'allow',
             task: {
@@ -85,5 +87,16 @@ describe('scaffold handoff', () => {
         };
 
         expect(() => parseWorkflowOpencode(broken)).toThrow(/manager permission/i);
+    });
+
+    it('rejects edited configs that remove the execute handoff command', () => {
+        const cfg = parseWorkflowOpencode(JSON.parse(createScaffoldFiles()['opencode.json']));
+        const broken = {
+            ...cfg,
+        };
+
+        delete broken.command;
+
+        expect(() => parseWorkflowOpencode(broken)).toThrow(/command/i);
     });
 });
