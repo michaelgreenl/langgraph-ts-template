@@ -63,7 +63,7 @@ const agent = z
 const execute = z
     .object({
         agent: z.literal('manager'),
-        subtask: z.literal(true),
+        subtask: z.literal(false),
         template: z.string().min(1),
     })
     .passthrough();

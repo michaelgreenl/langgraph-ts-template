@@ -5,7 +5,7 @@
         "planner": {
             "mode": "primary",
             "description": "Planning-only agent that writes initiative plans and phase tasks docs after clearing assumptions",
-            "model": "openai/gpt-5.4",
+            "model": "openai/gpt-4o",
             "variant": "xhigh",
             "prompt": "__PLANNER_PROMPT__",
             "tools": {
@@ -23,7 +23,7 @@
         "manager": {
             "mode": "primary",
             "description": "Executes a phase tasks.md step by step using coder subagents, validates results, commits clean steps",
-            "model": "openai/gpt-5.4",
+            "model": "openai/gpt-4o",
             "variant": "xhigh",
             "prompt": "__MANAGER_PROMPT__",
             "permission": {
@@ -41,7 +41,7 @@
             "mode": "subagent",
             "hidden": true,
             "description": "TDD-focused implementor dispatched by the manager for a specific tasks.md step",
-            "model": "openai/gpt-5.4",
+            "model": "openai/gpt-4o",
             "variant": "xhigh",
             "prompt": "__CODER_PROMPT__",
             "permission": {
@@ -54,8 +54,8 @@
         "execute": {
             "description": "Hand approved work to manager for execution",
             "agent": "manager",
-            "subtask": true,
-            "template": "The active planner session is approved for execution. Continue as the manager, use the existing conversation as context, and execute the user request below according to the packaged manager contract.\n\nUser execute request:\n$ARGUMENTS"
+            "subtask": false,
+            "template": "The active planner session is approved for execution. Continue as the manager in this same conversation, reuse any already-established phase, tasks.md, step, repo, and step-log paths unless they are missing or conflicting, and execute the user request below according to the packaged manager contract.\n\nUser execute request:\n$ARGUMENTS"
         }
     }
 }

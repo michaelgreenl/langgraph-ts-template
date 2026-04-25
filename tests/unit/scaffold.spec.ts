@@ -33,8 +33,11 @@ describe('scaffold contract', () => {
         expect(cfg.agent.planner.mode).toBe('primary');
         expect(cfg.agent.manager.mode).toBe('primary');
         expect(cfg.agent.coder.hidden).toBe(true);
+        expect(cfg.agent.planner).toMatchObject({ model: 'openai/gpt-4o' });
+        expect(cfg.agent.manager).toMatchObject({ model: 'openai/gpt-4o' });
+        expect(cfg.agent.coder).toMatchObject({ model: 'openai/gpt-4o' });
         expect(cfg.command.execute.agent).toBe('manager');
-        expect(cfg.command.execute.subtask).toBe(true);
+        expect(cfg.command.execute.subtask).toBe(false);
     });
 
     it('reads the raw opencode scaffold asset', () => {

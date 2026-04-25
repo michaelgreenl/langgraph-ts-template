@@ -16,7 +16,7 @@ export declare const workflowOpencodeSchema: z.ZodObject<{
     command: z.ZodObject<{
         execute: z.ZodObject<{
             agent: z.ZodLiteral<"manager">;
-            subtask: z.ZodLiteral<true>;
+            subtask: z.ZodLiteral<false>;
             template: z.ZodString;
         }, z.core.$loose>;
     }, z.core.$loose>;

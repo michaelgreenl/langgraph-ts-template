@@ -38,8 +38,11 @@ describe('scaffold handoff', () => {
         expect(cfg.agent.manager.mode).toBe('primary');
         expect(cfg.agent.coder.mode).toBe('subagent');
         expect(cfg.agent.coder.hidden).toBe(true);
+        expect(cfg.agent.planner).toMatchObject({ model: 'openai/gpt-4o' });
+        expect(cfg.agent.manager).toMatchObject({ model: 'openai/gpt-4o' });
+        expect(cfg.agent.coder).toMatchObject({ model: 'openai/gpt-4o' });
         expect(cfg.command.execute.agent).toBe('manager');
-        expect(cfg.command.execute.subtask).toBe(true);
+        expect(cfg.command.execute.subtask).toBe(false);
         expect(cfg.agent.planner.permission).toEqual({
             edit: 'allow',
             task: {
@@ -98,5 +101,22 @@ describe('scaffold handoff', () => {
         delete broken.command;
 
         expect(() => parseWorkflowOpencode(broken)).toThrow(/command/i);
+    });
+
+    it('rejects edited configs that force the execute handoff back into subtask mode', () => {
+        const cfg = parseWorkflowOpencode(JSON.parse(createScaffoldFiles()['opencode.json']));
+
+        expect(() =>
+            parseWorkflowOpencode({
+                ...cfg,
+                command: {
+                    ...cfg.command,
+                    execute: {
+                        ...cfg.command.execute,
+                        subtask: true,
+                    },
+                },
+            }),
+        ).toThrow(/subtask/i);
     });
 });

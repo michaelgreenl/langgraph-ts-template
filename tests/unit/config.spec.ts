@@ -29,9 +29,9 @@ const coderPermission = {
 const command = {
     execute: {
         agent: 'manager',
-        subtask: true,
+        subtask: false,
         template:
-            'The active planner session is approved for execution. Continue as the manager, use the existing conversation as context, and execute the user request below according to the packaged manager contract.\n\nUser execute request:\n$ARGUMENTS',
+            'The active planner session is approved for execution. Continue as the manager in this same conversation, reuse any already-established phase, tasks.md, step, repo, and step-log paths unless they are missing or conflicting, and execute the user request below according to the packaged manager contract.\n\nUser execute request:\n$ARGUMENTS',
     },
 } as const;
 
@@ -76,7 +76,7 @@ describe('workflow config', () => {
             command: {
                 execute: {
                     agent: 'manager',
-                    subtask: true,
+                    subtask: false,
                 },
             },
             agent: {
@@ -146,6 +146,38 @@ describe('workflow config', () => {
         ).toThrow();
     });
 
+    it('rejects execute handoffs that keep manager in subtask mode', () => {
+        expect(() =>
+            parseWorkflowOpencode({
+                default_agent: 'planner',
+                command: {
+                    execute: {
+                        ...command.execute,
+                        subtask: true,
+                    },
+                },
+                agent: {
+                    planner: {
+                        mode: 'primary',
+                        permission: plannerPermission,
+                        prompt: 'plan',
+                    },
+                    manager: {
+                        mode: 'primary',
+                        permission: managerPermission,
+                        prompt: 'manage',
+                    },
+                    coder: {
+                        mode: 'subagent',
+                        hidden: true,
+                        permission: coderPermission,
+                        prompt: 'code',
+                    },
+                },
+            }),
+        ).toThrow();
+    });
+
     it('loads opencode config from disk', async () => {
         const dir = await createDir();
         const file = join(dir, 'opencode.json');
@@ -181,7 +213,7 @@ describe('workflow config', () => {
             command: {
                 execute: {
                     agent: 'manager',
-                    subtask: true,
+                    subtask: false,
                 },
             },
             agent: {
