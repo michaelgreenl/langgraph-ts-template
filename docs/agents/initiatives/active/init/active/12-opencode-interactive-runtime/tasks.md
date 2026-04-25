@@ -173,14 +173,14 @@ Verify:
 
 This step owns the CLI/runtime transition. It must bundle the opencode runtime dependency, scaffold workflow-local `opencode.json`, retire prompt commands, validate workflow config through the workflow package validator, and launch the bundled planner-first runtime in TTY or server-only mode. It must not yet do the final smoke proof.
 
-- [ ] `maw-cli/package.json` and any new runtime utility: add the bundled opencode runtime dependency needed for `dev`
-- [ ] `maw-cli/src/commands/{init,dev}.ts`, `src/index.ts`, `src/utils/**`, and workflow-resolution helpers: remove the active `maw.json` dependency, scaffold `.maw/graphs/<workflow>/opencode.json`, stop creating `.maw/templates/`, retire `prompt:list` and `prompt:preview`, validate the workflow-local `opencode.json`, and launch bundled opencode with `OPENCODE_CONFIG` in TTY and non-TTY modes
-- [ ] `maw-cli/tests/{init.test.ts,dev.test.ts,cli.test.ts,langgraph.test.ts,package-metadata.test.ts,bin.test.ts}` and any prompt-command tests or fixtures that must be replaced: cover prompt-command retirement, workflow validation failures, TTY planner-first launch, non-TTY server-only launch, and retained compatibility file generation
+- [x] `maw-cli/package.json` and any new runtime utility: add the bundled opencode runtime dependency needed for `dev`
+- [x] `maw-cli/src/commands/{init,dev}.ts`, `src/index.ts`, `src/utils/**`, and workflow-resolution helpers: remove the active `maw.json` dependency, scaffold `.maw/graphs/<workflow>/opencode.json`, stop creating `.maw/templates/`, retire `prompt:list` and `prompt:preview`, validate the workflow-local `opencode.json`, and launch bundled opencode with `OPENCODE_CONFIG` in TTY and non-TTY modes
+- [x] `maw-cli/tests/{init.test.ts,dev.test.ts,cli.test.ts,langgraph.test.ts,package-metadata.test.ts,bin.test.ts}` and any prompt-command tests or fixtures that must be replaced: cover prompt-command retirement, workflow validation failures, TTY planner-first launch, non-TTY server-only launch, and retained compatibility file generation
 
 Verify:
 
-- [ ] `bun run build`
-- [ ] `bun run test`
+- [x] `bun run build`
+- [x] `bun run test`
 
 ### 4. Align active docs to the raw `opencode.json` contract
 
@@ -225,8 +225,8 @@ Verify:
 - [x] Step 1: `bun run test:int -- tests/integration/scaffold.test.ts`
 - [x] Step 2: `bun run build`
 - [x] Step 2: `bun run test:int -- tests/integration/graph.test.ts`
-- [ ] Step 3: `bun run build`
-- [ ] Step 3: `bun run test`
+- [x] Step 3: `bun run build`
+- [x] Step 3: `bun run test`
 - [ ] Step 4: `rg "opencode.json|planner|manager|coder|maw-cli dev" README.md docs/usage/mvp docs/agents/initiatives/active/init/init-plan.md`
 - [ ] Step 4: manual review of active docs for superseded references
 - [ ] Step 5: `bun smoke-init phase6-opencode-interactive-runtime` in `../maw-smoke/`
