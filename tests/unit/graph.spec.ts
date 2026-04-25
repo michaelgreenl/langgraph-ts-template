@@ -1,6 +1,26 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { parseWorkflowOpencode, readScaffoldAsset } from '../../src/scaffold/index.js';
 
 const calls: string[] = [];
+
+const createOpencode = (planner: string, coder: string) => {
+    const base = parseWorkflowOpencode(JSON.parse(readScaffoldAsset('opencode')));
+
+    return {
+        ...base,
+        agent: {
+            ...base.agent,
+            planner: {
+                ...base.agent.planner,
+                prompt: planner,
+            },
+            coder: {
+                ...base.agent.coder,
+                prompt: coder,
+            },
+        },
+    };
+};
 
 const firstPrompt = (input: unknown): string => {
     if (!Array.isArray(input)) {
@@ -43,15 +63,18 @@ describe('graph', () => {
         calls.splice(0);
     });
 
-    it('keeps planner/coder prompt and handoff fields deterministic', async () => {
-        const app = createGraph();
+    it('uses inline opencode prompts and appends the planner handoff for coder', async () => {
+        const app = createGraph({ opencode: createOpencode('Planner system prompt.', 'Coder system prompt.') });
 
         const result = await app.invoke({ messages: ['Hello'] });
 
         expect(calls).toHaveLength(2);
-        expect(result.plannerPrompt).not.toBe('');
-        expect(result.coderPrompt).not.toBe('');
+        expect(result.plannerPrompt).toBe('Planner system prompt.');
+        expect(result.coderPrompt).toContain('Coder system prompt.');
+        expect(result.coderPrompt).toContain('Planner handoff:\nPlanner handoff from unit stub.');
         expect(result.handoff).toBe('Planner handoff from unit stub.');
+        expect(calls[0]).toBe('Planner system prompt.');
+        expect(calls[1]).toBe(result.coderPrompt);
     });
 });
 

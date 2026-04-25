@@ -2,62 +2,32 @@ import { SystemMessage, type BaseMessage } from '@langchain/core/messages';
 import type { RunnableConfig } from '@langchain/core/runnables';
 import { ChatOpenAI } from '@langchain/openai';
 import { StateGraph } from '@langchain/langgraph';
-import { access, readFile } from 'node:fs/promises';
+import { access } from 'node:fs/promises';
 import { resolve } from 'node:path';
-import { z } from 'zod';
 import {
-    DEFAULT_WORKFLOW_CONFIG,
-    loadWorkflowConfig,
-    resolveWorkflowConfig,
-    type ResolvedWorkflowConfig,
-    type WorkflowConfig,
-} from '../config.js';
-import { createTemplateEngine, type TemplateVars } from '../templates/engine.js';
+    loadWorkflowOpencode,
+    parseWorkflowOpencode,
+    readScaffoldAsset,
+    type WorkflowOpencode,
+} from '../scaffold/index.js';
 import { MAW_SYSTEM_ID, StateAnnotation } from './state.js';
 
 const DEFAULT_GRAPH_NAME = 'New Agent';
 const DEFAULT_MODEL = 'gpt-4.1-mini';
 const EMPTY_HANDOFF = 'Planner returned an empty handoff.';
-const ROOT_WORKSPACE = '.';
+const DEFAULT_OPENCODE = parseWorkflowOpencode(JSON.parse(readScaffoldAsset('opencode')));
 
-interface ProjectConfig {
-    openviking: boolean;
-    templates: {
-        customPath: string;
-    };
-}
-
-const projectConfigSchema = z
-    .object({
-        openviking: z.boolean(),
-        templates: z
-            .object({
-                customPath: z.string().min(1),
-            })
-            .passthrough(),
-    })
-    .passthrough();
-
-const DEFAULT_PROJECT_CONFIG: ProjectConfig = {
-    openviking: true,
-    templates: {
-        customPath: '.maw/templates',
-    },
-};
+type RuntimeAgent = 'planner' | 'coder';
 
 export interface GraphConfig {
-    agent?: string;
-    workflowConfig?: WorkflowConfig;
-    workflow?: string;
     name?: string;
+    opencode?: WorkflowOpencode;
     root?: string;
-    vars?: TemplateVars;
+    workflow?: string;
 }
 
 interface Runtime {
-    projectConfig: ProjectConfig;
-    root: string;
-    workflowConfig: ResolvedWorkflowConfig;
+    opencode: WorkflowOpencode;
 }
 
 interface Model {
@@ -80,83 +50,51 @@ const createModel = (): Model => {
     return new ChatOpenAI({ model: DEFAULT_MODEL });
 };
 
-const loadProjectConfig = async (root: string): Promise<ProjectConfig> => {
-    const file = resolve(root, 'maw.json');
+const loadRuntime = async (cfg: GraphConfig): Promise<Runtime> => {
+    if (cfg.opencode) {
+        return {
+            opencode: parseWorkflowOpencode(cfg.opencode),
+        };
+    }
+
+    if (!cfg.workflow) {
+        return {
+            opencode: DEFAULT_OPENCODE,
+        };
+    }
+
+    const root = cfg.root ?? process.cwd();
+    const file = resolve(root, '.maw/graphs', cfg.workflow, 'opencode.json');
 
     if (!(await fileExists(file))) {
-        return DEFAULT_PROJECT_CONFIG;
+        return {
+            opencode: DEFAULT_OPENCODE,
+        };
     }
 
     try {
-        const text = await readFile(file, 'utf8');
-        const value: unknown = JSON.parse(text);
-
-        return projectConfigSchema.parse(value);
+        return {
+            opencode: await loadWorkflowOpencode(file),
+        };
     } catch (err) {
-        throw new Error(`Invalid maw.json at ${file}: ${message(err)}`);
+        throw new Error(`Invalid opencode.json at ${file}: ${message(err)}`);
     }
 };
 
-const loadRuntime = async (cfg: GraphConfig): Promise<Runtime> => {
-    const root = cfg.root ?? process.cwd();
-    const projectConfig = await loadProjectConfig(root);
-    let workflowConfig = DEFAULT_WORKFLOW_CONFIG;
+const prompt = (runtime: Runtime, name: RuntimeAgent, handoff = ''): string => {
+    const text = runtime.opencode.agent[name].prompt.trim();
 
-    if (cfg.workflowConfig) {
-        workflowConfig = resolveWorkflowConfig(cfg.workflowConfig);
-    } else if (cfg.workflow) {
-        const file = resolve(root, '.maw/graphs', cfg.workflow, 'config.json');
-
-        if (await fileExists(file)) {
-            try {
-                workflowConfig = resolveWorkflowConfig(await loadWorkflowConfig(file));
-            } catch (err) {
-                console.warn(
-                    `[langgraph-ts-template] Invalid workflow config at ${file}; falling back to embedded defaults. ${message(err)}`,
-                );
-            }
-        }
+    if (name !== 'coder') {
+        return text;
     }
 
-    return {
-        projectConfig,
-        root,
-        workflowConfig,
-    };
+    return `${text}\n\nPlanner handoff:\n${handoff.trim() || EMPTY_HANDOFF}`;
 };
 
-const composePrompt = async (runtime: Runtime, agent: string, vars?: TemplateVars): Promise<string> => {
-    const opts = {
-        prompts: runtime.workflowConfig.prompts,
-        workspace: ROOT_WORKSPACE,
-        customPath: runtime.projectConfig.templates.customPath,
-        root: runtime.root,
-    };
-
-    try {
-        return await createTemplateEngine(opts).compose(agent, vars);
-    } catch (err) {
-        const msg = message(err);
-
-        if (runtime.workflowConfig === DEFAULT_WORKFLOW_CONFIG || !msg.startsWith('Unable to resolve snippet:')) {
-            throw err;
-        }
-
-        console.warn(`[langgraph-ts-template] ${msg} Falling back to embedded workflow defaults for agent ${agent}.`);
-
-        return createTemplateEngine({
-            prompts: DEFAULT_WORKFLOW_CONFIG.prompts,
-            workspace: ROOT_WORKSPACE,
-            customPath: runtime.projectConfig.templates.customPath,
-            root: runtime.root,
-        }).compose(agent, vars);
-    }
-};
-
-const withSystem = (prompt: string, messages: BaseMessage[]): BaseMessage[] => {
+const withSystem = (text: string, messages: BaseMessage[]): BaseMessage[] => {
     return [
         new SystemMessage({
-            content: prompt,
+            content: text,
             id: MAW_SYSTEM_ID,
         }),
         ...messages,
@@ -201,13 +139,13 @@ const handoffText = (message: BaseMessage): string => {
     return EMPTY_HANDOFF;
 };
 
-const plannerNode = (runtime: Promise<Runtime>, model: Model, vars?: TemplateVars) => {
+const plannerNode = (runtime: Promise<Runtime>, model: Model) => {
     return async (
         state: typeof StateAnnotation.State,
         config: RunnableConfig,
     ): Promise<typeof StateAnnotation.Update> => {
         const cfg = await runtime;
-        const plannerPrompt = await composePrompt(cfg, 'planner', vars);
+        const plannerPrompt = prompt(cfg, 'planner');
         const reply = await model.invoke(withSystem(plannerPrompt, state.messages), config);
 
         return {
@@ -218,16 +156,13 @@ const plannerNode = (runtime: Promise<Runtime>, model: Model, vars?: TemplateVar
     };
 };
 
-const coderNode = (runtime: Promise<Runtime>, model: Model, vars?: TemplateVars) => {
+const coderNode = (runtime: Promise<Runtime>, model: Model) => {
     return async (
         state: typeof StateAnnotation.State,
         config: RunnableConfig,
     ): Promise<typeof StateAnnotation.Update> => {
         const cfg = await runtime;
-        const coderPrompt = await composePrompt(cfg, 'coder', {
-            ...vars,
-            handoff: state.handoff,
-        });
+        const coderPrompt = prompt(cfg, 'coder', state.handoff);
         const reply = await model.invoke(withSystem(coderPrompt, state.messages), config);
 
         return {
@@ -249,8 +184,8 @@ export const createGraph = (cfg: GraphConfig = {}) => {
     const runtime = loadRuntime(cfg);
     const model = createModel();
     const graph = new StateGraph(StateAnnotation)
-        .addNode('planner', plannerNode(runtime, model, cfg.vars))
-        .addNode('coder', coderNode(runtime, model, cfg.vars))
+        .addNode('planner', plannerNode(runtime, model))
+        .addNode('coder', coderNode(runtime, model))
         .addEdge('__start__', 'planner')
         .addEdge('planner', 'coder')
         .addEdge('coder', '__end__')

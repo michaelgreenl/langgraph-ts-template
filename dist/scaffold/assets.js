@@ -51,8 +51,7 @@ const matter = (text) => {
     return block;
 };
 const unquote = (text) => {
-    if ((text.startsWith("'") && text.endsWith("'")) ||
-        (text.startsWith('"') && text.endsWith('"'))) {
+    if ((text.startsWith("'") && text.endsWith("'")) || (text.startsWith('"') && text.endsWith('"'))) {
         return text.slice(1, -1);
     }
     return text;

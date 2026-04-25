@@ -1,14 +1,11 @@
 import { type BaseMessage } from '@langchain/core/messages';
-import { type WorkflowConfig } from '../config.js';
-import { type TemplateVars } from '../templates/engine.js';
+import { type WorkflowOpencode } from '../scaffold/index.js';
 import { StateAnnotation } from './state.js';
 export interface GraphConfig {
-    agent?: string;
-    workflowConfig?: WorkflowConfig;
-    workflow?: string;
     name?: string;
+    opencode?: WorkflowOpencode;
     root?: string;
-    vars?: TemplateVars;
+    workflow?: string;
 }
 export declare const route: (state: typeof StateAnnotation.State) => "__end__" | "callModel";
 export declare const createGraph: (cfg?: GraphConfig) => import("@langchain/langgraph").CompiledStateGraph<{

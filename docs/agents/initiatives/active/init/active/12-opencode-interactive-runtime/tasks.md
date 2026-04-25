@@ -160,14 +160,14 @@ Verify:
 
 This step owns the headless compatibility path only. It must remove the retained runtime's dependency on the retired workflow-local `config.json` and Nunjucks surface while keeping direct LangGraph smoke working. It must not try to force planner/manager parity into the compatibility path.
 
-- [ ] `langgraph-ts-template/src/agent/**` and any adjacent runtime helper: replace runtime assumptions that still read `.maw/graphs/<workflow>/config.json` or Nunjucks-driven prompt data so the direct LangGraph compatibility path still runs from the new scaffold contract
-- [ ] `langgraph-ts-template/src/index.ts`: keep the retained `createGraph` compatibility API aligned with the new workflow contract after config/template retirement
-- [ ] `langgraph-ts-template/tests/integration/graph.test.ts` and `tests/unit/{graph.spec.ts,agent.spec.ts}`: prove the retained direct LangGraph compatibility runtime still compiles and runs without the old prompt surface
+- [x] `langgraph-ts-template/src/agent/**` and any adjacent runtime helper: replace runtime assumptions that still read `.maw/graphs/<workflow>/config.json` or Nunjucks-driven prompt data so the direct LangGraph compatibility path still runs from the new scaffold contract
+- [x] `langgraph-ts-template/src/index.ts`: keep the retained `createGraph` compatibility API aligned with the new workflow contract after config/template retirement
+- [x] `langgraph-ts-template/tests/integration/graph.test.ts` and `tests/unit/{graph.spec.ts,agent.spec.ts}`: prove the retained direct LangGraph compatibility runtime still compiles and runs without the old prompt surface
 
 Verify:
 
-- [ ] `bun run build`
-- [ ] `bun run test:int -- tests/integration/graph.test.ts`
+- [x] `bun run build`
+- [x] `bun run test:int -- tests/integration/graph.test.ts`
 
 ### 3. Teach `maw-cli` to scaffold and launch the interactive opencode runtime
 
@@ -223,8 +223,8 @@ Verify:
 - [x] Step 1: `bun run typecheck`
 - [x] Step 1: `bun run test`
 - [x] Step 1: `bun run test:int -- tests/integration/scaffold.test.ts`
-- [ ] Step 2: `bun run build`
-- [ ] Step 2: `bun run test:int -- tests/integration/graph.test.ts`
+- [x] Step 2: `bun run build`
+- [x] Step 2: `bun run test:int -- tests/integration/graph.test.ts`
 - [ ] Step 3: `bun run build`
 - [ ] Step 3: `bun run test`
 - [ ] Step 4: `rg "opencode.json|planner|manager|coder|maw-cli dev" README.md docs/usage/mvp docs/agents/initiatives/active/init/init-plan.md`

@@ -68,9 +68,7 @@ export const workflowOpencodeSchema = z
         if ((item.hidden === true) !== (want.hidden === true)) {
             ctx.addIssue({
                 code: 'custom',
-                message: want.hidden === true
-                    ? `${name} must stay hidden.`
-                    : `${name} must stay visible.`,
+                message: want.hidden === true ? `${name} must stay hidden.` : `${name} must stay visible.`,
                 path: ['agent', name, 'hidden'],
             });
         }
