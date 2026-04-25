@@ -238,28 +238,28 @@ Verify:
 
 ### Phase completion
 
-- [ ] `langgraph-ts-template`: `bun run build`
-- [ ] `langgraph-ts-template`: `bun run typecheck`
-- [ ] `langgraph-ts-template`: `bun run test`
-- [ ] `langgraph-ts-template`: `bun run test:int`
-- [ ] `maw-cli`: `bun run build`
-- [ ] `maw-cli`: `bun run lint`
-- [ ] `maw-cli`: `bun run test`
-- [ ] `../maw-smoke`: `bun smoke-init phase6-opencode-interactive-runtime`
-- [ ] `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`: run `bunx maw-cli init`
-- [ ] `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`: prove the TTY `bunx maw-cli dev langgraph-ts-template` planner-to-manager flow
-- [ ] `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`: prove the SDK-harnessed non-TTY `bunx maw-cli dev langgraph-ts-template` server-only flow
-- [ ] `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`: run `bunx @langchain/langgraph-cli dev --config .maw/graphs/langgraph-ts-template` plus the exact compatibility `curl` request from `Execution Notes`
-- [ ] `../maw-smoke/docs/agents/smoke-logs/phase6-opencode-interactive-runtime.md`: log the final results, issues, and fixes
+- [x] `langgraph-ts-template`: `bun run build`
+- [x] `langgraph-ts-template`: `bun run typecheck`
+- [x] `langgraph-ts-template`: `bun run test`
+- [x] `langgraph-ts-template`: `bun run test:int`
+- [x] `maw-cli`: `bun run build`
+- [x] `maw-cli`: `bun run lint`
+- [x] `maw-cli`: `bun run test`
+- [x] `../maw-smoke`: `bun smoke-init phase6-opencode-interactive-runtime`
+- [x] `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`: run `bunx maw-cli init`
+- [x] `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`: prove the TTY `bunx maw-cli dev langgraph-ts-template` planner-to-manager flow
+- [x] `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`: prove the SDK-harnessed non-TTY `bunx maw-cli dev langgraph-ts-template` server-only flow
+- [x] `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`: run `bunx @langchain/langgraph-cli dev --config .maw/graphs/langgraph-ts-template` plus the exact compatibility `curl` request from `Execution Notes`
+- [x] `../maw-smoke/docs/agents/smoke-logs/phase6-opencode-interactive-runtime.md`: log the final results, issues, and fixes
 
 ## Exit Criteria
 
-- [ ] `.maw/graphs/<workflow>/config.json`, `.maw/templates/`, Nunjucks prompt composition, and `maw-cli prompt:list` / `prompt:preview` are retired from the active workflow contract
-- [ ] `maw-cli init` scaffolds `.maw/graphs/<workflow>/opencode.json` and no longer creates `.maw/templates/`
-- [ ] The workflow package ships a default raw `opencode.json` scaffold asset plus a validator or schema export, and invalid edited workflow-local `opencode.json` files fail before runtime launch
-- [ ] `maw-cli dev <workflow>` launches bundled opencode directly, starts on `planner` in TTY mode, and exposes the same workflow in server-only mode when no TTY is present
-- [ ] The default interactive base workflow exposes visible primary `planner` and `manager` agents plus hidden `coder`, and an explicit execute request hands control from `planner` to `manager`
-- [ ] `manager` can execute clean step work through `coder` and auto-commit clean results under the Phase 6 workflow contract
-- [ ] The separate direct LangGraph `/runs/wait` compatibility path still runs through generated `graph.ts` and `langgraph.json`
-- [ ] Active docs outside `complete/` no longer describe the workflow contract through `maw.json`, `config.json`, `.maw/templates/`, Nunjucks composition, or `maw-cli prompt:*`
-- [ ] Smoke proof covers interactive TTY planner and manager behavior, the non-TTY server-only SDK harness path, and the retained direct LangGraph compatibility path
+- [x] `.maw/graphs/<workflow>/config.json`, `.maw/templates/`, Nunjucks prompt composition, and `maw-cli prompt:list` / `prompt:preview` are retired from the active workflow contract
+- [x] `maw-cli init` scaffolds `.maw/graphs/<workflow>/opencode.json` and no longer creates `.maw/templates/`
+- [x] The workflow package ships a default raw `opencode.json` scaffold asset plus a validator or schema export, and invalid edited workflow-local `opencode.json` files fail before runtime launch
+- [x] `maw-cli dev <workflow>` launches bundled opencode directly, starts on `planner` in TTY mode, and exposes the same workflow in server-only mode when no TTY is present
+- [x] The default interactive base workflow exposes visible primary `planner` and `manager` agents plus hidden `coder`, and an explicit execute request hands control from `planner` to `manager`
+- [x] `manager` can execute clean step work through `coder` and auto-commit clean results under the Phase 6 workflow contract
+- [x] The separate direct LangGraph `/runs/wait` compatibility path still runs through generated `graph.ts` and `langgraph.json`
+- [x] Active docs outside `complete/` no longer describe the workflow contract through `maw.json`, `config.json`, `.maw/templates/`, Nunjucks composition, or `maw-cli prompt:*`
+- [x] Smoke proof covers interactive TTY planner and manager behavior, the non-TTY server-only SDK harness path, and the retained direct LangGraph compatibility path

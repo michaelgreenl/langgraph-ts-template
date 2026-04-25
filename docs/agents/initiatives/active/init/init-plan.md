@@ -585,7 +585,7 @@ Historical note: the completed phase summaries below are preserved for sequencin
 
 ### Phase 6: Opencode interactive runtime
 
-- [ ] complete
+- [x] complete
 
 - replace workflow-local `config.json` and Nunjucks prompt composition with workflow-local raw `opencode.json`
 - ship planner and manager as the default visible primary agents, plus hidden `coder`, in the base workflow
