@@ -199,20 +199,20 @@ Verify:
 
 This step owns the end-to-end proof. It must show the bundled opencode runtime works in TTY and non-TTY modes, that planner starts first, that execute hands off to manager, and that the retained direct LangGraph compatibility path still serves `/runs/wait`. It must log the final evidence in `../maw-smoke/`.
 
-- [ ] `../maw-smoke`: run `bun smoke-init phase6-opencode-interactive-runtime` and then `bunx maw-cli init` inside `tests/smoke-phase6-opencode-interactive-runtime/`
-- [ ] In TTY mode inside that smoke project: run `bunx maw-cli dev langgraph-ts-template`, confirm planner is the initial agent, explicitly request execution, and record the handoff to manager plus coder-backed step execution and auto-commit behavior
-- [ ] In non-TTY mode for the same smoke project: run `bunx maw-cli dev langgraph-ts-template` through the new SDK harness and capture planner plus manager interactions through the server-only runtime path
-- [ ] In that same smoke project: run `bunx @langchain/langgraph-cli dev --config .maw/graphs/langgraph-ts-template` and then the exact compatibility `curl --silent --show-error --fail --request POST --url http://localhost:2024/runs/wait ...` command from `Execution Notes`
-- [ ] `../maw-smoke/docs/agents/smoke-logs/phase6-opencode-interactive-runtime.md`: record interactive TTY, server-only harness, and direct LangGraph compatibility results, plus any issues and fixes
+- [x] `../maw-smoke`: run `bun smoke-init phase6-opencode-interactive-runtime` and then `bunx maw-cli init` inside `tests/smoke-phase6-opencode-interactive-runtime/`
+- [x] In TTY mode inside that smoke project: run `bunx maw-cli dev langgraph-ts-template`, confirm planner is the initial agent, explicitly request execution, and record the handoff to manager plus coder-backed step execution and auto-commit behavior
+- [x] In non-TTY mode for the same smoke project: run `bunx maw-cli dev langgraph-ts-template` through the new SDK harness and capture planner plus manager interactions through the server-only runtime path
+- [x] In that same smoke project: run `bunx @langchain/langgraph-cli dev --config .maw/graphs/langgraph-ts-template` and then the exact compatibility `curl --silent --show-error --fail --request POST --url http://localhost:2024/runs/wait ...` command from `Execution Notes`
+- [x] `../maw-smoke/docs/agents/smoke-logs/phase6-opencode-interactive-runtime.md`: record interactive TTY, server-only harness, and direct LangGraph compatibility results, plus any issues and fixes
 
 Verify:
 
-- [ ] `bun smoke-init phase6-opencode-interactive-runtime` in `../maw-smoke/`
-- [ ] In `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`, run `bunx maw-cli init`
-- [ ] In TTY mode inside `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`, run `bunx maw-cli dev langgraph-ts-template`
-- [ ] In `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`, run `bunx @langchain/langgraph-cli dev --config .maw/graphs/langgraph-ts-template`
-- [ ] In a second terminal for that same smoke project, run the exact `curl --silent --show-error --fail --request POST --url http://localhost:2024/runs/wait ...` command from `Execution Notes`
-- [ ] Manual check: the new SDK harness can drive the non-TTY `bunx maw-cli dev langgraph-ts-template` server-only path and captures planner plus manager evidence
+- [x] `bun smoke-init phase6-opencode-interactive-runtime` in `../maw-smoke/`
+- [x] In `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`, run `bunx maw-cli init`
+- [x] In TTY mode inside `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`, run `bunx maw-cli dev langgraph-ts-template`
+- [x] In `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`, run `bunx @langchain/langgraph-cli dev --config .maw/graphs/langgraph-ts-template`
+- [x] In a second terminal for that same smoke project, run the exact `curl --silent --show-error --fail --request POST --url http://localhost:2024/runs/wait ...` command from `Execution Notes`
+- [x] Manual check: the new SDK harness can drive the non-TTY `bunx maw-cli dev langgraph-ts-template` server-only path and captures planner plus manager evidence
 
 ## Verification
 
@@ -229,12 +229,12 @@ Verify:
 - [x] Step 3: `bun run test`
 - [x] Step 4: `rg "opencode.json|planner|manager|coder|maw-cli dev" README.md docs/usage/mvp docs/agents/initiatives/active/init/init-plan.md`
 - [x] Step 4: manual review of active docs for superseded references
-- [ ] Step 5: `bun smoke-init phase6-opencode-interactive-runtime` in `../maw-smoke/`
-- [ ] Step 5: in `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`, run `bunx maw-cli init`
-- [ ] Step 5: in TTY mode inside `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`, run `bunx maw-cli dev langgraph-ts-template`
-- [ ] Step 5: in `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`, run `bunx @langchain/langgraph-cli dev --config .maw/graphs/langgraph-ts-template`
-- [ ] Step 5: in a second terminal for that same smoke project, run the exact compatibility `curl --silent --show-error --fail --request POST --url http://localhost:2024/runs/wait ...` command from `Execution Notes`
-- [ ] Step 5: manual check that the SDK harness drives the non-TTY server-only `bunx maw-cli dev langgraph-ts-template` path and captures planner plus manager evidence
+- [x] Step 5: `bun smoke-init phase6-opencode-interactive-runtime` in `../maw-smoke/`
+- [x] Step 5: in `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`, run `bunx maw-cli init`
+- [x] Step 5: in TTY mode inside `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`, run `bunx maw-cli dev langgraph-ts-template`
+- [x] Step 5: in `../maw-smoke/tests/smoke-phase6-opencode-interactive-runtime/`, run `bunx @langchain/langgraph-cli dev --config .maw/graphs/langgraph-ts-template`
+- [x] Step 5: in a second terminal for that same smoke project, run the exact compatibility `curl --silent --show-error --fail --request POST --url http://localhost:2024/runs/wait ...` command from `Execution Notes`
+- [x] Step 5: manual check that the SDK harness drives the non-TTY server-only `bunx maw-cli dev langgraph-ts-template` path and captures planner plus manager evidence
 
 ### Phase completion
 
