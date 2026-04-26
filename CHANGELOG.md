@@ -1,3 +1,15 @@
+## [0.6.0](https://github.com/michaelgreenl/langgraph-ts-template/compare/v0.5.0...v0.6.0) (2026-04-26)
+
+### Features
+
+* **cli:** launch bundled opencode workflow runtime ([f592dcd](https://github.com/michaelgreenl/langgraph-ts-template/commit/f592dcdd1ac9b36a36988d5c30335290426e2e0d))
+* **scaffold:** switch workflow contract to opencode ([5313ef7](https://github.com/michaelgreenl/langgraph-ts-template/commit/5313ef784ec19d10da850295534daa00de0efa8c))
+
+### Bug Fixes
+
+* **opencode:** route execute requests to manager ([ab79d90](https://github.com/michaelgreenl/langgraph-ts-template/commit/ab79d9002685737f85058ed38126b12db1992417))
+* **opencode:** switch execute handoff to manager ([29cc24c](https://github.com/michaelgreenl/langgraph-ts-template/commit/29cc24c2f5d4c9bef8fc99842851c4945b7585e7))
+
 ## [0.5.0](https://github.com/michaelgreenl/langgraph-ts-template/compare/v0.4.0...v0.5.0) (2026-04-24)
 
 ### Features
